@@ -1,0 +1,7 @@
+__pycache__/
+*.csv
+*.bak
+*.dat
+*.exe
+metadata/
+pki/
