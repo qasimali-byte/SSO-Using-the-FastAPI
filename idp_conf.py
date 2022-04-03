@@ -1,5 +1,5 @@
 CONFIG = {
-    "entityid": "http://saml.example.com:saml/idp.xml",
+    # "entityid": "http://saml.example.com:saml/idp.xml",
     "name": "Rolands IdP",
     # "service": {
     #     "idp": {
@@ -24,7 +24,7 @@ CONFIG = {
     "xmlsec_binary": "./xmlsec1.exe",
     "delete_tmpfiles": True,
     "metadata": {
-            'local': ['metadata/sp.xml']
+            'local': ['metadata/sp.xml','metadata/sp1.xml']
         },
     
     # "attribute_map_dir": "attributemaps",

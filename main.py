@@ -2,6 +2,7 @@ import re
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import RedirectResponse,HTMLResponse, Response
 from pydantic import BaseModel
+from constants import Constants
 
 from loginprocessview import LoginProcessView
 from fastapi.templating import Jinja2Templates
@@ -78,20 +79,38 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates/")
 create_tables()
 
-class temp():
-    request1=""
-value = ""
+
 @app.get("/sso/redirect/")
-async def read_root(request: Request, SAMLRequest: str):
+async def read_root(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
     # print( await verifier.__call__(request))
-    if cookie.__call__(request) == "No session cookie attached to request":
+    req = LoginProcessView()
+    verify_cookie = cookie.__call__(request)
+    if  verify_cookie == "No session cookie attached to request":
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    
+    if verify_cookie == "Invalid session provided":
+        # delete the cookie from browser and db
+        # req.delete_cookie(verify_session[0],request)
+        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    ## session verification
+    verify_session = await verifier.__call__(request)
+    if verify_session[1] != True:
+        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+
+    ## session verification in db
+    if req.get_session(verify_session[0],db) == "session not found":
+        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+
     # return LoginProcessView().get()
     # print(request.url)
     print(SAMLRequest)
     print(request.cookies)
     print(vars(request))
     print( await verifier.__call__(request))
+    resp = req.get(SAMLRequest)
+    # print(resp["data"]["data"])
+    return HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
+    # return "session found"
     # db = SAMLRequest
     # dbfile = open('examplePickle', 'ab')
       
@@ -118,20 +137,43 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
     # print(request['referer'])
     '''
     '''
+    valid_session = True
+
+    ### verify session if exsists
+    if cookie.__call__(request) == "No session cookie attached to request":
+        valid_session = False
+    
+    ## session verification
+    verify_session = await verifier.__call__(request)
+    if verify_session[1] != True:
+        # delete the cookie from browser and db
+        print(verify_session[0],"---------------re  ")
+        valid_session = False
+
+    ## session verification in db
     resp = LoginProcessView()
+    if resp.get_session(verify_session[0],db) == "session not found":
+        valid_session = False
+
+
+    if valid_session == True:
+        return "session found"
+
+    # resp = LoginProcessView()
     user = resp.get_user(email,password,db)
-    print(user)
-    print(email,password)
     if user == None:
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":saml_request, "error": "Invalid username or password"})
     print(vars(request))
     # print(request.headers['referer'])
     print(saml_request,"---saml_request")
     session = uuid4()
-    cookie.attach_to_response(response, session)
+    print(session)
+    ## store session in the database
+    resp.store_session(session,email,db)
+    
     print(vars(response))
     print(session)
-    return "seesion is attached"
+    # return "seesion is attached"
     # print(username,password)
     # req = temp().request1
     # print(temp().request1)
@@ -146,9 +188,12 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
     '''
 
 
-    resp = resp.get(saml_request)
-    # print(resp["data"]["data"])
-    # return HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
+    resp = resp.get(saml_request, email)
+    print(resp["data"]["data"])
+    response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
+    # cookie.attach_to_response(response, session)
+    # return "session attached"
+    return response
     
     
     

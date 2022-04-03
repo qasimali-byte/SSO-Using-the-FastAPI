@@ -15,14 +15,14 @@ class SameSiteEnum(str, Enum):
     lax = "lax"
     strict = "strict"
     none = "none"
-
+#14 * 24 * 60 * 60 
 
 class CookieParameters(BaseModel):
-    max_age: int = 14 * 24 * 60 * 60  # 14 days in seconds
+    max_age: int = 120 # 14 days in seconds
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False
-    httponly: bool = False
+    httponly: bool = True
     samesite: SameSiteEnum = SameSiteEnum.lax
 
 
@@ -77,7 +77,8 @@ class SessionCookie(SecurityBase, SessionFrontend[UUID]):
             )
         except (SignatureExpired, BadSignature):
             if self.auto_error:
-                raise HTTPException(status_code=401, detail="Invalid session provided")
+                return "Invalid session provided"
+                # raise HTTPException(status_code=401, detail="Invalid session provided")
             error = FrontendError("Session cookie has invalid signature")
             super().attach_id_state(request, error)
             return error

@@ -44,18 +44,21 @@ class SessionVerifier(Generic[ID, SessionModel]):
             ]
         except Exception:
             if self.auto_error:
-                raise HTTPException(
-                    status_code=500, detail="internal failure of session verification"
-                )
+                return "internal failure of session verification",False
+                # raise HTTPException(
+                #     status_code=500, detail="internal failure of session verification"
+                # )
             else:
-                return BackendError(
-                    "failed to extract the {} session from state", self.identifier
-                )
+                return "failed to extract the {} session from state", False
+                # return BackendError(
+                #     "failed to extract the {} session from state", self.identifier
+                # )
 
         if isinstance(session_id, FrontendError):
             if self.auto_error:
-                raise self.auth_http_exception
-            return
+                return "error in session verification", False
+                # raise self.auth_http_exception
+            return "error in session verification", False
 
         # session_data = await self.backend.read(session_id)
         # if not session_data or not self.verify_session(session_data):
@@ -63,5 +66,5 @@ class SessionVerifier(Generic[ID, SessionModel]):
         #         raise self.auth_http_exception
         #     return
 
-        # return session_data
-        print("session_id:", session_id)
+        return session_id,True
+        # print("session_id:", session_id)
