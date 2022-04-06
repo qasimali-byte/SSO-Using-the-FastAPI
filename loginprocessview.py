@@ -20,12 +20,21 @@ class LoginProcessView():
             store.delete(user_cookie)
 
         if not store.get(session_id):
+            print("stored user session")
             store.set(session_id, email)
             return "stored session"
         return "stored user session"
 
+    def get_userid(self, session_id, db: Session):
+        store = StoreSession(db)
+        usersession_obj = store.get(session_id)
+        if usersession_obj :
+            return usersession_obj.user_id
+        return None
+
     def get_session(self, session_id, db: Session):
         store = StoreSession(db)
+        print(session_id)
         if type(session_id) == str:
             return "session not found"
         if store.get(session_id):

@@ -18,12 +18,12 @@ class SameSiteEnum(str, Enum):
 #14 * 24 * 60 * 60 
 
 class CookieParameters(BaseModel):
-    max_age: int = 120 # 14 days in seconds
+    max_age: int = 180 # 14 days in seconds
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False
     httponly: bool = True
-    samesite: SameSiteEnum = SameSiteEnum.lax
+    samesite: SameSiteEnum = SameSiteEnum.none
 
 
 class SessionCookie(SecurityBase, SessionFrontend[UUID]):

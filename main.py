@@ -23,7 +23,7 @@ cookie_params = CookieParameters()
 
 # Uses UUID
 cookie = SessionCookie(
-    cookie_name="cookie",
+    cookie_name="cookie_idp",
     identifier="general_verifier",
     auto_error=True,
     secret_key="DONOTUSE",
@@ -86,19 +86,23 @@ async def read_root(request: Request, SAMLRequest: str,db: Session = Depends(get
     req = LoginProcessView()
     verify_cookie = cookie.__call__(request)
     if  verify_cookie == "No session cookie attached to request":
+        print("No session cookie attached to request")
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     
     if verify_cookie == "Invalid session provided":
+        print("Invalid session provided")
         # delete the cookie from browser and db
         # req.delete_cookie(verify_session[0],request)
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     ## session verification
     verify_session = await verifier.__call__(request)
     if verify_session[1] != True:
+        print("Invalid session provided")
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
 
     ## session verification in db
     if req.get_session(verify_session[0],db) == "session not found":
+        print("session not found")
         return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
 
     # return LoginProcessView().get()
@@ -107,8 +111,10 @@ async def read_root(request: Request, SAMLRequest: str,db: Session = Depends(get
     print(request.cookies)
     print(vars(request))
     print( await verifier.__call__(request))
-    resp = req.get(SAMLRequest)
+    email_ = req.get_userid(verify_session[0],db)
+    resp = req.get(SAMLRequest,email_)
     # print(resp["data"]["data"])
+    print("session found")
     return HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     # return "session found"
     # db = SAMLRequest
@@ -191,7 +197,7 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
     resp = resp.get(saml_request, email)
     print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
-    # cookie.attach_to_response(response, session)
+    cookie.attach_to_response(response, session)
     # return "session attached"
     return response
     
@@ -201,6 +207,14 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
     # return templates.TemplateResponse(resp["data"]["data"],{"request": request})
     # response = RedirectResponse(url="http://localhost:8088/acs")
     # return fastapi.responses.RedirectResponse(url="http://localhost:8088/acs",status_code=status.HTTP_302_FOUND)
+
+# SAMLRequest: str
+@app.post("/logout/process")
+async def logout(request: Request,response : Response,db: Session = Depends(get_db),):
+    return ""
+#   response = RedirectResponse('*your login page*', status_code= 302)
+#   response.delete_cookie(key ='*your access token name*')
+#   return response
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8088, reload=True)
