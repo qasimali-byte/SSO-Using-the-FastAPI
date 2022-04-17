@@ -16,3 +16,8 @@ class UserSession(Base):
     id = Column(Integer, primary_key=True, index=True)
     cookie_id = Column(UUID(as_uuid=True),nullable=False, unique=True )
     user_id = Column(String(100), nullable=False, unique=True )
+
+class Sps(Base):
+    __tablename__ = "service_providers"
+    id = Column(Integer, primary_key=True, index=True)
+    sp_id = Column(String(100),nullable=False, unique=True )
