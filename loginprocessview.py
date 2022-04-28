@@ -42,7 +42,9 @@ class LoginProcessView():
         return "session not found"
 
     def get_user(self, email,password, db: Session):
+        print(email,"--email--")
         user = db.query(User).filter(User.email == email).first()
+        print(user,"---user--")
         if user :
             if user.password == password:
                 return user

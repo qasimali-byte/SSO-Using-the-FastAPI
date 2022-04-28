@@ -1,4 +1,4 @@
-from core.config import settings
+from core.development_config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from typing import Generator

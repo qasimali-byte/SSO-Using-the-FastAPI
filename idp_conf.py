@@ -24,7 +24,7 @@ CONFIG = {
     "xmlsec_binary": "./xmlsec1.exe",
     "delete_tmpfiles": True,
     "metadata": {
-            'local': ['metadata/sp.xml','metadata/sp1.xml']
+            'local': ['metadata/sp.xml','metadata/sp1.xml','metadata/ezsp.xml']
         },
     
     # "attribute_map_dir": "attributemaps",

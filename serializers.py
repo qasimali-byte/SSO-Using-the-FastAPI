@@ -27,5 +27,6 @@ class SamlRequestSerializer(BaseModel):
         try:
             data = idp_server.parse_authn_request(saml_request,BINDING_HTTP_REDIRECT)
         except Exception as e:
-            raise HTTPException(status_code=403, detail="Invalid SAML Request")
+            print("error",e)
+            raise HTTPException(status_code=403, detail=f"Invalid SAML Request: {e}")
         

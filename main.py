@@ -27,6 +27,7 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
+from core.development_config import settings
 class SessionData(BaseModel):
     username: str
 
@@ -163,7 +164,6 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
     verify_session = await verifier.__call__(request)
     if verify_session[1] != True:
         # delete the cookie from browser and db
-        print(verify_session[0],"---------------re  ")
         valid_session = False
 
     ## session verification in db
@@ -325,4 +325,4 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
 #   return response
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=80, reload=True)
+    uvicorn.run("main:app", host=settings.HOST_URL, port=settings.HOST_PORT, reload=True)
