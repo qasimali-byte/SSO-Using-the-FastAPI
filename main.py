@@ -27,7 +27,7 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
-from core.development_config import settings
+from core.config import settings
 class SessionData(BaseModel):
     username: str
 
