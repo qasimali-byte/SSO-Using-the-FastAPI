@@ -1,10 +1,14 @@
-from core.config import settings
+# from core.config import settings
+# from core.config import settings
+# from main import settings_by_env
+from core.config import Settings
+settings_by_env = Settings()
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from typing import Generator
 
 # For postgrSQL database
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+SQLALCHEMY_DATABASE_URL = settings_by_env.DATABASE_URL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 # For SQlLite Database
