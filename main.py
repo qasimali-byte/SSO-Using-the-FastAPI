@@ -1,4 +1,5 @@
-import re
+import load_env
+from core.config import Settings
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import RedirectResponse,HTMLResponse, Response
 import requests
@@ -27,7 +28,7 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
-from core.config import settings
+settings_by_env = Settings()
 class SessionData(BaseModel):
     username: str
 
@@ -325,4 +326,6 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
 #   return response
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=settings.HOST_URL, port=settings.HOST_PORT, reload=True)
+
+    uvicorn.run("main:app", host=settings_by_env.HOST_URL, port=settings_by_env.HOST_PORT, reload=True)
+    
