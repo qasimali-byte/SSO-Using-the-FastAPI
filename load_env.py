@@ -9,8 +9,8 @@ parser.add_argument("-e","--env", help="Select the environment to run the server
 args = parser.parse_args()
 config = vars(args)
 if config['env'] == 'dev':
-    env_path = Path(".") / ".env.dev"
+    env_path = Path(".") / "envs/.env.dev"
     load_dotenv(dotenv_path=env_path)
 elif config['env'] == "prod":
-    env_path = Path(".") / ".env.prod"
+    env_path = Path(".") / "envs/.env.prod"
     load_dotenv(dotenv_path=env_path)
