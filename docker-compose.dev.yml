@@ -12,8 +12,6 @@ services:
       - "80:80"
     command: >
       sh -c "python3 main.py -e prod"
-    env_file:
-      - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
