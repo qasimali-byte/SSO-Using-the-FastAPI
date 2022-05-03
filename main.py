@@ -44,6 +44,7 @@ cookie = SessionCookie(
 )
 backend = InMemoryBackend[UUID, SessionData]()
 
+
 class BasicVerifier(SessionVerifier[UUID, SessionData]):
     def __init__(
         self,
