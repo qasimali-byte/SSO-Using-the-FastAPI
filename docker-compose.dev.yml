@@ -1,6 +1,20 @@
 version: "3.8"
 
 services:
+  db_idp:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=faisal
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+    ports:
+      - 5432:5432
+    networks:
+      - fullstack
+  
   app:
     container_name: sso-idp-attech-jenkins
     image: sso-idp-attech-jenkins
@@ -19,19 +33,6 @@ services:
       - fullstack
     depends_on:
       - db_idp
-  db_idp:
-    image: postgres:13-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=faisal
-      - POSTGRES_DB=postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
-    ports:
-      - 5432:5432
-    networks:
-      - fullstack
   # pgadmin:
   #   image: dpage/pgadmin4
   #   container_name: pgadmin_container1
