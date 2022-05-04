@@ -22,11 +22,11 @@ pipeline {
                 sh 'curl http://localhost:80/'
             }
         }
-        post {
-            always {
-                sh 'docker compose down'
-                sh 'docker compose ps'
-            }
+    }
+    post {
+        always {
+            sh 'docker compose down'
+            sh 'docker compose ps'
         }
     }
 }
