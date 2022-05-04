@@ -94,7 +94,7 @@ templates = Jinja2Templates(directory="templates/")
 create_tables()
 
 
-@app.get("/sso/redirect/", tags=["Redirect Request Generated From Service Provider"])
+@app.get("/sso/redirect/", tags=["Redirect Request Generated From Service Provider Only Redirect Request"])
 async def read_root(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
     # print( await verifier.__call__(request))
     req = LoginProcessView()
