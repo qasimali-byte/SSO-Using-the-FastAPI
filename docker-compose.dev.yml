@@ -2,8 +2,8 @@ version: "3.8"
 
 services:
   app:
-    container_name: sso-idp-attech
-    image: sso-idp-attech
+    container_name: sso-idp-attech-jenkins
+    image: sso-idp-attech-jenkins
     build:
       context: .
     volumes:
