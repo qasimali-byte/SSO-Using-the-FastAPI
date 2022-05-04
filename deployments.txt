@@ -1,9 +1,0 @@
-docker-compose -f docker-compose.dev.yml up -d --build
-sudo psql -h localhost -p 5432 --user postgres
-ssh -i "faisal-sso2.pub" faisal@18.134.217.103
-
-## create database in postgres
-    postgres=# CREATE DATABASE sso_idp;
-
-# important links 
-# removing docker from sudo - https://linuxhandbook.com/docker-permission-denied/

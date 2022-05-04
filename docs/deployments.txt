@@ -1,0 +1,28 @@
+docker-compose -f docker-compose.dev.yml up -d --build
+sudo psql -h localhost -p 5432 --user postgres
+ssh -i "faisal-sso2.pub" faisal@18.134.217.103
+https://github.com/syedfaisalsaleeem/attech-identityprovider/settings/hooks/356209417 # updating web hook for jenkins
+
+## create database in postgres
+    postgres=# CREATE DATABASE sso_idp;
+
+## for stopping all docker containers
+sudo docker ps -a -q |sudo  xargs docker stop 
+
+# important links 
+# removing docker from sudo - https://linuxhandbook.com/docker-permission-denied/
+# ssh agent for slave node -https://stackoverflow.com/questions/51170209/jenkins-launch-method-launch-slave-agents-via-ssh-missing
+# agent node https://www.youtube.com/watch?v=99DddJiH7lM
+# use docker compose with jenkins https://www.youtube.com/watch?v=ZPD_PzGOvFM
+# setting up jenkins for private github repository 
+- https://medium.com/facademy/setup-jenkins-for-private-repository-9060f54eeac9
+- https://shreyakupadhyay.medium.com/integrate-jenkins-with-github-private-repo-8fb335494f7e
+
+
+# single logout important links
+- https://help.okta.com/en/prod/Content/Topics/Apps/Apps_Single_Logout.htm
+- https://docs.oracle.com/en/cloud/saas/marketing/eloqua-user/Help/SingleSignOn/Tasks/TestingSingleLogout.htm
+- https://www.onelogin.com/learn/how-single-sign-on-works
+- https://docs.axway.com/bundle/SecureTransport_54_AdministratorGuide_allOS_en_HTML5/page/Content/AdministratorsGuide/LDAP_integration/c_st_about_SSO.htm
+- https://social.msdn.microsoft.com/Forums/azure/en-US/dba7dabe-8797-429c-8d5b-6c830705ad82/error-8211-saml-single-logout-request-does-not-correspond-to-the-loggedin-session-participant?forum=Geneva
+- https://docs.servicenow.com/bundle/sandiego-platform-administration/page/integrate/saml/task/t_EnableSignedLogoutRequests.html
