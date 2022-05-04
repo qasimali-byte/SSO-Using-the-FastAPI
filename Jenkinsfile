@@ -1,9 +1,15 @@
 pipeline {
     agent {label 'linux'}
     stages {
-        stage('Build') {
+        stage('verify tooling') {
             steps {
-                sh 'echo "Hello World"'
+                sh '''
+                    docker info
+                    docker version
+                    docker-compose version
+                    curl --version
+                    jq --version
+                    '''
             }
         }
     }
