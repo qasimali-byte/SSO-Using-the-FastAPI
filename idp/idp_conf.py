@@ -19,12 +19,12 @@ CONFIG = {
     #         },
     #     }
     # },
-    "key_file": "pki/mykey.pem",
-    "cert_file": "pki/mycert.pem",
-    "xmlsec_binary": "./xmlsec1.exe",
+    "key_file": "idp/pki/mykey.pem",
+    "cert_file": "idp/pki/mycert.pem",
+    "xmlsec_binary": "idp/xmlsec1.exe",
     "delete_tmpfiles": True,
     "metadata": {
-            'local': ['metadata/sp.xml','metadata/sp1.xml','metadata/ezsp.xml']
+            'local': ['idp/metadata/sp.xml','idp/metadata/sp1.xml','idp/metadata/ezsp.xml']
         },
     
     # "attribute_map_dir": "attributemaps",

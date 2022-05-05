@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Sps
+from src.apis.v1.models import Sps
 
 class SPSController():
     def __init__(self, db: Session):

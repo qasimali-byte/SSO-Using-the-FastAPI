@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from sqlalchemy.orm import Session
-from models import UserSession
+from src.apis.v1.models import UserSession
 
 class Store(ABC):
     """Abstract class that defines methods for interacting with session data. """

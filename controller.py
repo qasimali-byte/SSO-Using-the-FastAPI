@@ -9,11 +9,9 @@ from fastapi_sessions.backends.session_backend import SessionBackend, SessionMod
 
 from fastapi_sessions.frontends.session_frontend import ID, FrontendError, SessionFrontend
 try:
-    from models import UserSession
+    from src.apis.v1.models import UserSession
     from serializers import SessionSerializer
-
 except ImportError:
-    from models import UserSession
     from serializers import SessionSerializer
 
 from abc import ABC, abstractmethod

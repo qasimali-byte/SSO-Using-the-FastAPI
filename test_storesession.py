@@ -1,5 +1,5 @@
 import unittest
-from db.session import SessionLocal, get_db
+from src.apis.v1.db.session import SessionLocal
 from storesession import StoreSession
 
 class TestStoreSession(unittest.TestCase):

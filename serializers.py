@@ -22,7 +22,7 @@ class SamlRequestSerializer(BaseModel):
         
     @validator('SAMLRequest')
     def verify_saml_request(cls, saml_request: str) -> str:
-        idp_server = server.Server(config_file="./idp_conf.py")
+        idp_server = server.Server(config_file="idp/idp_conf.py")
         # idp_server.config.setattr("idp", "want_authn_requests_signed", True)
         try:
             data = idp_server.parse_authn_request(saml_request,BINDING_HTTP_REDIRECT)

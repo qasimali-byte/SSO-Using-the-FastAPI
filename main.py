@@ -1,19 +1,22 @@
 import load_env
-from core.config import Settings
+from src.apis.v1.core.project_settings import Settings
+settings_by_env = Settings()
+from src.config.constants import Constants
+from src.apis.v1.db.session import engine, get_db
+from src.apis.v1.models import Base
+def create_tables():
+    Base.metadata.create_all(bind=engine)
+create_tables()
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
 from fastapi.responses import RedirectResponse,HTMLResponse, Response
 import requests
 from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
 from pydantic import BaseModel
-from constants import Constants
 from controller import SessionController
 
 from loginprocessview import LoginProcessView
 from fastapi.templating import Jinja2Templates
 import uvicorn
-import fastapi
-from models import Base
-from db.session import engine, get_db
 from sqlalchemy.orm import Session
 from fastapi_sessions.backends.implementations import InMemoryBackend
 from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
@@ -28,7 +31,7 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
-settings_by_env = Settings()
+
 class SessionData(BaseModel):
     username: str
 
@@ -86,12 +89,11 @@ verifier = BasicVerifier(
     auth_http_exception=HTTPException(status_code=403, detail="invalid session"),
 )
 
-def create_tables():
-    Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates/")
-create_tables()
+
 
 
 @app.get("/sso/redirect/", tags=["Redirect Request Generated From Service Provider Only Redirect Request"])
@@ -223,7 +225,7 @@ async def read_root(response: Response,request: Request,email: str = Form(...),p
 def test_logout_request_from_idp(remove_sp,name_id):
     from saml2.samlp import SessionIndex
     from saml2 import server
-    idp_server = server.Server(config_file="./idp_conf.py")
+    idp_server = server.Server(config_file="idp/idp_conf.py")
     nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=name_id)
     t_l = [
@@ -254,7 +256,10 @@ def test_logout_request_from_idp(remove_sp,name_id):
     relay_state="relay2")
     redirect_url = None
     print(info,"----info")
-    response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+    try:
+        response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+    except Exception as e:
+        print(e,"----e")
     # test_logout_response_from_sp(info['data'])
 
 
@@ -264,7 +269,7 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
     print(SAMLRequest)
     from base64 import decodebytes as b64decode
     from saml2 import server
-    idp_server = server.Server(config_file="./idp_conf.py")
+    idp_server = server.Server(config_file="idp/idp_conf.py")
     # print(req,"-----req-----")
     # info = saml_client.apply_binding(
     #     BINDING_HTTP_REDIRECT, req, destination="",
