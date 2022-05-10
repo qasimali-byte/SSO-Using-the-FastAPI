@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-class Settings:
+from pydantic import BaseSettings
+class Settings(BaseSettings):
     PROJECT_TITLE: str = "SSO IDP"
     PROJECT_VERSION: str = "0.0.1"
     HOST_URL: str = os.environ.get("HOST_URL")
