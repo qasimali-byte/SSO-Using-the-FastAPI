@@ -330,9 +330,12 @@
 # #   response = RedirectResponse('*your login page*', status_code= 302)
 # #   response.delete_cookie(key ='*your access token name*')
 # #   return response
+from src.app import create_app
+application = create_app()
 
 if __name__ == "__main__":
     from src import settings_by_env
     import uvicorn
-    uvicorn.run("src.app:app", host=settings_by_env.HOST_URL, port=settings_by_env.HOST_PORT, reload=True)
+    uvicorn.run("main:application", host=settings_by_env.HOST_URL, port=settings_by_env.HOST_PORT, reload=True)
+    
     
