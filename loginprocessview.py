@@ -53,6 +53,7 @@ class LoginProcessView():
         return None
 
     def get(self, request_parms, email):
+        from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
         users_info = {
             "name": "",
             "email": "",
@@ -66,7 +67,9 @@ class LoginProcessView():
         users_info["email"] = email
         identity = users_info
         resp_args = idp_server.response_args(data.message)
-        value = idp_server.create_authn_response(identity,userid=email,encrypt_cert_assertion=None,**resp_args)
+        nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
+             text=email)
+        value = idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,**resp_args)
         
         http_args = idp_server.apply_binding(
             binding=resp_args['binding'],
