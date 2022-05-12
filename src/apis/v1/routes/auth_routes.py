@@ -67,7 +67,6 @@ async def refresh_token(db: Session = Depends(get_db),authorize: AuthJWT = Depen
 @AuthJWT.token_in_denylist_loader
 def check_if_token_in_denylist(decrypted_token):
     jti = decrypted_token['jti']
-    print(jti)
     entry = redis_conn.get(jti)
     return (entry and entry == 'true') 
 
@@ -129,7 +128,7 @@ async def fresh_login(request: Request,login_validator:LoginValidator,db: Sessio
 
 # A token in denylist will not be able to access this any more
 @router.get('/test-token')
-def protected(authorize: AuthJWT = Depends()):
+def protected(authorize: AuthJWT = Depends(),token: str = Depends(oauth2_scheme)):
     authorize.jwt_required()
 
     current_user = authorize.get_jwt_subject()
