@@ -1,7 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from src.apis.v1.routes import sps_routes, idp_routes,auth_routes 
 from . import settings_by_env
+from fastapi_jwt_auth.exceptions import AuthJWTException
+from redis import Redis
+from fastapi.responses import JSONResponse
+
 def create_app():
     app = FastAPI()
     templates = Jinja2Templates(directory="templates/")
@@ -9,6 +13,13 @@ def create_app():
     app.include_router(idp_routes.router)
     app.include_router(auth_routes.router, prefix="/api/v1")
 
+    @app.exception_handler(AuthJWTException)
+    def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.message}
+        )
+    
     return app
 
 # app = create_app()

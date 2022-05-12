@@ -1,25 +1,28 @@
-from src.apis.v1.controllers.auth_controller import AuthController
+from src.apis.v1.services.auth_service import AuthService
 from sqlalchemy.orm import Session
 from uuid import UUID, uuid4
 from datetime import datetime
+
+from src.apis.v1.utils.auth_utils import create_password_hash
 def create_super_admin(db: Session):
     
 
     # Current date time in local system
     # print(datetime.now())
     try:
-        check = AuthController(db).insert(
+        hashed_password = create_password_hash("admin")
+        check = AuthService(db).insert_idp_user(
             uuid = uuid4(),
             organization_id = "1",
             username = "syed faisal",
             title = None,
             first_name = "syed",
             last_name = "faisal",
-            email = "syedfaisal@gmail.com",
+            email = "syed@gmail.com",
             other_email = "syedfaisal2@gmail.com",
             gender = "male",
             nhs_number = "1234",
-            password_hash = "admin",
+            password_hash = hashed_password,
             reset_password_token = "nothing",
             reset_password_token_expiry = "nothing",
             profile_image = None,
