@@ -46,6 +46,14 @@ services:
   #   networks:
   #     - fullstack
   #   restart: unless-stopped
+  redis:
+    image: "redis:alpine"
+    ports:
+     - "6379:6379"
+
+
+    networks:
+      - fullstack
 volumes:
     postgres_data:
                 
@@ -53,3 +61,8 @@ volumes:
 networks:
   fullstack:
     driver: bridge
+  node_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

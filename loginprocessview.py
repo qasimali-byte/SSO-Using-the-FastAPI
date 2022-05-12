@@ -6,8 +6,7 @@ from saml2 import (
     BINDING_HTTP_REDIRECT,
     entity,
 )
-from idp_user import USERS
-from models import User, UserSession
+from src.apis.v1.models import UserSession,User
 from sqlalchemy.orm import Session
 
 class LoginProcessView():
@@ -58,7 +57,7 @@ class LoginProcessView():
             "name": "",
             "email": "",
         }
-        idp_server = server.Server(config_file="./idp_conf.py")
+        idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
         saml_msg =request_parms
         # print(saml_msg)

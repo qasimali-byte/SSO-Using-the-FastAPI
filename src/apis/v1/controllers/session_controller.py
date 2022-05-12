@@ -9,28 +9,14 @@ from fastapi_sessions.backends.session_backend import SessionBackend, SessionMod
 
 from fastapi_sessions.frontends.session_frontend import ID, FrontendError, SessionFrontend
 try:
-    from src.apis.v1.models import UserSession
-    from serializers import SessionSerializer
+    from app.sessions.base_controller import Store
+    from app.sessions.models import UserSession
+    from app.sessions.serializers import SessionSerializer
+
 except ImportError:
+    from base_controller import Store
+    from models import UserSession
     from serializers import SessionSerializer
-
-from abc import ABC, abstractmethod
-
-class Store(ABC):
-    """Abstract class that defines methods for interacting with session data. """
-
-    @abstractmethod
-    def get(self, filter_key: str, filter_value: str) -> str:
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def set(self, cookieid, userid):
-        raise NotImplementedError()
-    
-    @abstractmethod
-    def delete(self, filter_key: str, filter_value: str):
-        raise NotImplementedError()
-
 
 class SessionStore(Store):
     def __init__(self, db: Session):
@@ -167,7 +153,6 @@ class SessionController(Generic[ID, SessionModel]):
 
         except Exception as e:
             print("--- Error: {}".format(str(e)))
-    
     @staticmethod
     def check_userid(user_id):
         try:
@@ -190,15 +175,6 @@ class SessionController(Generic[ID, SessionModel]):
             return session_.delete("cookie_id",cookie_id), 200
         except Exception as e:
             return "Error: {}".format(e), 500
-    
-    @staticmethod
-    def delete_userid(db:Session, user_id):
-        try:
-            session_ = SessionStore(db)
-            return session_.delete("user_id",user_id), 200
-        except Exception as e:
-            return "Error: {}".format(e), 500
-
     @staticmethod
     def create_session(db: Session, user_id: str, cookie, response):
         session_id = uuid4()
