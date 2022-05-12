@@ -16,7 +16,7 @@ router = APIRouter(tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
 
 # Setup our redis connection for storing the denylist tokens
-redis_conn = Redis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=6379, db=0, decode_responses=True)
 
 @AuthJWT.load_config
 def get_config():

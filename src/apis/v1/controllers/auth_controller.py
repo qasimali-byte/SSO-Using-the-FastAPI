@@ -18,19 +18,19 @@ class AuthController:
             data = EmailValidatorError(
                 message= "email format is not correct",
                 verification=False, 
-            )
-            response = custom_response(data=data,status_code=422)
-            return response
+            ), 422
+            return data
+
 
         user_object = AuthService(self.db).authenticate_user(email, password)
         if not user_object:
             data = EmailValidatorError(
                 message= "Incorrect email or password",
                 verification=False, 
-            )
-            response = custom_response(data=data,status_code=401)
-            return response
-        return user_object
+            ), 401
+            return data
+
+        return user_object,200
 
     def logout(self,authorize):
         try:
@@ -43,7 +43,10 @@ class AuthController:
             return response
         
     def login(self, email: str, password: str, authorize):
-        self.login_authentication(email, password)
+        auth_result = self.login_authentication(email, password)
+        if  auth_result[1] != 200:
+            response = custom_response(data=auth_result[0],status_code=auth_result[1])
+            return response
 
         # Use create_access_token() and create_refresh_token() to create our
         # access and refresh tokens
@@ -59,7 +62,10 @@ class AuthController:
         return response
         
     def fresh_login(self, email: str, password: str, authorize):
-        self.login_authentication(email, password)
+        auth_result = self.login_authentication(email, password)
+        if  auth_result[1] != 200:
+            response = custom_response(data=auth_result[0],status_code=auth_result[1])
+            return response
             
         # Use create_access_token() and create_refresh_token() to create our
         # access and refresh tokens
