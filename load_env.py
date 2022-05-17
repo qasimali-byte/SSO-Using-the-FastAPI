@@ -8,8 +8,7 @@ parser.add_argument("-e","--env", help="Select the environment to run the server
                     type=str,required=False,choices=['dev', 'prod'])
 args = parser.parse_args()
 config = vars(args)
-# config = {}
-# config['env'] = "dev"
+
 if config['env'] == 'dev':
     env_path = Path(".") / "envs/.env.dev"
     load_dotenv(dotenv_path=env_path)

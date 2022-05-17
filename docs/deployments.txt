@@ -2,6 +2,7 @@ docker-compose -f docker-compose.dev.yml up -d --build
 sudo psql -h localhost -p 5432 --user postgres
 ssh -i "faisal-sso2.pub" faisal@18.134.217.103
 https://github.com/syedfaisalsaleeem/attech-identityprovider/settings/hooks/356209417 # updating web hook for jenkins
+docker run --name myjenkins1 -d -v myvoll:/var/jenkins_home -p 8080:8080 -p 50000:50000 jenkins/jenkins
 
 ## create database in postgres
     postgres=# CREATE DATABASE sso_idp;

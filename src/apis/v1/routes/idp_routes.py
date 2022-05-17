@@ -215,6 +215,104 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
     # response = RedirectResponse(url="http://localhost:8088/acs")
     # return fastapi.responses.RedirectResponse(url="http://localhost:8088/acs",status_code=status.HTTP_302_FOUND)
 
-@router.get("/sso/logout",summary="Logout Request API From Service Provider")
-async def sso_logout(request: Request,response : Response,SAMLRequest: str,db: Session = Depends(get_db)):
-    pass
+def test_logout_request_from_idp(remove_sp,name_id):
+    from saml2.samlp import SessionIndex
+    from saml2 import server
+    idp_server = server.Server(config_file="idp/idp_conf.py")
+    nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
+             text=name_id)
+    t_l = [
+        "loadbalancer-91.siroe.com",
+        "loadbalancer-9.siroe.com"
+    ]
+    t_l_2 = {
+        "loadbalancer-9.siroe.com":"http://localhost:8000/slo/request",
+        "loadbalancer-91.siroe.com":"http://localhost:8010/slo/request"
+    }
+    t_l.remove(remove_sp)
+
+    req_id, req = idp_server.create_logout_request(
+        issuer_entity_id=t_l[0],
+        destination=t_l_2[t_l[0]],
+        name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
+        session_indexes=["_foo"])
+
+    # assert req.destination == "http://localhost:8088/logout/process"
+    # assert req.reason == "Tired"
+    # assert req.version == "2.0"
+    # assert req.name_id == nid
+    # assert req.issuer.text == "loadbalancer-9.siroe.com"
+    # assert req.session_index == [SessionIndex("_foo")]
+    print(req,"----req")
+    info = idp_server.apply_binding(
+    BINDING_SOAP, req, t_l_2[t_l[0]],
+    relay_state="relay2")
+    redirect_url = None
+    print(info,"----info")
+    try:
+        response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+    except Exception as e:
+        print(e,"----e")
+    # test_logout_response_from_sp(info['data'])
+
+
+# SAMLRequest: str
+@router.get("/sso/logout",summary=["Logout Request API From Service Provider"])
+async def logout(request: Request,response : Response,SAMLRequest: str,db: Session = Depends(get_db),):
+    print(SAMLRequest)
+    from base64 import decodebytes as b64decode
+    from saml2 import server
+    idp_server = server.Server(config_file="idp/idp_conf.py")
+    # print(req,"-----req-----")
+    # info = saml_client.apply_binding(
+    #     BINDING_HTTP_REDIRECT, req, destination="",
+    #     relay_state="relay2")
+    # print(data,"---reached here---")
+    # loc = data['body']
+    # qs = parse.parse_qs(loc[:])
+    # print(qs)
+    samlreq = SAMLRequest
+    # resphttp = idp_server.handle_logout_request(samlreq, nid,
+    #         BINDING_HTTP_REDIRECT)
+    # _dic = unpack_form(resphttp['data'], "SAMLResponse")
+    # xml = b64decode(_dic['SAMLResponse'].encode('UTF-8'))
+    # print(xml,"---xml--")
+    req_info = idp_server.parse_logout_request(samlreq, BINDING_HTTP_REDIRECT)
+    print(vars(req_info),"---req_info---",req_info.message.name_id.text,vars(req_info.message),req_info.message.issuer.text)
+    # response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
+
+    # verify_request_signature(req_info)
+
+    # resphttp = idp_server.handle_logout_request(samlreq, nid,
+    #         BINDING_HTTP_REDIRECT)
+
+    # find the users logged in database in which sp
+    resp = idp_server.create_logout_response(req_info.message, [entity.BINDING_HTTP_REDIRECT])
+    print(vars(resp.issuer),"--req_info--")
+    hinfo = idp_server.apply_binding(entity.BINDING_HTTP_REDIRECT, resp.__str__(), resp.destination, "/", response=True)
+    print(hinfo,"---hinfo---")
+    # create logout request for sp2
+    # test_logout_request_from_idp("loadbalancer-91.siroe.com")
+    # html_response = {
+    #     "data": hinfo,
+    #     "type": "REDIRECT",
+    # }
+    redirect_url = None
+    for key, value in hinfo['headers']:
+        if key == 'Location':
+            redirect_url = value
+            break
+    print(redirect_url,"----redirect_url")
+    response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
+    verified_id = SessionController().verify_session(cookie,request)
+    print(verified_id)
+    if verified_id[1] == 200:
+        verified_status = SessionController().check_session_db(db,verified_id[0])
+        if verified_status[1] == 200:
+            SessionController().delete_session(db,verified_id[0])
+            cookie.delete_from_response(response)
+        else:
+            SessionController().delete_userid(db,req_info.message.name_id.text)
+    
+    # test_logout_request_from_idp(req_info.message.issuer.text,req_info.message.name_id.text)
+    return response
