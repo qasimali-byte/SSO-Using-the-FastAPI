@@ -22,7 +22,7 @@ fileConfig(config.config_file_name)
 
 # from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.models import Base
-from src.apis.v1 import models
+from src.apis.v1.models import Sps, User, UserSession, idp_users
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -35,6 +35,7 @@ def get_url():
     This function is used to get the database url from the environment variable
     """
     return 'postgresql://postgres:faisal@localhost:5432/sso_idp'
+    
     
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -67,23 +68,22 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    pass
-    # connectable = engine_from_config(
-    #     config.get_section(config.config_ini_section),
-    #     prefix="sqlalchemy.",
-    #     poolclass=pool.NullPool,
-    # )
+    # pass
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
 
-    # with connectable.connect() as connection:
-    #     context.configure(
-    #         connection=connection, target_metadata=target_metadata
-    #     )
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
-    #     with context.begin_transaction():
-    #         context.run_migrations()
+        with context.begin_transaction():
+            context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+
+run_migrations_online()
+
