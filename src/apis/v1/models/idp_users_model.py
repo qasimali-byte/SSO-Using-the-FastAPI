@@ -31,3 +31,5 @@ class idp_users(Base):
     created_date = Column(DateTime, nullable=False, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
     last_login_date = Column(DateTime, nullable=False, unique=False)
+    sp_apps_relation = relationship("Child",
+                secondary=association_table)
