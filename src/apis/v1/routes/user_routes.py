@@ -25,8 +25,9 @@ async def create_user(user_validator:AdminUserValidator,request: Request,db: Ses
     pass
 
 @router.post("/user/internal", summary="Create Internal User Api")
-async def create_user(user_validator:InternalUserValidator,request: Request,db: Session = Depends(get_db)):
+async def create_internal_user(user_validator:InternalUserValidator,request: Request,db: Session = Depends(get_db)):
     """
         Create Internal User 
     """
+    req = await request.json()
     pass
