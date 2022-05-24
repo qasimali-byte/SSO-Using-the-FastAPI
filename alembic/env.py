@@ -22,7 +22,7 @@ fileConfig(config.config_file_name)
 
 # from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.models import Base
-from src.apis.v1.models import Sps, User, UserSession, idp_users
+from src.apis.v1.models import Sps, User, UserSession, idp_users, SAMLUserSession
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

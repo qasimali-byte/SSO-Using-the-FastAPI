@@ -40,14 +40,14 @@ def create_super_admin(db: Session):
             updated_date = datetime.now(),
             last_login_date = datetime.now()
             )
-        db.add(check)
-        db.commit()
-        data = SPSService(db).get_sps_app_by_name("ez-nav")
-        # check.sp_apps_relation.is_accessible = True
-        # check.sp_apps_relation.sp_apps_id = data.id
-        statement = user_idp_sp_app.insert().values(idp_users_id=check.id,  sp_apps_id=data.id, is_accessible=True)
-        db.execute(statement)
-        db.commit()
+        # db.add(check)
+        # db.commit()
+        # data = SPSService(db).get_sps_app_by_name("ez-nav")
+        # # check.sp_apps_relation.is_accessible = True
+        # # check.sp_apps_relation.sp_apps_id = data.id
+        # statement = user_idp_sp_app.insert().values(idp_users_id=check.id,  sp_apps_id=data.id, is_accessible=True)
+        # db.execute(statement)
+        # db.commit()
         # check = AuthService(db).get_idp_user("umair@gmail.com")
         print(vars(check))
     except Exception as e:

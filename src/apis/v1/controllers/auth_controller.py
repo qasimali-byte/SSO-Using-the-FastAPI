@@ -5,7 +5,7 @@ from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.services.auth_service import AuthService
 from src.apis.v1.validators.auth_validators import EmailValidatorError, EmailValidatorOut, LoginValidator, LoginValidatorOut, RefreshTokenValidatorOut
-
+from fastapi import status
 
 class AuthController:
 
@@ -17,7 +17,8 @@ class AuthController:
         if not validation:
             data = EmailValidatorError(
                 message= "email format is not correct",
-                verification=False, 
+                verification=False,
+                statuscode=status.HTTP_422_UNPROCESSABLE_ENTITY 
             ), 422
             return data
 
@@ -27,6 +28,7 @@ class AuthController:
             data = EmailValidatorError(
                 message= "Incorrect email or password",
                 verification=False, 
+                statuscode=status.HTTP_401_UNAUTHORIZED
             ), 401
             return data
 
@@ -37,11 +39,12 @@ class AuthController:
             authorize.jwt_required()
         except Exception as e:
             data = {
-                "message":str(e)
+                "message":str(e),
+                "statuscode":status.HTTP_422_UNPROCESSABLE_ENTITY
             }
             response = custom_response(data=data,status_code=422)
             return response
-        
+
     def login(self, email: str, password: str, authorize):
         auth_result = self.login_authentication(email, password)
         if  auth_result[1] != 200:
@@ -57,7 +60,8 @@ class AuthController:
             access_token= access_token, 
             refresh_token=refresh_token,
             roles= ["super_admin"], 
-            token_type= "bearer")
+            token_type= "bearer",
+            statuscode=200)
         response = custom_response(data=data,status_code=200)
         return response
         
@@ -72,7 +76,8 @@ class AuthController:
         access_token = authorize.create_access_token(subject=email,fresh=True)
         data = RefreshTokenValidatorOut(
             message="successfully generated new access token",
-            access_token= access_token
+            access_token= access_token,
+            statuscode=status.HTTP_200_OK
             )
         response = custom_response(data=data,status_code=200)
         return response
@@ -84,6 +89,7 @@ class AuthController:
                 verification= True, 
                 roles=["super_admin"], 
                 email= email,
+                statuscode=status.HTTP_200_OK
                 )
             response = custom_response(data=data,status_code=200)
 
@@ -91,7 +97,8 @@ class AuthController:
         else:
             data = EmailValidatorError(
                 message= "invalid email",
-                verification=False, 
+                verification=False,
+                statuscode=status.HTTP_422_UNPROCESSABLE_ENTITY 
             )
             response = custom_response(data=data,status_code=422)
         
@@ -107,7 +114,8 @@ class AuthController:
             authorize.jwt_refresh_token_required()
         except Exception as e:
             data = {
-                "message":str(e)
+                "message":str(e),
+                "statuscode":status.HTTP_422_UNPROCESSABLE_ENTITY
             }
             response = custom_response(data=data,status_code=422)
             return response
@@ -116,7 +124,8 @@ class AuthController:
         new_access_token = authorize.create_access_token(subject=current_user,fresh=False)
         data = RefreshTokenValidatorOut(
             message = "successfully generated new access token",
-            access_token = new_access_token
+            access_token = new_access_token,
+            statuscode=status.HTTP_200_OK
         )
         response = custom_response(data=data,status_code=200)
         return response

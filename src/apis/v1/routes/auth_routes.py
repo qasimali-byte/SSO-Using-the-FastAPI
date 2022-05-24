@@ -1,22 +1,32 @@
 from os import access
+from uuid import uuid4
 from fastapi import Depends, HTTPException, Request, APIRouter, Response
+from fastapi.responses import HTMLResponse
+from fastapi import status
+from src.apis.v1.helpers.html_parser import HTMLPARSER
+from src.apis.v1.controllers.idp_controller import IDPController
+from src.apis.v1.controllers.session_controller import SessionController
+from fastapi_sessions.frontends.implementations.cookie import SessionCookie
+from src.apis.v1.helpers.customize_response import custom_response
+from loginprocessview import LoginProcessView
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
-from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidatorError, EmailValidatorOut, LoginValidator, LogoutValidator
+from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidatorError, EmailValidatorOut, LoginValidator, LoginValidatorOut, LoginValidatorOutRedirect, LogoutValidator
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_jwt_auth import AuthJWT
 from redis import Redis
-
+from src.apis.v1.routes.idp_routes import cookie,cookie_frontend
 
 router = APIRouter(tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
 
 # Setup our redis connection for storing the denylist tokens
 redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=6379, db=0, decode_responses=True)
+
 
 @AuthJWT.load_config
 def get_config():
@@ -38,7 +48,7 @@ async def email_verifier(email_validator:EmailValidator,request: Request,db: Ses
     resp = AuthController(db).email_verification(email)
     return resp
 
-@router.post("/login", summary="Submit Login Page API submission")
+@router.post("/login", summary="Submit Login Page API submission",responses={200:{"model":LoginValidatorOut},307:{"model":LoginValidatorOutRedirect}})
 async def sso_login(login_validator:LoginValidator,request: Request,db: Session = Depends(get_db), authorize: AuthJWT = Depends() ):
     #validate the cookie in db
     # if unique cookie is valid, use all emails
@@ -51,6 +61,44 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
     
     req = await request.json()
     email,password = req["email"],req["password"]
+    verified_id = SessionController().verify_session(cookie_frontend,request)
+    print("verified_id", verified_id,type(verified_id[1]))
+    if verified_id[1] == 200:
+        idp_controller = IDPController(db)
+        verified_data = idp_controller.get_frontend_session_saml(verified_id[0])
+        print(verified_data,"verified data")
+        if verified_data[1] == 200:
+            req = LoginProcessView()
+            ## validate email and password 
+            auth_result = AuthController(db).login_authentication(email, password)
+            if  auth_result[1] != 200:
+                response = custom_response(data=auth_result[0],status_code=auth_result[1])
+                return response
+
+            resp = req.get(verified_data[0].saml_req,email)
+            print(verified_data[0].saml_req,"------check----")
+            # delete frontend cookie
+            idp_controller.delete_frontend_session(verified_id[0])
+            # create idp cookie
+            session = uuid4()
+            print(session)
+            ## store session in the database
+            req.store_session(session,email,db)
+            
+            data = HTMLPARSER().parse_html(resp["data"]["data"])
+            access_token = authorize.create_access_token(subject=email,fresh=True)
+            refresh_token = authorize.create_refresh_token(subject=email)
+            # resp_tokens = AuthController(db).login(email,password,authorize)
+            data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="successfully authenticated",
+            roles=["super_admin"],token_type="Bearer",redirect_url=data[0],saml_response=data[1],
+            statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
+            response = custom_response(data=data_out
+                ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+            print(response,"---response--")
+            cookie.attach_to_response(response, session)
+            return response
+             
+
     resp = AuthController(db).login(email,password,authorize)
     return resp
 
