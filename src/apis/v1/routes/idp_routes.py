@@ -1,4 +1,6 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
+from src.apis.v1.controllers.idp_controller import IDPController
+from fastapi_sessions.frontends.implementations.cookie import CookieParameters2
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
 
@@ -33,6 +35,7 @@ class SessionData(BaseModel):
     username: str
 
 cookie_params = CookieParameters()
+cookie_params_2 = CookieParameters2()
 
 # Uses UUID
 cookie = SessionCookie(
@@ -41,6 +44,14 @@ cookie = SessionCookie(
     auto_error=True,
     secret_key="DONOTUSE",
     cookie_params=cookie_params,
+)
+
+cookie_frontend = SessionCookie(
+    cookie_name="cookie_frontend",
+    identifier="general_verifier",
+    auto_error=True,
+    secret_key="DONOTUSE",
+    cookie_params=cookie_params_2,
 )
 backend = InMemoryBackend[UUID, SessionData]()
 
@@ -86,6 +97,15 @@ verifier = BasicVerifier(
     auth_http_exception=HTTPException(status_code=403, detail="invalid session"),
 )
 
+@router.post("/sso/",summary="Only Redirect Request from Service Provider")
+async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
+    verified_id = SessionController().verify_session(cookie_frontend,request)
+    idp_controller = IDPController(db)
+    verified_data = idp_controller.get_frontend_session_saml(verified_id[0]) 
+    req = LoginProcessView()
+    resp = req.get(verified_data[0].saml_req,"syed@gmail.com")
+    return HTMLResponse(content=resp["data"]["data"])
+    
 @router.get("/sso/redirect/",summary="Only Redirect Request from Service Provider")
 async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
     # validate saml request parameter
@@ -101,6 +121,22 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     print(SAMLRequest,"----SAMLRequest")
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
     # resp = req.get(SAMLRequest,email_)
+
+    verified_id = SessionController().verify_session(cookie,request)
+    if verified_id[1] == 200:
+        verified_status = SessionController().check_session_db(db,verified_id[0])
+        if verified_status[1] == 200:
+            email_ = req.get_userid(verified_id[0],db)
+            resp = req.get(SAMLRequest,email_)
+            return HTMLResponse(content=resp["data"]["data"])
+    
+    session = uuid4()
+    # store the cookie in db
+    IDPController(db).store_frontend_saml(session,SAMLRequest)
+    response = RedirectResponse(url="http://localhost:3001/")
+    cookie_frontend.attach_to_response(response, session)
+    # return "session attached"
+    return response
 
     verify_cookie = cookie.__call__(request)
     if  verify_cookie == "No session cookie attached to request":

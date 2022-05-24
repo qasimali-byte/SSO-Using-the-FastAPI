@@ -1,8 +1,8 @@
-from email.policy import default
-from xmlrpc.client import Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from . import Base
+from src.apis.v1.models.user_idp_sp_apps_model import user_idp_sp_app
 
 class idp_users(Base):
     __tablename__ = "idp_users"
@@ -31,3 +31,5 @@ class idp_users(Base):
     created_date = Column(DateTime, nullable=False, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
     last_login_date = Column(DateTime, nullable=False, unique=False)
+    sp_apps_relation = relationship("SPAPPS",
+                secondary=user_idp_sp_app,lazy='joined')

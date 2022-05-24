@@ -8,15 +8,11 @@ from sqlalchemy.orm import Session
 from fastapi_sessions.backends.session_backend import SessionBackend, SessionModel
 
 from fastapi_sessions.frontends.session_frontend import ID, FrontendError, SessionFrontend
-try:
-    from app.sessions.base_controller import Store
-    from app.sessions.models import UserSession
-    from app.sessions.serializers import SessionSerializer
 
-except ImportError:
-    from base_controller import Store
-    from models import UserSession
-    from serializers import SessionSerializer
+from src.apis.v1.controllers.base_session_controller import Store
+from src.apis.v1.models.usersessionmodel import UserSession
+from src.apis.v1.validators.session_validator import SessionSerializer
+
 
 class SessionStore(Store):
     def __init__(self, db: Session):
