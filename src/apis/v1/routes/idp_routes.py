@@ -132,7 +132,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     session = uuid4()
     # store the cookie in db
     IDPController(db).store_frontend_saml(session,SAMLRequest)
-    response = RedirectResponse(url="http://localhost:8080/sign-in")
+    response = RedirectResponse(url="http://18.134.217.103:8080")
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     # return "session attached"
