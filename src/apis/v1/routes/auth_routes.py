@@ -58,7 +58,7 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
     # if unique cookie is not valid, use only admin emails
         # if admin email is valid, return cookie_idp + token
         # if admin email is not valid return error  
-    
+    print("cookies",vars(request))
     req = await request.json()
     email,password = req["email"],req["password"]
     verified_id = SessionController().verify_session(cookie_frontend,request)
