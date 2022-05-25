@@ -11,10 +11,10 @@ from pydantic.main import BaseModel
 from starlette.requests import Request
 
 
-class SameSiteEnum(str, Enum):
+class SameSiteEnum(Enum):
     lax = "lax"
     strict = "strict"
-    none = "none"
+    none = None
 #14 * 24 * 60 * 60 
 
 class CookieParameters(BaseModel):
@@ -30,8 +30,8 @@ class CookieParameters2(BaseModel):
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False
-    httponly: bool = True
-    samesite: None
+    httponly: bool = False
+    samesite: SameSiteEnum = SameSiteEnum.none
 
 class SessionCookie(SecurityBase, SessionFrontend[UUID]):
     def __init__(
