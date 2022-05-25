@@ -118,7 +118,6 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     # print( await verifier.__call__(request))
     req = LoginProcessView()
     ## check the valid samrequest
-    print(SAMLRequest,"----SAMLRequest")
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
     # resp = req.get(SAMLRequest,email_)
 
@@ -135,6 +134,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     IDPController(db).store_frontend_saml(session,SAMLRequest)
     response = RedirectResponse(url="http://localhost:3000/sign-in")
     cookie_frontend.attach_to_response(response, session)
+    print(cookie_frontend,vars(cookie_frontend),"---cookie--")
     # return "session attached"
     return response
 

@@ -7,8 +7,3 @@ from src.apis.v1.models import Base
 def create_tables():
     Base.metadata.create_all(bind=engine)
 create_tables()
-
-from src.apis.v1.helpers.super_admin import create_super_admin
-from src.apis.v1.db.session import SessionLocal
-db = SessionLocal()
-create_super_admin(db)

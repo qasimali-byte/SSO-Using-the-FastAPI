@@ -331,6 +331,7 @@
 # #   response.delete_cookie(key ='*your access token name*')
 # #   return response
 from src.app import create_app
+import populate
 application = create_app()
 
 if __name__ == "__main__":
