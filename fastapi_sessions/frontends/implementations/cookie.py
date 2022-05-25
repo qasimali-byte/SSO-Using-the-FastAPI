@@ -14,7 +14,7 @@ from starlette.requests import Request
 class SameSiteEnum(Enum):
     lax = "lax"
     strict = "strict"
-    none = None
+    none = "none"
 #14 * 24 * 60 * 60 
 
 class CookieParameters(BaseModel):
@@ -107,5 +107,5 @@ class SessionCookie(SecurityBase, SessionFrontend[UUID]):
         response.set_cookie(
             key=self.model.name,
             value=str(self.signer.dumps(session_id.hex)),
-            **dict(self.cookie_params),
+            max_age=18000, secure=False,httponly=True,samesite=None
         )
