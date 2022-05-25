@@ -22,15 +22,15 @@ class CookieParameters(BaseModel):
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = True
-    httponly: bool = True
+    httponly: bool = False
     samesite: SameSiteEnum = SameSiteEnum.none
 
 class CookieParameters2(BaseModel):
     max_age: int = 18000 # 14 days in seconds
     path: str = "/"
-    domain: Optional[str] = None
+    domain: Optional[str] = "http://localhost:3000"
     secure: bool = True
-    httponly: bool = True
+    httponly: bool = False
     samesite: SameSiteEnum = SameSiteEnum.none
 
 class SessionCookie(SecurityBase, SessionFrontend[UUID]):
