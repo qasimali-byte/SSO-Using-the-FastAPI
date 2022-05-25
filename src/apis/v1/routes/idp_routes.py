@@ -134,7 +134,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     IDPController(db).store_frontend_saml(session,SAMLRequest)
     response = RedirectResponse(url="http://localhost:3000/sign-in")
     cookie_frontend.attach_to_response(response, session)
-    print(cookie_frontend,vars(cookie_frontend),"---cookie--")
+    print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     # return "session attached"
     return response
 
