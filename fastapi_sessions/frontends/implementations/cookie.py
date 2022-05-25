@@ -21,7 +21,7 @@ class CookieParameters(BaseModel):
     max_age: int = 180 # 14 days in seconds
     path: str = "/"
     domain: Optional[str] = None
-    secure: bool = False
+    secure: bool = True
     httponly: bool = True
     samesite: SameSiteEnum = SameSiteEnum.none
 
@@ -29,7 +29,7 @@ class CookieParameters2(BaseModel):
     max_age: int = 18000 # 14 days in seconds
     path: str = "/"
     domain: Optional[str] = None
-    secure: bool = False
+    secure: bool = True
     httponly: bool = True
     samesite: SameSiteEnum = SameSiteEnum.none
 

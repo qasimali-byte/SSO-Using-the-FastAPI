@@ -23,6 +23,7 @@ fileConfig(config.config_file_name)
 # from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.models import Base
 from src.apis.v1.models import Sps, User, UserSession, idp_users, SAMLUserSession
+from src.apis.v1.core.project_settings import Settings
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -34,7 +35,7 @@ def get_url():
     """
     This function is used to get the database url from the environment variable
     """
-    return 'postgresql://postgres:faisal@localhost:5432/sso_idp'
+    return Settings().DATABASE_URL
     
     
 def run_migrations_offline():
