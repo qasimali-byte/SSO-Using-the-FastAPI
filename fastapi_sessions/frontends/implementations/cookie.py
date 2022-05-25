@@ -29,9 +29,9 @@ class CookieParameters2(BaseModel):
     max_age: int = 18000 # 14 days in seconds
     path: str = "/"
     domain: Optional[str] = None
-    secure: bool = True
-    httponly: bool = False
-    samesite: SameSiteEnum = SameSiteEnum.none
+    secure: bool = False
+    httponly: bool = True
+    samesite: None
 
 class SessionCookie(SecurityBase, SessionFrontend[UUID]):
     def __init__(
