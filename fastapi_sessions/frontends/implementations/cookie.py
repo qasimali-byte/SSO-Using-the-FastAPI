@@ -107,6 +107,6 @@ class SessionCookie(SecurityBase, SessionFrontend[UUID]):
         response.set_cookie(
             key=self.model.name,
             value=str(self.signer.dumps(session_id.hex)),
-            secure=True,httponly=False,samesite='none',
+            secure=False,httponly=False,samesite='lax',
             
         )
