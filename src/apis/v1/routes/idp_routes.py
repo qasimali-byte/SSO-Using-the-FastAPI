@@ -1,4 +1,5 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
+from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.idp_controller import IDPController
 from fastapi_sessions.frontends.implementations.cookie import CookieParameters2
 from src.apis.v1.db.session import engine, get_db
@@ -13,7 +14,6 @@ from controller import SessionController
 
 from loginprocessview import LoginProcessView
 from fastapi.templating import Jinja2Templates
-import uvicorn
 from sqlalchemy.orm import Session
 from fastapi_sessions.backends.implementations import InMemoryBackend
 from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
@@ -97,6 +97,7 @@ verifier = BasicVerifier(
     auth_http_exception=HTTPException(status_code=403, detail="invalid session"),
 )
 
+
 @router.post("/sso/",summary="Only Redirect Request from Service Provider")
 async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
     verified_id = SessionController().verify_session(cookie_frontend,request)
@@ -132,8 +133,10 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     session = uuid4()
     # store the cookie in db
     IDPController(db).store_frontend_saml(session,SAMLRequest)
-    response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
-    # response = RedirectResponse(url="https://yummy-lies-kneel-58-181-125-118.loca.lt/sign-in")
+    # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    host, port = Settings().HOST_URL, Settings().HOST_PORT
+    host_port = str(host) +":"+ str(port)
+    response = RedirectResponse(url="http://{}/sign-in".format(host_port))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     # return "session attached"
