@@ -136,7 +136,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
     host_port = str(host) +":"+ str(port)
-    response = RedirectResponse(url="http://{}/sign-in".format(host_port))
+    response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     # return "session attached"
