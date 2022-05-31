@@ -40,8 +40,8 @@ def create_super_admin(db: Session):
             updated_date = datetime.now(),
             last_login_date = datetime.now()
             )
-        # db.add(check)
-        # db.commit()
+        db.add(check)
+        db.commit()
         # data = SPSService(db).get_sps_app_by_name("ez-nav")
         # # check.sp_apps_relation.is_accessible = True
         # # check.sp_apps_relation.sp_apps_id = data.id
