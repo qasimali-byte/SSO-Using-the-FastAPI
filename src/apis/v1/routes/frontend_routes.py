@@ -5,8 +5,13 @@ templates = Jinja2Templates(directory="build")
 
 router = APIRouter(tags=["SSO Frontend"])
 
-@router.get("/")
+# @router.get("/")
 @router.get("/sign-in")
 @router.get("/user-managment")
+@router.get("/forgot-password")
+@router.get("/audit-trail")
+@router.get("/create-user")
+@router.get("/reset-password")
+@router.get("/home")
 async def serve_spa(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
