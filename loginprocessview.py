@@ -54,8 +54,8 @@ class LoginProcessView():
     def get(self, request_parms, email):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
         users_info = {
-            "name": "",
-            "email": "",
+            "name": email,
+            "email": email,
         }
         idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
