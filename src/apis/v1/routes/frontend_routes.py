@@ -5,7 +5,7 @@ templates = Jinja2Templates(directory="build")
 
 router = APIRouter(tags=["SSO Frontend"])
 
-# @router.get("/")
+@router.get("/")
 @router.get("/sign-in")
 @router.get("/user-managment")
 @router.get("/forgot-password")
