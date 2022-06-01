@@ -16,8 +16,6 @@ services:
       - fullstack
   
   app:
-    container_name: sso-idp-attech-jenkins
-    image: sso-idp-attech-jenkins
     build:
       context: .
     volumes:
