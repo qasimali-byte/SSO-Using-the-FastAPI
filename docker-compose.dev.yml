@@ -6,14 +6,11 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=faisal
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=sso_idp
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
     ports:
-      - 5432
-    networks:
-      - fullstack
+      - 5432:5432
   
   app:
     build:
@@ -24,37 +21,13 @@ services:
       - "80:80"
     command: >
       sh -c "python3 main.py -e prod"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - fullstack
     depends_on:
       - db_idp
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   container_name: pgadmin_container1
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: postgres
-  #     PGADMIN_DEFAULT_PASSWORD: faisal
-  #   depends_on:
-  #     - db_idp
-  #   ports:
-  #     - "5050:80"
-  #   networks:
-  #     - fullstack
-  #   restart: unless-stopped
+
   redis:
     image: "redis:alpine"
     ports:
      - 6379
-
-
-    networks:
-      - fullstack
 volumes:
     postgres_data:
                 
-# Networks to be created to facilitate communication between containers
-networks:
-  fullstack:
-    driver: bridge
