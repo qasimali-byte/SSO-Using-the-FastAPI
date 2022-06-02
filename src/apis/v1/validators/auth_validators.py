@@ -1,17 +1,17 @@
 from email import message
 from os import access
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, EmailStr
+from typing import Optional
 
 class EmailValidator(BaseModel):
     email: str
-
 
     @validator('email')
     def validate(cls, email: str) -> bool:
         return True
 
 class LoginValidator(BaseModel):
-    email: str
+    email: Optional[EmailStr]
     password: str
     
 class LogoutValidator(BaseModel):

@@ -5,3 +5,10 @@ user_idp_sp_app = Table('user_idp_sp_app', Base.metadata,
     Column('sp_apps_id', ForeignKey('sp_apps.id')),
     Column('is_accessible', Boolean, nullable=False, unique=False, default=True),
 )
+
+class idp_sp(Base):
+    __tablename__ = "idp_sp"
+    id = Column(Integer, primary_key=True)
+    idp_users_id = Column(ForeignKey('idp_users.id'))
+    sp_apps_id = Column(ForeignKey('sp_apps.id'))
+    is_accessible = Column(Boolean, nullable=False, unique=False, default=True)

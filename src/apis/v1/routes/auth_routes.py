@@ -20,9 +20,10 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi_jwt_auth import AuthJWT
 from redis import Redis
 from src.apis.v1.routes.idp_routes import cookie,cookie_frontend
+from . import oauth2_scheme
 
 router = APIRouter(tags=["Authentication"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
+
 
 # Setup our redis connection for storing the denylist tokens
 redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=6379, db=0, decode_responses=True)
@@ -58,15 +59,12 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
     # if unique cookie is not valid, use only admin emails
         # if admin email is valid, return cookie_idp + token
         # if admin email is not valid return error  
-    print("cookies",vars(request))
     req = await request.json()
     email,password = req["email"],req["password"]
     verified_id = SessionController().verify_session(cookie_frontend,request)
-    print("verified_id", verified_id,type(verified_id[1]))
     if verified_id[1] == 200:
         idp_controller = IDPController(db)
         verified_data = idp_controller.get_frontend_session_saml(verified_id[0])
-        print(verified_data,"verified data")
         if verified_data[1] == 200:
             req = LoginProcessView()
             ## validate email and password 
@@ -76,12 +74,10 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
                 return response
 
             resp = req.get(verified_data[0].saml_req,email)
-            print(verified_data[0].saml_req,"------check----")
             # delete frontend cookie
             idp_controller.delete_frontend_session(verified_id[0])
             # create idp cookie
             session = uuid4()
-            print(session)
             ## store session in the database
             req.store_session(session,email,db)
             
@@ -94,7 +90,6 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
             statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
             response = custom_response(data=data_out
                 ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)
-            print(response,"---response--")
             cookie.attach_to_response(response, session)
             return response
              

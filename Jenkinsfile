@@ -13,8 +13,8 @@ pipeline {
         }
         stage('Start container'){
             steps {
-                sh 'docker-compose -f docker-compose.dev.yml down'
-                sh 'docker-compose -f docker-compose.dev.yml up -d --build'
+                sh 'docker-compose down'
+                sh 'docker-compose up -d --build'
                 sh 'docker ps'
             }
         }

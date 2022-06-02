@@ -19,7 +19,6 @@ class LoginProcessView():
             store.delete(user_cookie)
 
         if not store.get(session_id):
-            print("stored user session")
             store.set(session_id, email)
             return "stored session"
         return "stored user session"
@@ -33,7 +32,6 @@ class LoginProcessView():
 
     def get_session(self, session_id, db: Session):
         store = StoreSession(db)
-        print(session_id)
         if type(session_id) == str:
             return "session not found"
         if store.get(session_id):
@@ -41,9 +39,7 @@ class LoginProcessView():
         return "session not found"
 
     def get_user(self, email,password, db: Session):
-        print(email,"--email--")
         user = db.query(User).filter(User.email == email).first()
-        print(user,"---user--")
         if user :
             if user.password == password:
                 return user
@@ -60,7 +56,6 @@ class LoginProcessView():
         idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
         saml_msg =request_parms
-        # print(saml_msg)
         data = idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
         verify_request_signature(data)
         users_info["email"] = email
