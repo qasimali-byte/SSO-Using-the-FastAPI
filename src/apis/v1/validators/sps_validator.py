@@ -16,5 +16,5 @@ class ListServiceProviders(BaseModel):
     
 class ListServiceProviderValidatorOut(BaseModel):
     serviceproviders: Optional[List['ListServiceProviders']] = None
-    message : str = "Success"
+    message : str = "success"
     statuscode : int = 200

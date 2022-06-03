@@ -1,7 +1,7 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.idp_controller import IDPController
-from fastapi_sessions.frontends.implementations.cookie import CookieParameters2
+from fastapi_sessions.frontends.implementations.cookie import CookieParameters,CookieParameters2
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
 
@@ -136,56 +136,12 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
     host_port = str(host) +":"+ str(port)
+    # logout the user from frontend as well
+    
     response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
-    # return "session attached"
     return response
-
-    verify_cookie = cookie.__call__(request)
-    if  verify_cookie == "No session cookie attached to request":
-        print("No session cookie attached to request")
-        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
-    
-    if verify_cookie == "Invalid session provided":
-        print("Invalid session provided")
-        # delete the cookie from browser and db
-        # req.delete_cookie(verify_session[0],request)
-        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
-    ## session verification
-    verify_session = await verifier.__call__(request)
-    if verify_session[1] != True:
-        print("Invalid session provided")
-        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
-
-    ## session verification in db
-    if req.get_session(verify_session[0],db) == "session not found":
-        print("session not found")
-        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
-
-    # return LoginProcessView().get()
-    # print(request.url)
-    print(SAMLRequest)
-    print(request.cookies)
-    print(vars(request))
-    print( await verifier.__call__(request))
-    email_ = req.get_userid(verify_session[0],db)
-    resp = req.get(SAMLRequest,email_)
-    # print(resp["data"]["data"])
-    print("session found")
-
-    return HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
-    # return "session found"
-    # db = SAMLRequest
-    # dbfile = open('examplePickle', 'ab')
-      
-    # # source, destination
-    # pickle.dump(db, dbfile)                     
-    # dbfile.close()
-    # temp(request1=SAMLRequest)
-
-    # check the session of the user
-    # return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     
 
 @router.post("/sso/login", summary="Submit Login Page API submission")

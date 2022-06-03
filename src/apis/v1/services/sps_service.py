@@ -2,6 +2,7 @@ from datetime import datetime
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
+from sqlalchemy import desc
 
 
 class SPSService():
@@ -37,7 +38,7 @@ class SPSService():
         try:
             
             sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
-            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).all()
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])

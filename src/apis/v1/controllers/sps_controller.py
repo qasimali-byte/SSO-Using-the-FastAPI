@@ -32,8 +32,8 @@ class SPSController():
                 response = custom_response(data=data,status_code=status.HTTP_200_OK)
                 return response
 
-            data = ErrorResponseValidator(message="No service provider found against this email",status=False)
-            response = custom_response(data=data,status_code=status.HTTP_404_NOT_FOUND)
+            data = ListServiceProviderValidatorOut(serviceproviders=[])
+            response = custom_response(data=data,status_code=status.HTTP_200_OK)
             return response
 
         except Exception as e:
