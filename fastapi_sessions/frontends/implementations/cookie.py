@@ -26,7 +26,7 @@ class CookieParameters(BaseModel):
     samesite: SameSiteEnum = SameSiteEnum.lax
 
 class CookieParameters2(BaseModel):
-    max_age: int = 4 * 24 * 60 * 60 # 4 days in seconds
+    max_age: int = 3 * 60 # 3 minutes in seconds
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False

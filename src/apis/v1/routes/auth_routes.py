@@ -3,6 +3,7 @@ from uuid import uuid4
 from fastapi import Depends, HTTPException, Request, APIRouter, Response
 from fastapi.responses import HTMLResponse
 from fastapi import status
+from src.apis.v1.helpers.global_helpers import delete_all_cookies
 from src.apis.v1.helpers.html_parser import HTMLPARSER
 from src.apis.v1.controllers.idp_controller import IDPController
 from src.apis.v1.controllers.session_controller import SessionController
@@ -84,17 +85,18 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             access_token = authorize.create_access_token(subject=email,fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)
-            # resp_tokens = AuthController(db).login(email,password,authorize)
             data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="successfully authenticated",
             roles=["super_admin"],token_type="Bearer",redirect_url=data[0],saml_response=data[1],
             statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
             response = custom_response(data=data_out
                 ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)
             cookie.attach_to_response(response, session)
+            delete_all_cookies(response, only_frontend=True)
             return response
              
 
     resp = AuthController(db).login(email,password,authorize)
+    delete_all_cookies(resp)
     return resp
 
 
@@ -143,11 +145,13 @@ async def sso_logout(logout_validator:LogoutValidator,request: Request, authoriz
 
     except Exception as e:
         return {"message":"token has expired"}
-    # resp = AuthController(db).logout(authorize)
-    # return resp
-    return {
-        "message":"succesfully logged out"
+
+    response = custom_response(data={
+        "message":"successfully logged out"
     }
+        ,status_code=status.HTTP_200_OK)
+    delete_all_cookies(response)
+    return response
 
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db), authorize: AuthJWT = Depends()):
