@@ -18,7 +18,7 @@ class SameSiteEnum(Enum):
 #14 * 24 * 60 * 60 
 
 class CookieParameters(BaseModel):
-    max_age: int = 36000 # 14 days in seconds
+    max_age: int = 4 * 24 * 60 * 60  # 4 days in seconds
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False
@@ -26,7 +26,7 @@ class CookieParameters(BaseModel):
     samesite: SameSiteEnum = SameSiteEnum.lax
 
 class CookieParameters2(BaseModel):
-    max_age: int = 36000 # 14 days in seconds
+    max_age: int = 4 * 24 * 60 * 60 # 4 days in seconds
     path: str = "/"
     domain: Optional[str] = None
     secure: bool = False
