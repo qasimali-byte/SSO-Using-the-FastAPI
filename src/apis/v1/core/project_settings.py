@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access","refresh"}
     access_expires = timedelta(minutes=15)
-    refresh_expires = timedelta(days=30)
+    refresh_expires = timedelta(days=3)
     REDIS_HOST_URL = os.environ.get("REDIS_HOST_URL")
 
 def settings():
