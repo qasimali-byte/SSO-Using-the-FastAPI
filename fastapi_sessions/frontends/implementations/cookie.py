@@ -11,7 +11,7 @@ from pydantic.main import BaseModel
 from starlette.requests import Request
 
 
-class SameSiteEnum(Enum):
+class SameSiteEnum(str, Enum):
     lax = "lax"
     strict = "strict"
     none = "none"
@@ -107,4 +107,4 @@ class SessionCookie(SecurityBase, SessionFrontend[UUID]):
         response.set_cookie(
             key=self.model.name,
             value=str(self.signer.dumps(session_id.hex)),
-            **self.cookie_params.dict())
+            **dict(self.cookie_params))
