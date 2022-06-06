@@ -15,8 +15,4 @@ class Store(ABC):
     def delete(self, filter_key: str, filter_value: str):
         raise NotImplementedError()
 
-
-
-# v = Store()
-# v.get(filter_key="user_id", filter_value="1")
  

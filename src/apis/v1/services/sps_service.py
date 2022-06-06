@@ -34,6 +34,13 @@ class SPSService():
         except:
             return False
 
+    def get_all_sps(self):
+        try:
+            sps = self.db.query(SPAPPS).all()
+            return sps
+        except:
+            return []
+
     def get_sps_app(self,user_email):
         try:
             
@@ -42,7 +49,7 @@ class SPSService():
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
-                serviceproviders.append({"id": y.id, "name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible})
+                serviceproviders.append({"id": y.id, "name": y.display_name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible})
 
             return serviceproviders
 

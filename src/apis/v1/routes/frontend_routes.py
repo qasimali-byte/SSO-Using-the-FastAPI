@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="build")
 
 
-router = APIRouter(tags=["SSO Frontend"])
+router = APIRouter(tags=["SSO Frontend"], include_in_schema=False)
 
 @router.get("/")
 @router.get("/sign-in")
