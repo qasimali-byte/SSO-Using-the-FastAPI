@@ -16,4 +16,23 @@ class RolesService():
         except Exception as e:
             print(e)
             return []
+
+    def get_internal_roles_selected_db(self, internal_user_role):
+        try:
+            internal_roles_data_object = self.db.query(roles).join(idp_user_types).filter(idp_user_types.user_type == "internal").\
+            filter(roles.name == internal_user_role).first()
+            return internal_roles_data_object
+            
+        except Exception as e:
+            print(e)
+            return None
+
+    def get_external_roles_db(self):
+        try:
+            external_roles_data_object = self.db.query(roles).join(idp_user_types).filter(idp_user_types.user_type == "external").all()
+            return external_roles_data_object
+            
+        except Exception as e:
+            print(e)
+            return []
         

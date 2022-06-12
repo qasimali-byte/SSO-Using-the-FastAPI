@@ -26,3 +26,23 @@ class RolesController():
             data = ErrorResponseValidator(message=str(e),status=False)
             response = custom_response(data=data,status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return response
+
+    def external_roles(self):
+        try:
+            data = RolesService(self.db).get_external_roles_db()
+            if data:
+                    internal_roles_data = [{"id":values.id,"name":values.name,"label":values.label,"is_active":values.is_active,
+                    "type_of_user":"external"} for values in data]
+                    validated_response = InternalRoleValidatorOut(roles=internal_roles_data)
+                    response = custom_response(data=validated_response,status_code=status.HTTP_200_OK)
+                    return response
+            else:
+                validated_response = []
+                response = custom_response(data=validated_response,status_code=status.HTTP_200_OK)
+                return response
+
+
+        except Exception as e:
+            data = ErrorResponseValidator(message=str(e),status=False)
+            response = custom_response(data=data,status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return response

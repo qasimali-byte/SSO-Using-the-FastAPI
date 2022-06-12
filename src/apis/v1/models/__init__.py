@@ -14,3 +14,6 @@ from .samlusersessionmodel import SAMLUserSession
 from .idp_user_types_model import idp_user_types
 from .roles_model import roles
 from .user_role_model import idp_user_role
+from .type_role_permissions_model import type_role_permissions
+from .permissions_model import permissions
+from .practices_model import practices

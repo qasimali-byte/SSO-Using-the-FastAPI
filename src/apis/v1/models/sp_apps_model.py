@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from . import Base
 
 class SPAPPS(Base):
@@ -14,3 +15,5 @@ class SPAPPS(Base):
     is_active = Column(Boolean, nullable=False, unique=False, default=True)
     created_date = Column(DateTime, nullable=False, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
+    practices = relationship("practices", lazy="joined")
+    roles = relationship("roles", lazy="joined")

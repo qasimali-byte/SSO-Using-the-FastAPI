@@ -33,4 +33,4 @@ class idp_users(Base):
     last_login_date = Column(DateTime, nullable=True, unique=False)
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))
     user_type = relationship("idp_user_types", backref="idp_users")
-    idp_sp = relationship("idp_sp")
+    idp_sp = relationship("idp_sp", lazy="joined")

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from src.apis.v1.routes import sps_routes, idp_routes,auth_routes,user_routes,\
-     frontend_routes,staticfiles_routes, roles_routes
+     frontend_routes,staticfiles_routes, roles_routes, practices_routes
 from . import settings_by_env
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
@@ -27,6 +27,7 @@ def create_app():
     app.include_router(user_routes.router, prefix="/api/v1")
     app.include_router(frontend_routes.router)
     app.include_router(roles_routes.router, prefix="/api/v1")
+    app.include_router(practices_routes.router, prefix="/api/v1")
     
 
 

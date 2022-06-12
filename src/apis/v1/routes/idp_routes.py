@@ -120,7 +120,6 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     req = LoginProcessView()
     ## check the valid samrequest
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
-    # resp = req.get(SAMLRequest,email_)
 
     verified_id = SessionController().verify_session(cookie,request)
     if verified_id[1] == 200:
@@ -138,7 +137,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     host_port = str(host) +":"+ str(port)
     # logout the user from frontend as well
     
-    response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
+    response = RedirectResponse(url="http://{}/sign-in".format("localhost:3001"))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     return response
@@ -184,32 +183,12 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
     print(session)
     ## store session in the database
     resp.store_session(session,email,db)
-    
-    print(vars(response))
-    print(session)
-    # return "seesion is attached"
-    # print(username,password)
-    # req = temp().request1
-    # print(temp().request1)
-    # dbfile = open('examplePickle', 'rb')     
-    # db = pickle.load(dbfile)
-    # dbfile.close()
-    # print(db,"-------")
-    # db = "http://localhost:8088/sso/redirect/?SAMLRequest="+db
-
     resp = resp.get(saml_request, email)
     print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     cookie.attach_to_response(response, session)
-    # return "session attached"
     return response
-    
-    
-    
-    # return resp["data"]
-    # return templates.TemplateResponse(resp["data"]["data"],{"request": request})
-    # response = RedirectResponse(url="http://localhost:8088/acs")
-    # return fastapi.responses.RedirectResponse(url="http://localhost:8088/acs",status_code=status.HTTP_302_FOUND)
+
 
 def test_logout_request_from_idp(remove_sp,name_id):
     from saml2.samlp import SessionIndex
@@ -233,23 +212,16 @@ def test_logout_request_from_idp(remove_sp,name_id):
         name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
         session_indexes=["_foo"])
 
-    # assert req.destination == "http://localhost:8088/logout/process"
-    # assert req.reason == "Tired"
-    # assert req.version == "2.0"
-    # assert req.name_id == nid
-    # assert req.issuer.text == "loadbalancer-9.siroe.com"
-    # assert req.session_index == [SessionIndex("_foo")]
-    print(req,"----req")
+
     info = idp_server.apply_binding(
     BINDING_SOAP, req, t_l_2[t_l[0]],
     relay_state="relay2")
     redirect_url = None
-    print(info,"----info")
     try:
         response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
     except Exception as e:
         print(e,"----e")
-    # test_logout_response_from_sp(info['data'])
+
 
 
 # SAMLRequest: str
@@ -259,20 +231,9 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
     from base64 import decodebytes as b64decode
     from saml2 import server
     idp_server = server.Server(config_file="idp/idp_conf.py")
-    # print(req,"-----req-----")
-    # info = saml_client.apply_binding(
-    #     BINDING_HTTP_REDIRECT, req, destination="",
-    #     relay_state="relay2")
-    # print(data,"---reached here---")
-    # loc = data['body']
-    # qs = parse.parse_qs(loc[:])
-    # print(qs)
+
     samlreq = SAMLRequest
-    # resphttp = idp_server.handle_logout_request(samlreq, nid,
-    #         BINDING_HTTP_REDIRECT)
-    # _dic = unpack_form(resphttp['data'], "SAMLResponse")
-    # xml = b64decode(_dic['SAMLResponse'].encode('UTF-8'))
-    # print(xml,"---xml--")
+
     req_info = idp_server.parse_logout_request(samlreq, BINDING_HTTP_REDIRECT)
     print(vars(req_info),"---req_info---",req_info.message.name_id.text,vars(req_info.message),req_info.message.issuer.text)
     # response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
