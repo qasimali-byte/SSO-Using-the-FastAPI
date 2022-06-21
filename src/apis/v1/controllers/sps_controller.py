@@ -79,3 +79,6 @@ class SPSController():
             data = ErrorResponseValidator(message=str(e),status=False)
             response = custom_response(data=data,status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return response
+
+    def assign_sps_to_user(self, **kwargs):
+        return SPSService(self.db).assign_sps_to_user_db(**kwargs)

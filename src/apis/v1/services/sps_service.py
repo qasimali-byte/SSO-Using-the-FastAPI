@@ -3,7 +3,7 @@ from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from sqlalchemy import desc
-
+from fastapi import status
 
 class SPSService():
     def __init__(self, db):
@@ -55,3 +55,23 @@ class SPSService():
 
         except Exception as e:
             return []
+
+    def assign_sps_to_user_db(self, user_id, sps_object_list):
+        try:
+            objects = []
+            sps_object = sps_object_list
+
+            for sp in sps_object:
+                objects.append(idp_sp(
+                    is_accessible=True,
+                    idp_users_id = user_id,
+                    sp_apps_id  = sp,
+
+                ))
+
+            self.db.bulk_save_objects(objects)
+            self.db.commit()
+
+            return "assigned sps to user", status.HTTP_200_OK
+        except Exception as e:
+            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
