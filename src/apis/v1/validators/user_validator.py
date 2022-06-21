@@ -1,33 +1,41 @@
-from email import message
-from pydantic import BaseModel, EmailStr, validator, typing
-
-from src.apis.v1.validators.practices_validator import SPPracticesValidator
-from src.apis.v1.validators.roles_validator import SPRolesValidator
+from datetime import datetime
+from pydantic import BaseModel, EmailStr, validator, typing, Field
+from src.apis.v1.helpers.global_helpers import create_unique_id
+from src.apis.v1.validators.practices_validator import SPRegionsValidator
+from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
+from src.apis.v1.validators.gender_validator import ListGenderValidator
+import uuid
 class AdminUserValidator(BaseModel):
     email: str
     password: str
 
-
+class IdsList(BaseModel):
+    id: int
+class UserRolesValidatorIn(BaseModel):
+    id: int
+    sub_role: typing.Optional[int] = None
+class UserAppsValidatorIn(BaseModel):
+    id: int
+    practices: typing.List[IdsList]
+    role: UserRolesValidatorIn
 class InternalUserValidator(BaseModel):
     """
         Internal User Validator
     """
-    firstname: str
-    lastname: str
-    email: typing.Optional[EmailStr]
-    internal_user_role: typing.Literal['sub-admin', 'practice-admin'] = "Enter sub-admin or practice-admin"
-    surgeries_allowed: typing.Optional[list] = None
-    audit_log_access_level: typing.Literal['read-only', 'full-access'] = "Enter read-only or full-access"
-    apps_allowed: typing.Set = {"ez-analytics","ez-doc","dr-iq","ez-nav","ez-path"}
-    is_active: bool
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
+    dr_iq_gender_id: typing.Optional[int] = None
+    apps: typing.List[UserAppsValidatorIn]
 
-    @validator('apps_allowed')
-    def validate_apps_allowed(cls, v,  **kwargs):
-        apps = kwargs['field'].default
-        for iteration in v:
-            if iteration not in apps:
-                raise ValueError(f'Unexpected value only apps allowed are {apps}')
-        return v
+    # @validator('apps_allowed')
+    # def validate_apps_allowed(cls, v,  **kwargs):
+    #     apps = kwargs['field'].default
+    #     for iteration in v:
+    #         if iteration not in apps:
+    #             raise ValueError(f'Unexpected value only apps allowed are {apps}')
+    #     return v
 
 
 class UserValidatorOut(BaseModel):
@@ -54,13 +62,80 @@ class SPPracticeRoleValidator(BaseModel):
     """
     id: int
     name: str
+    gender: typing.Optional[typing.List[ListGenderValidator]] = []
     sp_app_name: str
     sp_app_image: str
-    practices: SPPracticesValidator
-    roles: SPRolesValidator
+    practices: SPRegionsValidator
+    roles: typing.Optional[SPRolesValidator]
 
 
 class UserSPPracticeRoleValidatorOut(BaseModel):
     sp_practice_roles: typing.List['SPPracticeRoleValidator']
     message: str = "successfully fetched sp practice roles"
     statuscode: int = 200
+
+class PracticesRolesId(BaseModel):
+    practice_id: int
+    role_id: int
+class PracticesAppsRolesValidator(BaseModel):
+    """
+        Practices Apps Roles Validator
+    """
+    app: typing.Literal["ez-login","ez-analytics","ez-doc","dr-iq","ez-nav","ez-path"]
+    practices_roles: typing.List['PracticesRolesId']
+class UserValidatorIn(BaseModel):
+    """
+        User Validator
+    """
+    firstname: str
+    lastname: str
+    email: typing.Optional[EmailStr]
+    type_of_user: typing.Literal[ 'external','internal']
+    practices_apps_roles: typing.List['PracticesAppsRolesValidator']
+
+
+
+class GetUserInfoValidator(BaseModel):
+    firstname: str = Field(alias="first_name")
+    lastname: str = Field(alias="last_name")
+    email: str
+    phone_number: str = Field(alias="contact_no")
+    address: str = Field(alias="address")
+    image_url: typing.Optional[str] = Field(alias="profile_image")
+
+    class Config:
+        orm_mode = True
+
+
+class UserInfoValidator(BaseModel):
+    user_info: GetUserInfoValidator
+    statuscode: int 
+    message: str 
+
+
+class UpdateUserValidatorIn(BaseModel):
+    first_name: str = Field(alias="first_name")
+    last_name: str = Field(alias="last_name")
+    contact_no: str = Field(alias="contact_no")
+    address: str = Field(alias="address")
+
+class CreateUserValidator(BaseModel):
+        uuid = create_unique_id()
+        first_name: str = Field(alias="firstname")
+        last_name: str = Field(alias="lastname")
+        username : str
+        email : EmailStr
+        nhs_number = "123456789"
+        organization_id = "2"
+        password_hash = "admin"
+        reset_password_token = 'reset_password_token',
+        reset_password_token_expiry = 'reset_password_token_expiry',
+        created_date = datetime.now(),
+        updated_date = datetime.now(),
+        last_login_date = datetime.now()
+        user_type_id: int
+        dr_iq_gender_id: typing.Optional[int]
+        is_active: bool = True
+
+        class Config:
+            arbitrary_types_allowed = True

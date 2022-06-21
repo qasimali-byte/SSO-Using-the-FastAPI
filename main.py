@@ -1,6 +1,11 @@
+import load_env
 from src.app import create_app
-import populate
 application = create_app()
+
+@application.on_event("startup")
+async def startup_event():
+    import populate
+    
 
 if __name__ == "__main__":
     from src import settings_by_env

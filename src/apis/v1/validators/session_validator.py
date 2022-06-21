@@ -1,6 +1,5 @@
 import uuid
 from pydantic import BaseModel
-from sqlalchemy.dialects.postgresql import UUID
 
 class SessionSerializer(BaseModel):
     cookie_id: uuid.UUID

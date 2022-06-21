@@ -1,11 +1,15 @@
 from pydantic import BaseModel, validator, typing
 
-class ListSPPracticesValidator(BaseModel):
+class SPPracticesValidator(BaseModel):
     id: int
     name: str
+class ListSPRegionsValidator(BaseModel):
+    id: int
+    name: str
+    practices: typing.List[SPPracticesValidator]
 
-class SPPracticesValidator(BaseModel):
+class SPRegionsValidator(BaseModel):
     """
         List SP Practices Validator
     """
-    __root__: typing.List[ListSPPracticesValidator]
+    __root__: typing.List[ListSPRegionsValidator]

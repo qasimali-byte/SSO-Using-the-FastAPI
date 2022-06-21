@@ -17,7 +17,7 @@ def create_app():
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
+        allow_methods=["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE"],
         allow_headers=["Access-Control-Allow-Headers","Set-Cookie", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
     )
     app.include_router(staticfiles_routes.router)
