@@ -29,7 +29,7 @@ async def create_user(user_validator:AdminUserValidator,request: Request,db: Ses
 @router.post("/user/internal", summary="Create Internal User Api", responses={201:{"model":UserValidatorOut},
             404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"},
             500:{"description":"Internal Server Error","model":ErrorResponseValidator}})
-async def create_internal_user(user_validator:InternalUserValidator,request: Request,db: Session = Depends(get_db)):
+async def create_internal_user(user_validator:InternalUserValidator,db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
     """
         Create Internal User 
     """
@@ -95,14 +95,14 @@ async def create_external_user(user_validator:ExternalUserValidator,request: Req
 
 @router.get("/user/service-providers/practices/roles", summary="Get All Service Providers With Practices And RolesApi",
             responses={200:{"model":UserSPPracticeRoleValidatorOut,"description":"Succesfully returned service providers with their practices and roles"},})
-# async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
-async def get_practice_roles(db: Session = Depends(get_db)):
+async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+# async def get_practice_roles(db: Session = Depends(get_db)):
     """
         Get All Service Providers Practice Roles
     """
-    # authorize.jwt_required()
-    # current_user_email = authorize.get_jwt_subject()
-    current_user_email = "umair@gmail.com"
+    authorize.jwt_required()
+    current_user_email = authorize.get_jwt_subject()
+    # current_user_email = "umair@gmail.com"
     resp = UsersController(db).get_sps_practice_roles(current_user_email)
     return resp
 
