@@ -5,6 +5,8 @@ from src.apis.v1.validators.practices_validator import SPRegionsValidator
 from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
 from src.apis.v1.validators.gender_validator import ListGenderValidator
 import uuid
+from src.apis.v1.utils.auth_utils import create_password_hash
+
 class AdminUserValidator(BaseModel):
     email: str
     password: str
@@ -16,7 +18,7 @@ class UserRolesValidatorIn(BaseModel):
     sub_role: typing.Optional[int] = None
 class UserAppsValidatorIn(BaseModel):
     id: int
-    practices: typing.List[IdsList]
+    practices: typing.List[IdsList] = []
     role: UserRolesValidatorIn
 class InternalUserValidator(BaseModel):
     """
@@ -120,16 +122,17 @@ class UpdateUserValidatorIn(BaseModel):
     address: str = Field(alias="address")
 
 class CreateUserValidator(BaseModel):
-        uuid = create_unique_id()
+        uuid : uuid.UUID
         first_name: str = Field(alias="firstname")
         last_name: str = Field(alias="lastname")
         username : str
         email : EmailStr
         nhs_number = "123456789"
         organization_id = "2"
-        password_hash = "admin"
+        password_hash = create_password_hash("admin")
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
+        profile_image = "http://18.134.217.103/image/profile_image.jpg"
         created_date = datetime.now(),
         updated_date = datetime.now(),
         last_login_date = datetime.now()

@@ -1,6 +1,6 @@
 from __future__ import with_statement
 from logging.config import fileConfig
-
+import load_env
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 

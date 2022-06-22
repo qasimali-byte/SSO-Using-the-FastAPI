@@ -9,4 +9,4 @@ def delete_all_cookies(response, only_frontend=False):
 
 def create_unique_id():
     import uuid
-    return uuid.uuid4()
+    return uuid.uuid1()

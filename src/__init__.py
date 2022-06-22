@@ -1,4 +1,3 @@
-import load_env
 from src.apis.v1.core.project_settings import Settings
 settings_by_env = Settings()
 from src.config.constants import Constants

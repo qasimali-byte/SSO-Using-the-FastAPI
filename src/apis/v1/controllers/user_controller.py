@@ -44,6 +44,7 @@ class UsersController():
             Create Internal User Controller
         """
         # ## verify valid ids of sp applications , roles, sub roles and practices
+        # ## roles must be atleast selected when the app is selected roles cannot be empty
         
         # ## format data for create user
         apps_ids_list, practices_ids_list, selected_roles_list = self.format_data_for_create_user(user_data)
@@ -59,7 +60,7 @@ class UsersController():
         user_type_id = TypeUserController(self.db).get_type_of_user(user_data['type_of_user'])['id']
 
         # ## create user data
-        idp_user_data = CreateUserValidator(firstname=user_data['firstname'], lastname=user_data['lastname'], email=user_data['email'],
+        idp_user_data = CreateUserValidator(uuid=create_unique_id(),firstname=user_data['firstname'], lastname=user_data['lastname'], email=user_data['email'],
          username=str(user_data['firstname'])+str(user_data['lastname']),user_type_id=user_type_id )
         
         # ## create user in db
