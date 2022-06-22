@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import List
 from uuid import uuid4
-from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response
+from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.services.auth_service import AuthService
 from src.apis.v1.core.project_settings import Settings
@@ -141,3 +142,13 @@ async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT 
     current_user_email = authorize.get_jwt_subject()
     resp = UsersController(db).update_user_info(user_email=current_user_email,user_data=updateuser.dict())
     return resp
+
+@router.put("/user/profile_image", summary="Update User Profile Image")
+async def update_user_info(files: List[UploadFile] = File(...)):
+    """
+        This api updates the user information for profile image
+    """
+
+
+
+    return {"success","image updated successfully"}
