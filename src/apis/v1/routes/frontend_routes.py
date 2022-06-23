@@ -7,7 +7,7 @@ router = APIRouter(tags=["SSO Frontend"], include_in_schema=False)
 
 @router.get("/")
 @router.get("/sign-in")
-@router.get("/user-managment")
+@router.get("/user-management")
 @router.get("/forgot-password")
 @router.get("/audit-trail")
 @router.get("/create-user")
