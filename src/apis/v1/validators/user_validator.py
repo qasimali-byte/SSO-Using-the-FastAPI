@@ -129,6 +129,8 @@ class CreateUserValidator(BaseModel):
         email : EmailStr
         nhs_number = "123456789"
         organization_id = "2"
+        contact_no = "+92123456789"
+        address = "enter address here"
         password_hash = create_password_hash("admin")
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
