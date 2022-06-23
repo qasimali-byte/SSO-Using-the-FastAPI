@@ -5,7 +5,7 @@ from src.apis.v1.constants.role_enums import RoleEnums
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
-from fastapi_jwt_auth import AuthJWT
+from fastapi_auth.auth import AuthJWT
 
 from src.apis.v1.validators.roles_validator import InternalRoleValidatorOut, RoleValidatorIn
 from . import oauth2_scheme
