@@ -152,21 +152,23 @@ class UserService():
             if values[1].name == "ez-login" and type_of_user[0].lower() == "internal":
                 user_selected_roles = RolesService(self.db).get_user_selected_role(values[1].name, user_id)
 
+                # it should be get from db
                 if user_selected_roles == "super-admin":
-                    user_roles = [{"id":1,"name":"Sub Admin","sub_roles":[]}, {"id":2, "name":"Practice Admin","sub_roles":[]}]
+                    user_roles = [{"id":1,"name":"Sub Admin","sub_roles":[]}, {"id":16, "name":"Practice Admin","sub_roles":[]}]
                 elif user_selected_roles == "sub-admin":
-                    user_roles = [{"id":2, "name":"Practice Admin","sub_roles":[]}]
+                    user_roles = [{"id":16, "name":"Practice Admin","sub_roles":[]}]
                 else:
                     user_roles = []
 
-                practice_roles_data.insert(0,{
-                    "id":values[1].id,
-                    "name":values[1].name,
-                    "sp_app_name": values[1].display_name,
-                    "sp_app_image": values[1].logo_url,
-                    "roles": user_roles,
-                    "practices":[]
-                })
+                if user_selected_roles != "practice-administrator":
+                    practice_roles_data.insert(0,{
+                        "id":values[1].id,
+                        "name":values[1].name,
+                        "sp_app_name": values[1].display_name,
+                        "sp_app_image": values[1].logo_url,
+                        "roles": user_roles,
+                        "practices":[]
+                    })
             
             elif values[1].name == "dr-iq":
                 user_roles = RolesService(self.db).get_apps_practice_roles(values[1].id)

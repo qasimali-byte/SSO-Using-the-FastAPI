@@ -8,7 +8,7 @@ from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
-from fastapi_jwt_auth import AuthJWT
+from fastapi_auth.auth import AuthJWT
 from . import oauth2_scheme
 
 from src.apis.v1.validators.user_validator import AdminUserValidator, ExternalUserValidator, InternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
