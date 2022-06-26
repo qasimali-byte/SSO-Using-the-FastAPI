@@ -9,25 +9,7 @@ import jwt
 
 class AuthJWT(AuthJWT):
     def __init__(self, req: Request = None, res: Response = None):
-        super().__init__()
-        """
-        Get jwt header from incoming request or get
-        request and response object if jwt in the cookie
-
-        :param req: all incoming request
-        :param res: response from endpoint
-        """
-        if res and self.jwt_in_cookies:
-            self._response = res
-
-        if req:
-            # get request object when cookies in token location
-            if self.jwt_in_cookies:
-                self._request = req
-            # get jwt in headers when headers in token location
-            if self.jwt_in_headers:
-                auth = req.headers.get(self._header_name.lower())
-                if auth: self._get_jwt_from_headers(auth)
+        super().__init__(req, res)
 
     def _verified_token(self,encoded_token: str, issuer: Optional[str] = None) -> Dict[str,Union[str,int,bool]]:
         """

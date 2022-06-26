@@ -1,4 +1,5 @@
 from sqlalchemy import and_
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
@@ -28,10 +29,10 @@ class RolesService():
 
             self.db.bulk_save_objects(objects)
             self.db.commit()
-
-            return "assigned roles to user", status.HTTP_200_OK
+            return "assigned roles to user"
+            
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"error occured in roles service")
 
     def get_internal_roles_db(self):
         try:

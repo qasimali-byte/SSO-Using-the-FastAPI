@@ -18,7 +18,7 @@ from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidato
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi_auth.auth import AuthJWT
+from ..helpers.auth import AuthJWT
 from redis import Redis
 from src.apis.v1.routes.idp_routes import cookie,cookie_frontend
 from . import oauth2_scheme

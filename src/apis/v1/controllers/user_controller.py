@@ -1,4 +1,3 @@
-from datetime import datetime
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -9,45 +8,21 @@ from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
-from src.apis.v1.validators.user_validator import  CreateUserValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+from src.apis.v1.validators.user_validator import  CreateUserValidator, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+from ..utils.user_utils import format_data_for_create_user
 class UsersController():
     def __init__(self, db) -> None:
         self.db = db
 
-    def format_data_for_create_user(self, user_data) -> tuple:
+    def create_user(self, user_data):
         """
-            Format Data For Create User Controller
-        """
-
-        apps = user_data['apps']
-        apps_ids_list, duplicate_apps_check  = [] , {}
-        practices_ids_list, duplicate_practices_check = [] ,{}
-        selected_roles_list = []
-        for app in apps:
-            if app['id'] not in duplicate_apps_check:
-                duplicate_apps_check[app['id']] = 1
-                apps_ids_list.append(app["id"])
-            
-            for practice in app["practices"]:
-                if practice['id'] not in duplicate_practices_check:
-                    duplicate_practices_check[practice['id']] = 1
-                    practices_ids_list.append(practice["id"])
-
-            
-            selected_roles_tuple = tuple([app["id"],app["role"]["id"],app["role"]["sub_role"]])
-            selected_roles_list.append(selected_roles_tuple)
-
-        return apps_ids_list, practices_ids_list, selected_roles_list
-
-    def create_internal_user(self, user_data):
-        """
-            Create Internal User Controller
+            Create User Controller
         """
         # ## verify valid ids of sp applications , roles, sub roles and practices
         # ## roles must be atleast selected when the app is selected roles cannot be empty
         
         # ## format data for create user
-        apps_ids_list, practices_ids_list, selected_roles_list = self.format_data_for_create_user(user_data)
+        apps_ids_list, practices_ids_list, selected_roles_list = format_data_for_create_user(user_data)
 
         ## verify if user already exists
         check_email = AuthController(self.db).email_verification(user_data['email'])
@@ -64,36 +39,17 @@ class UsersController():
          username=str(user_data['firstname'])+str(user_data['lastname']),user_type_id=user_type_id )
         
         # ## create user in db
-        user_created_data, user_status = UserService(self.db).create_internal_user_db(idp_user_data.dict())
-        if user_status != 201:
-            data = ErrorResponseValidator(message=user_created_data)
-            response = custom_response(status_code=user_status, data=data)
-            return response
-
-
+        user_created_data = UserService(self.db).create_internal_user_db(idp_user_data.dict())
         user_id = user_created_data.id
 
         # assign sp apps to user
-        sps_data, sps_status = SPSController(self.db).assign_sps_to_user(user_id=user_id, sps_object_list=apps_ids_list)
-        if sps_status != 200:
-            data = ErrorResponseValidator(message=sps_data)
-            response = custom_response(status_code=sps_status, data=data)
-            return response
-
+        SPSController(self.db).assign_sps_to_user(user_id=user_id, sps_object_list=apps_ids_list)
 
         # ## assign sp practices to user
-        practices_data, practices_status = PracticesController(self.db).assign_practices_to_user(user_id=user_id, practices_list=practices_ids_list)
-        if practices_status != 200:
-            data = ErrorResponseValidator(message=practices_data)
-            response = custom_response(status_code=practices_status, data=data)
-            return response
+        PracticesController(self.db).assign_practices_to_user(user_id=user_id, practices_list=practices_ids_list)
 
         # ## assign sp roles to user
-        roles_data, roles_status = RolesController(self.db).assign_roles_to_user(user_id=user_id, roles_list=selected_roles_list)
-        if roles_status != 200:
-            data = ErrorResponseValidator(message=roles_data)
-            response = custom_response(status_code=roles_status, data=data)
-            return response
+        RolesController(self.db).assign_roles_to_user(user_id=user_id, roles_list=selected_roles_list)
 
         data = UserValidatorOut()
         response = custom_response(status_code=status.HTTP_201_CREATED, data=data)
@@ -123,13 +79,9 @@ class UsersController():
         """
             Get User Information Controller
         """
-        user_info_data, user_info_status = UserService(self.db).get_user_info_db(user_email)
-        if user_info_status != 200:
-            data = ErrorResponseValidator(message=user_info_data)
-            response = custom_response(status_code=user_info_status, data=data)
-            return response
-
-        response = custom_response(status_code=user_info_status, data=user_info_data)
+        user_info_data = UserService(self.db).get_user_info_db(user_email)
+        user_info_resp = UserInfoValidator(user_info = user_info_data,statuscode=status.HTTP_200_OK, message="User Info Found")
+        response = custom_response(status_code=status.HTTP_200_OK, data=user_info_resp)
         return response
 
 
@@ -138,12 +90,11 @@ class UsersController():
             Update User Information Controller
         """
         user_data['email'] = user_email
-        user_info_data, user_info_status = UserService(self.db).update_user_info_db(user_data)
-        if user_info_status != 201:
-            data = ErrorResponseValidator(message=user_info_data)
-            response = custom_response(status_code=user_info_status, data=data)
-            return response
         
-        response = custom_response(status_code=user_info_status, data=user_info_data)
+        ## update user info in db
+        UserService(self.db).update_user_info_db(user_data)
+
+        user_info_resp = UserInfoValidator(user_info= user_data, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
+        response = custom_response(status_code=status.HTTP_201_CREATED, data=user_info_resp)
         return response
         

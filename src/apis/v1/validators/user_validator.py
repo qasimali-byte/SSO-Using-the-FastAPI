@@ -20,9 +20,10 @@ class UserAppsValidatorIn(BaseModel):
     id: int
     practices: typing.List[IdsList] = []
     role: UserRolesValidatorIn
-class InternalUserValidator(BaseModel):
+
+class CreateInternalExternalUserValidatorIn(BaseModel):
     """
-        Internal User Validator
+        Create User Validator
     """
     firstname: str 
     lastname: str 
