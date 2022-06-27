@@ -10,7 +10,7 @@ from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from fastapi import status
 from sqlalchemy.orm import aliased, load_only,Load
-from sqlalchemy.sql.expression import or_
+# from sqlalchemy.sql.expression import or_
 
 from src.apis.v1.validators.user_validator import GetUserInfoValidator, UserInfoValidator
 class UserService():

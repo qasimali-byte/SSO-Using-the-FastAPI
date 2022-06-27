@@ -2,7 +2,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from . import Base
-from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
+# from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
 
 class idp_users(Base):
     __tablename__ = "idp_users"
@@ -34,5 +34,7 @@ class idp_users(Base):
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))
     dr_iq_gender_id = Column(Integer, ForeignKey("gender.id"))
     sp_apps_role = relationship("sp_apps_role", secondary="idp_user_apps_roles", back_populates='idp_users')
+    SPAPPS = relationship("SPAPPS", secondary="idp_sp", back_populates='idp_users')
+    
     # user_type = relationship("idp_user_types", backref="idp_users")
     # idp_sp = relationship("idp_sp", lazy="joined")

@@ -10,6 +10,9 @@ from src.apis.v1.services.user_service import UserService
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
 from src.apis.v1.validators.user_validator import  CreateUserValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+
+
+
 class UsersController():
     def __init__(self, db) -> None:
         self.db = db
