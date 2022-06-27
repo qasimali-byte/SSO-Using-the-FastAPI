@@ -3,4 +3,6 @@ __pycache__/
 *.bak
 *.dat
 .vscode/
+*.pytest_cache
+*.coverage
 .venv/

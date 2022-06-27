@@ -18,7 +18,7 @@ from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidato
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi_jwt_auth import AuthJWT
+from ..helpers.auth import AuthJWT
 from redis import Redis
 from src.apis.v1.routes.idp_routes import cookie,cookie_frontend
 from . import oauth2_scheme
@@ -139,9 +139,9 @@ async def sso_logout(logout_validator:LogoutValidator,request: Request, authoriz
 
 
         jti = authorize.get_jti(access_token)
-        redis_conn.setex(jti,Settings().access_expires,'true')
+        redis_conn.setex(jti,Settings().authjwt_access_token_expires,'true')
         jti = authorize.get_jti(refresh_token)
-        redis_conn.setex(jti,Settings().refresh_expires,'true')
+        redis_conn.setex(jti,Settings().authjwt_refresh_token_expires,'true')
 
     except Exception as e:
         return {"message":"token has expired"}

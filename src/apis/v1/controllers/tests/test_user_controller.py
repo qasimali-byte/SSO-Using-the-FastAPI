@@ -6,6 +6,53 @@ import sqlalchemy
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.core.project_settings import Settings
 
+    # data = {
+    #     "firstname": "string",
+    #     "lastname": "string",
+    #     "email": "user@example.com",
+    #     "dr_iq_gender_id":1,
+    #     "type_of_user": "internal",
+        # "apps": [
+        #     {
+        #     "id": 7,
+        #     "practices": [],
+        #     "role": {
+        #             "id": 1,
+        #             "sub_role": None
+        #         }
+                
+        #     },
+        #     {
+        #     "id": 3,
+        #     "practices": [
+        #             {
+        #             "id": 337,
+        #             },
+        #             {
+        #             "id": 338,
+        #             },
+        #             {
+        #             "id": 366,
+        #             },
+        #             {
+        #             "id": 374,
+        #             },
+        #             {
+        #             "id": 375,
+        #             },
+        #             {
+        #             "id": 376,
+        #             }
+        #         ],
+        #     "role": 
+        #             {
+        #             "id": 4,
+        #             "sub_role": 3
+        #             }
+                
+        #     }
+        # ]
+    # }
 class TestController(unittest.TestCase):
     def setUp(self):
         """ setup test fixtures """

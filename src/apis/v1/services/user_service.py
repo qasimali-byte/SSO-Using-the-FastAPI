@@ -1,3 +1,4 @@
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
 from src.apis.v1.models.roles_model import roles
@@ -17,32 +18,33 @@ class UserService():
 
     def __init__(self, db):
         self.db = db
+        self.error_string: str = "error occured in user service"
 
     def get_user_info_db(self, user_email):
         try:
             user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
-            user_info_resp = UserInfoValidator(user_info = user_info_object,statuscode=status.HTTP_200_OK, message="User Info Found")
-            return user_info_resp, status.HTTP_200_OK
-        except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            return user_info_object
 
-    def update_user_info_db(self, user_data):
+        except Exception as e:
+            raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update_user_info_db(self, user_data) -> str:
         try:
             self.db.query(idp_users).filter(idp_users.email == user_data['email']).update(user_data)
             self.db.commit()
-            user_info_resp = UserInfoValidator(user_info = user_data, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
-            return user_info_resp, status.HTTP_201_CREATED
+            return "User Info Updated"
+
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create_internal_user_db(self, user_data):
         try:
             create_user = idp_users(**user_data)
             self.db.add(create_user)
             self.db.commit()
-            return create_user, status.HTTP_201_CREATED
+            return create_user
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(str(e)+"error occured in user service", status.HTTP_500_INTERNAL_SERVER_ERROR)
             
     def create_internal_idp_user(self, **kwargs):
         try:
@@ -142,21 +144,23 @@ class UserService():
             if values[1].name == "ez-login" and type_of_user[0].lower() == "internal":
                 user_selected_roles = RolesService(self.db).get_user_selected_role(values[1].name, user_id)
 
+                # it should be get from db
                 if user_selected_roles == "super-admin":
-                    user_roles = [{"id":1,"name":"Sub Admin","sub_roles":[]}, {"id":2, "name":"Practice Admin","sub_roles":[]}]
+                    user_roles = [{"id":1,"name":"Sub Admin","sub_roles":[]}, {"id":16, "name":"Practice Admin","sub_roles":[]}]
                 elif user_selected_roles == "sub-admin":
-                    user_roles = [{"id":2, "name":"Practice Admin","sub_roles":[]}]
+                    user_roles = [{"id":16, "name":"Practice Admin","sub_roles":[]}]
                 else:
                     user_roles = []
 
-                practice_roles_data.insert(0,{
-                    "id":values[1].id,
-                    "name":values[1].name,
-                    "sp_app_name": values[1].display_name,
-                    "sp_app_image": values[1].logo_url,
-                    "roles": user_roles,
-                    "practices":[]
-                })
+                if user_selected_roles != "practice-administrator":
+                    practice_roles_data.insert(0,{
+                        "id":values[1].id,
+                        "name":values[1].name,
+                        "sp_app_name": values[1].display_name,
+                        "sp_app_image": values[1].logo_url,
+                        "roles": user_roles,
+                        "practices":[]
+                    })
             
             elif values[1].name == "dr-iq":
                 user_roles = RolesService(self.db).get_apps_practice_roles(values[1].id)
