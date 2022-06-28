@@ -1,5 +1,4 @@
 from datetime import datetime
-from this import s
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
 from fastapi import status
@@ -12,8 +11,8 @@ class UsersController():
         
     def get_users(self):
         try:
-            users_info, uses_info_status = UsersService(self.db).get_users_info_db()
-            data = UsersValidatorOut(users_data=users_info,message="Users data retrieved Sucessfully",status_code=uses_info_status)
+            users_info = UsersService(self.db).get_users_info_db()
+            data = UsersValidatorOut(users_data=users_info,message="Users data retrieved Sucessfully",status_code=status.HTTP_200_OK)
             response = custom_response(data=data,status_code=status.HTTP_200_OK)
             return response
         except Exception as e:
