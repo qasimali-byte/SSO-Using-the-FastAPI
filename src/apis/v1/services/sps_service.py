@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
@@ -71,7 +72,7 @@ class SPSService():
 
             self.db.bulk_save_objects(objects)
             self.db.commit()
+            return "assigned sps to user"
 
-            return "assigned sps to user", status.HTTP_200_OK
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

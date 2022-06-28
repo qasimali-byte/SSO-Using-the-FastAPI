@@ -2,6 +2,7 @@ from . import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
+from src.apis.v1.models.idp_users_model import idp_users
 
 
 class SPAPPS(Base):
@@ -18,5 +19,4 @@ class SPAPPS(Base):
     created_date = Column(DateTime, nullable=False, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
     roles = relationship("roles", secondary="sp_apps_role", back_populates='sp_apps')
-    # practices = relationship("practices", lazy="joined")
-    # roles = relationship("roles", lazy="joined")
+    # idp_users=relationship("idp_users", secondary="idp_sp", back_populates='SPAPPS')

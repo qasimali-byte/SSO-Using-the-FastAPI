@@ -1,3 +1,4 @@
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from fastapi import status
 
@@ -18,7 +19,7 @@ class PracticesService():
 
             self.db.bulk_save_objects(objects)
             self.db.commit()
+            return "assigned practices to user"
 
-            return "assigned practices to user", status.HTTP_200_OK
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(message=str(e) + "error occured in practices service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

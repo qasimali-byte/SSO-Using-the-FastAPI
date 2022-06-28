@@ -10,8 +10,7 @@ class TypeUserController():
         self.db = db
     
     def get_type_of_user(self,type_of_user):
-        data = TypeOfUserService(self.db).get_type_of_user_db(type_of_user)
-        return data
+        return TypeOfUserService(self.db).get_type_of_user_db(type_of_user)
         
     def get_type_of_user_service(self,type_of_user):
         try:
