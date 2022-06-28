@@ -16,4 +16,3 @@ class idp_sp(Base):
     idp_users_id = Column(ForeignKey('idp_users.id'))
     sp_apps_id = Column(ForeignKey('sp_apps.id'))
     is_accessible = Column(Boolean, nullable=False, unique=False, default=True)
-    # sp_apps_table = relationship("SPAPPS", lazy="joined")

@@ -20,5 +20,3 @@ class SPAPPS(Base):
     updated_date = Column(DateTime, nullable=False, unique=False)
     roles = relationship("roles", secondary="sp_apps_role", back_populates='sp_apps')
     idp_users=relationship("idp_users", secondary="idp_sp", back_populates='SPAPPS')
-    # practices = relationship("practices", lazy="joined")
-    # roles = relationship("roles", lazy="joined")

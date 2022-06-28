@@ -2,7 +2,6 @@ from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from fastapi import status
-from sqlalchemy.orm import joinedload
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 
 
