@@ -4,7 +4,7 @@ from typing import Generator
 from src import Base
 
 # For postgres database
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Mtbc1122@localhost:5432/sso_test_db"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:faisal@localhost:5432/sso_test_db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
