@@ -1,4 +1,7 @@
 from datetime import datetime
+
+import shortuuid as shortuuid
+
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -158,7 +161,8 @@ class UsersController():
         else:
             message += " Invalid image typ"
             return {"message": "There was an error,Invalid image type only png, jpg, jpeg,webp allowed"}
-        resource_name = f"{datetime.now().strftime('%Y_%m_%d-%I_%M_%S_%p')}_"+file.filename.replace(" ","_")
+        # resource_name = f"{datetime.now().strftime('%Y_%m_%d-%I_%M_%S_%p')}_"+file.filename.replace(" ","_")
+        resource_name = shortuuid.ShortUUID().random(length=10)+f".{file.content_type.split('/')[-1]}"
         with open(f"./public/assets/{resource_name}", 'wb') as f:
             f.write(content)
         image_url = Settings().BASE_URL+"/image/"+resource_name

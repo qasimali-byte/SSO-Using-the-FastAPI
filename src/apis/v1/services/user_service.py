@@ -1,3 +1,5 @@
+import os
+
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
 from src.apis.v1.models.roles_model import roles
@@ -38,7 +40,18 @@ class UserService():
     def update_user_image_db(self,user_email,user_image_url):
         try:
             # self.db.query(idp_users).filter(idp_users.email == user_email).update(user_data)
-            user = self.db.query(idp_users).filter(idp_users.email == str(user_email)).update({"profile_image": user_image_url})
+            #get existing image file name.
+            user_info_object = self.db.query(idp_users).filter(idp_users.email == str(user_email)).first()
+            existing_image_file_name = user_info_object.profile_image.split('/')[-1]
+            if not existing_image_file_name == 'profile_image.jpg':
+                user = self.db.query(idp_users).filter(idp_users.email == str(user_email)).update({"profile_image": user_image_url})
+            else:
+                try:
+                    file_ = f"./public/assets/{existing_image_file_name}"
+                    if os.path.isfile(file_):
+                        os.remove(file_)
+                except OSError as e:  ## if failed, report it back to the user ##
+                    print("Error: %s - %s." % (e.filename, e.strerror))
             self.db.commit()
             # user_info_resp = UserInfoValidator(user_info = user, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
             return "profile image updated", status.HTTP_201_CREATED
