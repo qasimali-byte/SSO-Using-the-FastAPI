@@ -11,6 +11,7 @@ from src.apis.v1.services.type_of_user_service import TypeOfUserService
 from src.apis.v1.models.idp_user_types_model import idp_user_types
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
+from src.apis.v1.helpers.customize_response import file_remover
 from fastapi import status
 from sqlalchemy.orm import aliased, load_only,Load
 
@@ -40,21 +41,13 @@ class UserService():
 
     def update_user_image_db(self,user_email,user_image_url):
         try:
-            # self.db.query(idp_users).filter(idp_users.email == user_email).update(user_data)
-            #get existing image file name.
             user_info_object = self.db.query(idp_users).filter(idp_users.email == str(user_email)).first()
             existing_image_file_name = user_info_object.profile_image.split('/')[-1]
-            if not existing_image_file_name == 'profile_image.jpg':
-                user = self.db.query(idp_users).filter(idp_users.email == str(user_email)).update({"profile_image": user_image_url})
-            else:
-                try:
-                    file_ = f"./public/assets/{existing_image_file_name}"
-                    if os.path.isfile(file_):
-                        os.remove(file_)
-                except OSError as e:  ## if failed, report it back to the user ##
-                    print("Error: %s - %s." % (e.filename, e.strerror))
+            if existing_image_file_name != 'profile_image.jpg':
+                file_remover(f"./public/assets/{existing_image_file_name}")
+            self.db.query(idp_users).filter(idp_users.email == str(user_email)).update(
+                {"profile_image": user_image_url})
             self.db.commit()
-            # user_info_resp = UserInfoValidator(user_info = user, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
             return "profile image updated", status.HTTP_201_CREATED
         except Exception as e:
             return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR

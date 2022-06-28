@@ -11,3 +11,4 @@ envs/
 .env.dev
 .env.prod
 load_env.py
+.idea

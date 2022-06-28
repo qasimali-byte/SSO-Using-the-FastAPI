@@ -1,5 +1,7 @@
 
 import shortuuid as shortuuid
+
+import utils
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -101,27 +103,12 @@ class UsersController():
         response = custom_response(status_code=status.HTTP_201_CREATED, data=user_info_resp)
         return response
 
-    def update_user_image(self,user_email,file,content):
+    def update_user_image(self,user_email,data_image):
         """
             Update User Image Controller
         """
-        message= ""
-        if file.content_type in ["image/png", "image/jpg", "image/jpeg", "image/webp"]:
-            message += " accepted "
-        else:
-            message += " Invalid image typ"
-            return {"message": "There was an error,Invalid image type only png, jpg, jpeg,webp allowed"}
-        # resource_name = f"{datetime.now().strftime('%Y_%m_%d-%I_%M_%S_%p')}_"+file.filename.replace(" ","_")
-        resource_name = shortuuid.ShortUUID().random(length=10)+f".{file.content_type.split('/')[-1]}"
-        with open(f"./public/assets/{resource_name}", 'wb') as f:
-            f.write(content)
-        image_url = Settings().BASE_URL+"/image/"+resource_name
+        image_url = utils.user_utils.image_writer(data_image)
         user_info_data, user_info_status = UserService(self.db).update_user_image_db(user_email=user_email,user_image_url=image_url)
-        # if user_info_status != 201:
-        #     data = ErrorResponseValidator(message=user_info_data)
-        #     response = custom_response(status_code=user_info_status, data=data)
-        #     return response
-
         response = custom_response(status_code=user_info_status, data=user_info_data)
         return response
         

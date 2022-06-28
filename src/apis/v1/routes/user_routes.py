@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 from uuid import uuid4
-from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File
+from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File, Form
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.db.session import engine, get_db
@@ -91,19 +91,19 @@ async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT 
 
 
 @router.put("/user/profile_image", summary="Update User Profile Image", responses={200:{"model":UserInfoValidator}}, status_code=200)
-async def update_user_image(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),file: UploadFile = File(...),db: Session = Depends(get_db)):
+async def update_user_image(request:Request,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image
     """
+
     try:
-        content = await file.read()
+        data_image = await request.json()
     except Exception as e:
         return {"message": f"There was an error uploading the file(s),{e}"}
-    finally:
-        await file.close()
+
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
-    resp = UsersController(db).update_user_image(user_email=current_user_email,file=file,content=content)
+    resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=data_image)
     # return resp
 
     return {"success",f"image updated successfully"}
