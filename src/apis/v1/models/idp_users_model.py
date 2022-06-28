@@ -34,4 +34,4 @@ class idp_users(Base):
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))
     dr_iq_gender_id = Column(Integer, ForeignKey("gender.id"))
     sp_apps_role = relationship("sp_apps_role", secondary="idp_user_apps_roles", back_populates='idp_users')
-    SPAPPS = relationship("SPAPPS", secondary="idp_sp", back_populates='idp_users')
+    # SPAPPS = relationship("SPAPPS", secondary="idp_sp", back_populates='idp_users')
