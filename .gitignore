@@ -5,10 +5,10 @@ __pycache__/
 .vscode/
 *.pytest_cache
 *.coverage
-.venv/
+venv/
+envs/
 .env.dev
 .env.prod
 load_env.py
-.tests/
 
 
