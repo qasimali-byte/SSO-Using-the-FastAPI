@@ -29,6 +29,5 @@ class UsersService():
             user_data = [values for values in user_data.values()]
             return user_data, status.HTTP_200_OK
         except Exception as e:
-            print(str(e), "--------------------------------")
-            # return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            return "Error: {}".format(e), status.HTTP_500_INTERNAL_SERVER_ERROR
 

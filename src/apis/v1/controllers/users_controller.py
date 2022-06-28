@@ -1,6 +1,4 @@
 from datetime import datetime
-from lib2to3.pytree import type_repr
-import typing
 from src.apis.v1.helpers.customize_response import custom_response
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator

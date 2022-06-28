@@ -1,4 +1,3 @@
-from re import A
 from sys import prefix
 from fastapi import FastAPI, Request
 from src.apis.v1.routes import sps_routes, idp_routes,auth_routes,user_routes,\
