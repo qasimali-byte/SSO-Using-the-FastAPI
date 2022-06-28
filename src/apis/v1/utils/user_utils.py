@@ -1,7 +1,8 @@
 import shortuuid
 
 from src.apis.v1.core.project_settings import Settings
-
+from src.apis.v1.helpers.custom_exceptions import CustomException
+from fastapi import status
 
 def format_data_for_create_user(user_data) -> tuple:
     """
@@ -39,8 +40,9 @@ def image_writer(data_image):
         message += " accepted "
     else:
         message += " Invalid image typ"
-        return {"message": "There was an error,Invalid image type only png, jpg, jpeg,webp allowed"}
-    resource_name = shortuuid.ShortUUID().random(length=8) + f".{content_type.split('/')[-1]}"
+        raise CustomException(message="There was an error,Invalid image type only png, jpg, jpeg,webp allowed - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    resource_name = shortuuid.ShortUUID().random(length=8)+"_"+image_name+ f".{content_type.split('/')[-1]}"
     with open(f"./public/assets/{resource_name}", 'wb') as f:
         f.write(image_data)
 

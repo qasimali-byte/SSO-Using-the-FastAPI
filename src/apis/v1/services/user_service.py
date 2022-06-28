@@ -39,7 +39,7 @@ class UserService():
         except Exception as e:
             raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def update_user_image_db(self,user_email,user_image_url):
+    def update_user_image_db(self,user_email,user_image_url) -> str:
         try:
             user_info_object = self.db.query(idp_users).filter(idp_users.email == str(user_email)).first()
             existing_image_file_name = user_info_object.profile_image.split('/')[-1]
@@ -48,9 +48,10 @@ class UserService():
             self.db.query(idp_users).filter(idp_users.email == str(user_email)).update(
                 {"profile_image": user_image_url})
             self.db.commit()
-            return "profile image updated", status.HTTP_201_CREATED
+            return "profile image updated"
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(message=str(e)+"- error occured in user service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     def create_internal_user_db(self, user_data):
         try:

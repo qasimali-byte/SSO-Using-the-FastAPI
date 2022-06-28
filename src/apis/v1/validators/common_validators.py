@@ -7,6 +7,10 @@ class ErrorResponseValidator(BaseModel):
     message: str
     status: bool = False
 
+class SuccessfulJsonResponseValidator(BaseModel):
+    message: str
+    statuscode: int
+
 class GeneralBaseModelErrors(BaseModel):
     detail = [
         {

@@ -1,7 +1,7 @@
 
 import shortuuid as shortuuid
 
-import utils
+from src.apis.v1.utils.user_utils import image_writer
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -12,7 +12,7 @@ from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
-from src.apis.v1.validators.common_validators import ErrorResponseValidator
+from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import  CreateUserValidator, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
 from ..utils.user_utils import format_data_for_create_user
 class UsersController():
@@ -107,8 +107,13 @@ class UsersController():
         """
             Update User Image Controller
         """
-        image_url = utils.user_utils.image_writer(data_image)
-        user_info_data, user_info_status = UserService(self.db).update_user_image_db(user_email=user_email,user_image_url=image_url)
-        response = custom_response(status_code=user_info_status, data=user_info_data)
+        image_url = image_writer(data_image)
+        update_image_data = UserService(self.db).update_user_image_db(user_email=user_email, user_image_url=image_url)
+        data = {
+            "message": update_image_data,
+            "statuscode": status.HTTP_201_CREATED
+        }
+        validated_data = SuccessfulJsonResponseValidator(data)
+        response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
         
