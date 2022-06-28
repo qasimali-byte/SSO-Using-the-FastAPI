@@ -1,6 +1,7 @@
+from sys import prefix
 from fastapi import FastAPI, Request
 from src.apis.v1.routes import sps_routes, idp_routes,auth_routes,user_routes,\
-     frontend_routes,staticfiles_routes, roles_routes, practices_routes
+     frontend_routes,staticfiles_routes, roles_routes, practices_routes, users_routes
 from src.handling_exceptions import registering_exceptions
 from . import settings_by_env
 from fastapi.responses import JSONResponse
@@ -29,7 +30,7 @@ def create_app():
     app.include_router(frontend_routes.router)
     app.include_router(roles_routes.router, prefix=api_url)
     app.include_router(practices_routes.router, prefix=api_url)
-    
+    app.include_router(users_routes.router,prefix=api_url)
 
     registering_exceptions(app)
 

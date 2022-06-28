@@ -22,3 +22,4 @@ from .sp_apps_role_model import sp_apps_role
 from .driq_practices_role_model import driq_practices_role
 from .sp_apps_role_driq_practice_role_model import sp_apps_role_driq_practice_role
 from .idp_user_apps_roles_model import idp_user_apps_roles
+from .idp_users_model import idp_users
