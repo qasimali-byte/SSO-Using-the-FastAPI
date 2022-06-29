@@ -14,7 +14,7 @@ api_url : str = "/api/v1"
 def create_app():
     app = FastAPI()
     app.mount("/static", StaticFiles(directory="build/static"), name="static")
-    origins = ["https://chilly-snakes-throw-58-181-125-118.loca.lt","http://localhost:3000","http://localhost:3001","http://18.134.217.103"]
+    origins = ["https://chilly-snakes-throw-58-181-125-118.loca.lt","http://localhost:3000","http://localhost:3000/","http://localhost:3001","http://18.134.217.103"]
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,

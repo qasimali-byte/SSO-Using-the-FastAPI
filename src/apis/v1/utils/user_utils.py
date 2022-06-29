@@ -44,6 +44,11 @@ def image_writer(data_image):
 
     resource_name = shortuuid.ShortUUID().random(length=8)+"_"+image_name+ f".{content_type.split('/')[-1]}"
     with open(f"./public/assets/{resource_name}", 'wb') as f:
-        f.write(image_data)
-
+        try:
+            f.write(image_data)
+        except:
+            print("===> wrong object formate")
+            f.write(data_image)
+        finally:
+            print("===> could not write file")
     return Settings().BASE_URL + "/image/" + resource_name
