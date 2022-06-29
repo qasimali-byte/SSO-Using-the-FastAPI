@@ -25,3 +25,9 @@ class GeneralBaseModelErrors(BaseModel):
             }
         }
     ]
+
+class MetaDataValidator(BaseModel):
+    page: int
+    per_page: int 
+    page_count: int
+    total_records: int
