@@ -54,8 +54,7 @@ class UserService():
         except Exception as e:
             raise CustomException(message=str(e)+"- error occured in user service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    def create_internal_user_db(self, user_data):
+    def create_user_db(self, user_data):
         try:
             create_user = idp_users(**user_data)
             self.db.add(create_user)

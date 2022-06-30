@@ -45,7 +45,7 @@ class UsersController():
          username=str(user_data['firstname'])+str(user_data['lastname']),user_type_id=user_type_id )
         
         # ## create user in db
-        user_created_data = UserService(self.db).create_internal_user_db(idp_user_data.dict())
+        user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
         user_id = user_created_data.id
 
         # assign sp apps to user
