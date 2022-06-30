@@ -42,7 +42,8 @@ def image_writer(data_image):
         message += " Invalid image typ"
         raise CustomException(message="There was an error,Invalid image type only png, jpg, jpeg,webp allowed - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    resource_name = shortuuid.ShortUUID().random(length=8)+"_"+image_name+ f".{content_type.split('/')[-1]}"
+    resource_name = shortuuid.ShortUUID().random(length=8)+"_"+image_name+f".{content_type.split('/')[-1]}"
+    resource_name = resource_name.replace(" ","_")
     with open(f"./public/assets/{resource_name}", 'wb') as f:
         try:
             f.write(image_data)

@@ -22,7 +22,7 @@ def create_app():
         allow_methods=["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE"],
         allow_headers=["Access-Control-Allow-Headers","Set-Cookie", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
     )
-    app.include_router(staticfiles_routes.router)
+    app.include_router(staticfiles_routes.router, prefix=api_url)
     app.include_router(sps_routes.router, prefix=api_url)
     app.include_router(idp_routes.router)
     app.include_router(auth_routes.router, prefix=api_url)
