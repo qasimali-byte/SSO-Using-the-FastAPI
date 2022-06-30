@@ -49,7 +49,7 @@ def image_writer(data_image):
         except Exception as e:
             raise CustomException(message="There was an error,Error in writing image - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    return Settings().BASE_URL + "/image/" + resource_name
+    return "image/" + resource_name
 
 
 def format_data_for_update_user_image(image) -> dict:
