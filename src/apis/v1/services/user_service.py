@@ -1,3 +1,5 @@
+
+import os
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
@@ -9,6 +11,7 @@ from src.apis.v1.services.type_of_user_service import TypeOfUserService
 from src.apis.v1.models.idp_user_types_model import idp_user_types
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
+from src.apis.v1.helpers.customize_response import file_remover
 from fastapi import status
 from sqlalchemy.orm import aliased, load_only,Load
 
@@ -35,6 +38,21 @@ class UserService():
 
         except Exception as e:
             raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update_user_image_db(self,user_email,user_image_url) -> str:
+        try:
+            user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
+            existing_image_file_name = user_info_object.profile_image.split('/')[-1]
+            if existing_image_file_name != 'profile_image.jpg':
+                file_remover(f"./public/assets/{existing_image_file_name}")
+
+            self.db.query(idp_users).filter(idp_users.email == user_email).update(
+                {"profile_image": user_image_url})
+            self.db.commit()
+            return "profile image updated"
+            
+        except Exception as e:
+            raise CustomException(message=str(e)+"- error occured in user service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create_user_db(self, user_data):
         try:

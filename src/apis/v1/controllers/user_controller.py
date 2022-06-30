@@ -1,15 +1,21 @@
+
+import shortuuid as shortuuid
+
+from src.apis.v1.utils.user_utils import image_writer
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
+from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
-from src.apis.v1.validators.common_validators import ErrorResponseValidator
+from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import  CreateUserValidator, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
-from ..utils.user_utils import format_data_for_create_user
+from ..utils.user_utils import format_data_for_create_user, format_data_for_update_user_image
+
 class UsersController():
     def __init__(self, db) -> None:
         self.db = db
@@ -50,7 +56,7 @@ class UsersController():
 
         # ## assign sp roles to user
         RolesController(self.db).assign_roles_to_user(user_id=user_id, roles_list=selected_roles_list)
-
+        
         data = UserValidatorOut()
         response = custom_response(status_code=status.HTTP_201_CREATED, data=data)
         return response
@@ -59,7 +65,6 @@ class UsersController():
 
     def get_sps_practice_roles(self, user_email):
 
-        # user_email = "faisal@example.com"
         practice_roles_data, practice_roles_status = UserService(self.db).get_all_sps_practice_roles_db(user_email)
         if practice_roles_status != 200:
             data = ErrorResponseValidator(message=practice_roles_data)
@@ -96,5 +101,20 @@ class UsersController():
 
         user_info_resp = UserInfoValidator(user_info= user_data, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
         response = custom_response(status_code=status.HTTP_201_CREATED, data=user_info_resp)
+        return response
+
+    def update_user_image(self,user_email,data_image):
+        """
+            Update User Image Controller
+        """
+        data_image = format_data_for_update_user_image(data_image)
+        image_url = image_writer(data_image)
+        update_image_data = UserService(self.db).update_user_image_db(user_email=user_email, user_image_url=image_url)
+        data = {
+            "message": update_image_data,
+            "statuscode": status.HTTP_201_CREATED
+        }
+        validated_data = SuccessfulJsonResponseValidator(**data)
+        response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
         

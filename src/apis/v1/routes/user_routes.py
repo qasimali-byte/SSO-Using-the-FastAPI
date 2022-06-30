@@ -1,14 +1,15 @@
+from datetime import datetime
+from typing import List
+from uuid import uuid4
+from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File, Form
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
 from ..helpers.auth import AuthJWT
 from . import oauth2_scheme
-
 from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
-from src.apis.v1.validators.common_validators import ErrorResponseValidator
-
-
+from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 
 router = APIRouter(tags=["User-Management"])
 
@@ -84,4 +85,16 @@ async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT 
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
     resp = UsersController(db).update_user_info(user_email=current_user_email,user_data=updateuser.dict())
+    return resp
+
+
+@router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=200)
+async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+    """
+        This api updates the user information for profile image, uses request.body.file
+    """
+
+    authorize.jwt_required()
+    current_user_email = authorize.get_jwt_subject()
+    resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp

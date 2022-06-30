@@ -3,6 +3,7 @@ __pycache__/
 *.bak
 *.dat
 .vscode/
+/public/assets/
 *.pytest_cache
 *.coverage
 venv/
@@ -10,5 +11,4 @@ envs/
 .env.dev
 .env.prod
 load_env.py
-
-
+.idea
