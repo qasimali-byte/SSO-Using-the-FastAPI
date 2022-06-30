@@ -41,14 +41,16 @@ class UserService():
 
     def update_user_image_db(self,user_email,user_image_url) -> str:
         try:
-            user_info_object = self.db.query(idp_users).filter(idp_users.email == str(user_email)).first()
+            user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
             existing_image_file_name = user_info_object.profile_image.split('/')[-1]
             if existing_image_file_name != 'profile_image.jpg':
                 file_remover(f"./public/assets/{existing_image_file_name}")
-            self.db.query(idp_users).filter(idp_users.email == str(user_email)).update(
+
+            self.db.query(idp_users).filter(idp_users.email == user_email).update(
                 {"profile_image": user_image_url})
             self.db.commit()
             return "profile image updated"
+            
         except Exception as e:
             raise CustomException(message=str(e)+"- error occured in user service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

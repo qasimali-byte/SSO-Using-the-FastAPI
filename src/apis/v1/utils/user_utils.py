@@ -46,9 +46,24 @@ def image_writer(data_image):
     with open(f"./public/assets/{resource_name}", 'wb') as f:
         try:
             f.write(image_data)
-        except:
-            print("===> wrong object formate")
-            f.write(data_image)
-        finally:
-            print("===> could not write file")
+        except Exception as e:
+            raise CustomException(message="There was an error,Error in writing image - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     return Settings().BASE_URL + "/image/" + resource_name
+
+
+def format_data_for_update_user_image(image) -> dict:
+    """
+        Format Data For Update User Controller
+    """
+
+    try:
+        data_image = {}
+        data_image['file'] = image.file.read()
+        data_image['name'] = image.filename
+        data_image['type'] = image.content_type
+        return data_image
+
+    except Exception as e:
+        raise CustomException(message= f"There was an error uploading the file(s),{e} - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+

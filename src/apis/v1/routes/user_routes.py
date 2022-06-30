@@ -88,19 +88,13 @@ async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT 
     return resp
 
 
-@router.put("/user/profile_image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=200)
-async def update_user_image(request:Request,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+@router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=200)
+async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image, uses request.body.file
     """
 
-    try:
-        # data_image = await request.json()
-        data_image = await request.body.get("image")
-    except Exception as e:
-        return {"message": f"There was an error uploading the file(s),{e}"}
-
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
-    resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=data_image)
+    resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp
