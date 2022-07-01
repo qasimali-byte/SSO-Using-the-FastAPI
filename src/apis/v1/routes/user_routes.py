@@ -98,3 +98,11 @@ async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = De
     current_user_email = authorize.get_jwt_subject()
     resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp
+
+@router.get("/user/{user_id}/service-providers/practices/roles/", summary="Get User Information with practices and roles")
+async def get_user_practices_roles_by_id(user_id:int, db: Session = Depends(get_db)):
+    """
+        This api get the user information for profile
+    """
+    resp = UsersController(db).get_user_practices_roles_by_id(user_id=user_id)
+    return resp

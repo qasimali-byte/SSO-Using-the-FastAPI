@@ -1,6 +1,3 @@
-
-import shortuuid as shortuuid
-
 from src.apis.v1.utils.user_utils import image_writer
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
@@ -66,6 +63,26 @@ class UsersController():
     def get_sps_practice_roles(self, user_email):
 
         practice_roles_data, practice_roles_status = UserService(self.db).get_all_sps_practice_roles_db(user_email)
+        if practice_roles_status != 200:
+            data = ErrorResponseValidator(message=practice_roles_data)
+            response = custom_response(status_code=practice_roles_status, data=data)
+            return response
+
+        try:
+            data = UserSPPracticeRoleValidatorOut(sp_practice_roles=practice_roles_data)
+        except Exception as e:
+            data = ErrorResponseValidator(message=str(e))
+            response = custom_response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, data=data)
+            return response
+        response = custom_response(status_code=practice_roles_status, data=data)
+        return response
+
+    def get_user_practices_roles_by_id(self, user_id:int):
+        """
+            Get User Practices And Selected Roles By ID
+         """
+        user_email = "umair@gmail.com"
+        practice_roles_data, practice_roles_status = UserService(self.db).get_all_sps_practice_roles_db(user_id)
         if practice_roles_status != 200:
             data = ErrorResponseValidator(message=practice_roles_data)
             response = custom_response(status_code=practice_roles_status, data=data)
