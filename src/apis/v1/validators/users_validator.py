@@ -1,5 +1,5 @@
-from pydantic import BaseModel, typing, Field
-from src.apis.v1.models import user_idp_sp_apps_model
+from pydantic import BaseModel, Field, typing
+from src.apis.v1.validators.common_validators import MetaDataValidator
 
 
 class UsersValidator(BaseModel):
@@ -12,6 +12,7 @@ class UsersValidator(BaseModel):
 
 
 class UsersValidatorOut(BaseModel):
+    metadata: MetaDataValidator = Field(alias="_metadata")
     users_data: typing.List[UsersValidator]
     message: str
     status_code: int
