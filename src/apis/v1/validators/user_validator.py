@@ -20,9 +20,10 @@ class UserAppsValidatorIn(BaseModel):
     id: int
     practices: typing.List[IdsList] = []
     role: UserRolesValidatorIn
-class InternalUserValidator(BaseModel):
+
+class CreateInternalExternalUserValidatorIn(BaseModel):
     """
-        Internal User Validator
+        Create User Validator
     """
     firstname: str 
     lastname: str 
@@ -134,7 +135,7 @@ class CreateUserValidator(BaseModel):
         password_hash = create_password_hash("admin")
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
-        profile_image = "http://18.134.217.103/image/profile_image.jpg"
+        profile_image = "image/profile_image.jpg"
         created_date = datetime.now(),
         updated_date = datetime.now(),
         last_login_date = datetime.now()

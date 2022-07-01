@@ -1,3 +1,4 @@
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.services.roles_service import RolesService
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
@@ -57,9 +58,8 @@ class RolesController():
             try:
                 selected_role_id.append(tuple([user_id,self.get_selected_role_id(app_id=role[0], role_id=role[1]),role[2]]))
             except Exception as e:
-                print(str(e))
-                return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+                raise CustomException(message=str(e) + "error occured in roles controller", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        roles_data, roles_status = RolesService(self.db).assign_roles_user_db(selected_data= selected_role_id)
-        return roles_data, roles_status
+        roles_data = RolesService(self.db).assign_roles_user_db(selected_data= selected_role_id)
+        return roles_data
 

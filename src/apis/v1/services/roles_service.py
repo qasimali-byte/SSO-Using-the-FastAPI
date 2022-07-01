@@ -1,4 +1,5 @@
 from sqlalchemy import and_
+from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
@@ -28,10 +29,10 @@ class RolesService():
 
             self.db.bulk_save_objects(objects)
             self.db.commit()
-
-            return "assigned roles to user", status.HTTP_200_OK
+            return "assigned roles to user"
+            
         except Exception as e:
-            return str(e), status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"error occured in roles service")
 
     def get_internal_roles_db(self):
         try:
@@ -76,21 +77,24 @@ class RolesService():
             return roles["roles"]
 
     def get_user_selected_role(self, sp_app_name, user_id):
-        user_selected_roles = []
-        user_selected_role_object = self.db.query(idp_users,roles)\
-        .filter(idp_users.id == user_id) \
-        .join(idp_user_apps_roles, idp_user_apps_roles.idp_users_id == idp_users.id) \
-        .join(sp_apps_role, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id) \
-        .join(roles, roles.id == sp_apps_role.roles_id) \
-        .all()
+        try:
+            user_selected_roles = []
+            user_selected_role_object = self.db.query(idp_users,roles)\
+            .filter(idp_users.id == user_id) \
+            .join(idp_user_apps_roles, idp_user_apps_roles.idp_users_id == idp_users.id) \
+            .join(sp_apps_role, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id) \
+            .join(roles, roles.id == sp_apps_role.roles_id) \
+            .all()
 
-        for users_values,roles_values in user_selected_role_object:
-            user_selected_roles.append(roles_values.name)
+            for users_values,roles_values in user_selected_role_object:
+                user_selected_roles.append(roles_values.name)
 
-        if sp_app_name == "ez-login":
-            return user_selected_roles[0]
-        
-        return user_selected_roles
+            if sp_app_name == "ez-login":
+                return user_selected_roles[0]
+            
+            return user_selected_roles
+        except Exception as e:
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+" - error occured in roles service")
 
 
         

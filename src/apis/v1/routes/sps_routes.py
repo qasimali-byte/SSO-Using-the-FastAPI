@@ -5,7 +5,7 @@ from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
-from fastapi_auth.auth import AuthJWT
+from ..helpers.auth import AuthJWT
 from . import oauth2_scheme
 
 router = APIRouter(tags=["Service Providers"])
