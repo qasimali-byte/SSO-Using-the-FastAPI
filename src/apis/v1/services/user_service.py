@@ -30,6 +30,16 @@ class UserService():
         except Exception as e:
             raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def get_user_info_db_by_id(self, user_id):
+        try:
+            user_info_object = self.db.query(idp_users).options(Load(idp_users) \
+            .load_only("id","first_name","last_name","email")).filter(idp_users.id == user_id).scalar()
+            return user_info_object
+
+        except Exception as e:
+            raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
     def update_user_info_db(self, user_data) -> str:
         try:
             self.db.query(idp_users).filter(idp_users.email == user_data['email']).update(user_data)

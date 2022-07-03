@@ -32,15 +32,6 @@ class CreateInternalExternalUserValidatorIn(BaseModel):
     dr_iq_gender_id: typing.Optional[int] = None
     apps: typing.List[UserAppsValidatorIn]
 
-    # @validator('apps_allowed')
-    # def validate_apps_allowed(cls, v,  **kwargs):
-    #     apps = kwargs['field'].default
-    #     for iteration in v:
-    #         if iteration not in apps:
-    #             raise ValueError(f'Unexpected value only apps allowed are {apps}')
-    #     return v
-
-
 class UserValidatorOut(BaseModel):
     statuscode: int = 201
     message: str = "successfully created user"
@@ -68,14 +59,21 @@ class SPPracticeRoleValidator(BaseModel):
     gender: typing.Optional[typing.List[ListGenderValidator]] = []
     sp_app_name: str
     sp_app_image: str
-    practices: SPRegionsValidator
+    practices: SPRegionsValidator = []
     roles: typing.Optional[SPRolesValidator]
-
+    is_selected: typing.Optional[bool]
+    class Config:
+        validate_assignment = True
 
 class UserSPPracticeRoleValidatorOut(BaseModel):
     sp_practice_roles: typing.List['SPPracticeRoleValidator']
     message: str = "successfully fetched sp practice roles"
     statuscode: int = 200
+class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
 
 class PracticesRolesId(BaseModel):
     practice_id: int

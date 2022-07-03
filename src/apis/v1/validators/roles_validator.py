@@ -66,10 +66,11 @@ class RolesValidator(BaseModel):
 class SubRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str 
-
+    is_selected: Optional[bool]
 class ListRolesValidatorWithOutOrm(BaseModel):
     id: int
-    name: str 
+    name: str
+    is_selected: Optional[bool]
     sub_roles : Optional[List[SubRolesValidatorWithOutOrm]] = []
 
 class RolesValidatorWithOutOrm(BaseModel):

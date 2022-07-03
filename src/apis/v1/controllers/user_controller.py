@@ -1,8 +1,8 @@
+from src.apis.v1.services.type_of_user_service import TypeOfUserService
 from src.apis.v1.utils.user_utils import image_writer
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
-from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.controllers.sps_controller import SPSController
@@ -10,9 +10,8 @@ from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
-from src.apis.v1.validators.user_validator import  CreateUserValidator, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+from src.apis.v1.validators.user_validator import  CreateUserValidator, GetUsersValidatorUpdateApps, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
 from ..utils.user_utils import format_data_for_create_user, format_data_for_update_user_image
-
 class UsersController():
     def __init__(self, db) -> None:
         self.db = db
@@ -70,6 +69,7 @@ class UsersController():
 
         try:
             data = UserSPPracticeRoleValidatorOut(sp_practice_roles=practice_roles_data)
+            data = data.dict(exclude_none=True)
         except Exception as e:
             data = ErrorResponseValidator(message=str(e))
             response = custom_response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, data=data)
@@ -77,24 +77,31 @@ class UsersController():
         response = custom_response(status_code=practice_roles_status, data=data)
         return response
 
-    def get_user_practices_roles_by_id(self, user_id:int):
+
+
+    def get_user_practices_roles_by_id(self, user_email:str, user_id:int):
         """
             Get User Practices And Selected Roles By ID
          """
-        user_email = "umair@gmail.com"
-        practice_roles_data, practice_roles_status = UserService(self.db).get_all_sps_practice_roles_db(user_id)
-        if practice_roles_status != 200:
-            data = ErrorResponseValidator(message=practice_roles_data)
-            response = custom_response(status_code=practice_roles_status, data=data)
+        selected_user_id = user_id
+        user_service_object = UserService(self.db) 
+        user_info = user_service_object.get_user_info_db(user_email)  
+        selected_user_info = user_service_object.get_user_info_db_by_id(user_id)
+        if selected_user_info is None:
+            data = ErrorResponseValidator(message="User Not Found")
+            response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=data)
             return response
-
-        try:
-            data = UserSPPracticeRoleValidatorOut(sp_practice_roles=practice_roles_data)
-        except Exception as e:
-            data = ErrorResponseValidator(message=str(e))
-            response = custom_response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, data=data)
-            return response
-        response = custom_response(status_code=practice_roles_status, data=data)
+        
+        selected_email = selected_user_info.email
+        allowed_apps = SPSController(self.db).get_allowed_apps_by_userid(user_email, selected_email, user_info.id, selected_user_id)
+        firstname = selected_user_info.first_name
+        lastname = selected_user_info.last_name
+        email = selected_user_info.email
+        type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
+        type_of_user = type_of_user['name']
+        data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname, 
+        email=email, type_of_user=type_of_user, sp_practice_roles=allowed_apps)
+        response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
     def get_user_info(self, user_email):
