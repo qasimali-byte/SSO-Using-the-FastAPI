@@ -1,6 +1,5 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, validator, typing, Field
-from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.validators.practices_validator import SPRegionsValidator
 from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
 from src.apis.v1.validators.gender_validator import ListGenderValidator
@@ -31,15 +30,7 @@ class CreateInternalExternalUserValidatorIn(BaseModel):
     type_of_user: typing.Literal['internal','external']
     dr_iq_gender_id: typing.Optional[int] = None
     apps: typing.List[UserAppsValidatorIn]
-
-    # @validator('apps_allowed')
-    # def validate_apps_allowed(cls, v,  **kwargs):
-    #     apps = kwargs['field'].default
-    #     for iteration in v:
-    #         if iteration not in apps:
-    #             raise ValueError(f'Unexpected value only apps allowed are {apps}')
-    #     return v
-
+    is_active: typing.Optional[bool] = True
 
 class UserValidatorOut(BaseModel):
     statuscode: int = 201
@@ -68,14 +59,24 @@ class SPPracticeRoleValidator(BaseModel):
     gender: typing.Optional[typing.List[ListGenderValidator]] = []
     sp_app_name: str
     sp_app_image: str
-    practices: SPRegionsValidator
+    practices: SPRegionsValidator = []
     roles: typing.Optional[SPRolesValidator]
-
+    is_selected: typing.Optional[bool] = Field(alias='Selected')
+    
+    class Config:
+        allow_population_by_field_name = True
+        validate_assignment = True
 
 class UserSPPracticeRoleValidatorOut(BaseModel):
     sp_practice_roles: typing.List['SPPracticeRoleValidator']
     message: str = "successfully fetched sp practice roles"
     statuscode: int = 200
+
+class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
 
 class PracticesRolesId(BaseModel):
     practice_id: int
@@ -135,7 +136,7 @@ class CreateUserValidator(BaseModel):
         password_hash = create_password_hash("admin")
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
-        profile_image = "http://18.134.217.103/image/profile_image.jpg"
+        profile_image = "image/profile_image.jpg"
         created_date = datetime.now(),
         updated_date = datetime.now(),
         last_login_date = datetime.now()
@@ -151,3 +152,11 @@ class UserDeleteValidatorOut(BaseModel):
     status_code: int
     class Config:
         orm_mode = True 
+class UpdateUserValidatorDataClass(BaseModel):
+    first_name: str = Field(alias="firstname")
+    last_name: str = Field(alias="lastname")
+    username : str
+    updated_date : datetime
+    user_type_id: int
+    dr_iq_gender_id: typing.Optional[int]
+    is_active: bool = True

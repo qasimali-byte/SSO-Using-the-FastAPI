@@ -7,3 +7,9 @@ class PracticesController:
 
     def assign_practices_to_user(self, **kwargs):
         return PracticesService(self.db).assign_practices_user_db(**kwargs)
+
+    def get_allowed_practices_by_userid(self, app_id, user_id, selected_id):
+
+        practices_object = PracticesService(self.db)
+        total_practices_allowed = practices_object.get_selected_practices_db_by_id(app_id,user_id, selected_id)
+        return total_practices_allowed

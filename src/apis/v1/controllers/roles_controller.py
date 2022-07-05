@@ -63,3 +63,8 @@ class RolesController():
         roles_data = RolesService(self.db).assign_roles_user_db(selected_data= selected_role_id)
         return roles_data
 
+    def get_allowed_roles_by_userid(self, app_id, user_id, selected_id):
+
+        roles_object = RolesService(self.db)
+        selected_roles_list = roles_object.get_selected_roles_db_by_id(app_id, user_id, selected_id)
+        return selected_roles_list
