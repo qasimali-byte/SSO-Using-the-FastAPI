@@ -147,6 +147,11 @@ class CreateUserValidator(BaseModel):
         class Config:
             arbitrary_types_allowed = True
 
+class UserDeleteValidatorOut(BaseModel):
+    message: str
+    status_code: int
+    class Config:
+        orm_mode = True 
 class UpdateUserValidatorDataClass(BaseModel):
     first_name: str = Field(alias="firstname")
     last_name: str = Field(alias="lastname")

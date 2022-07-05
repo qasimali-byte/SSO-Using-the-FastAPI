@@ -1,6 +1,6 @@
 from datetime import datetime
 from ..helpers.custom_exceptions import CustomException
-from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
+from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from sqlalchemy import desc

@@ -13,6 +13,7 @@ class UsersController():
         self.db = db
         self._metadata = {}
         
+
     def get_users(self, user_email:str, page_limit:int, page_offset:int) -> dict:
         """
             Get Users according to the roles of user email
