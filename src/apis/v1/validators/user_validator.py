@@ -61,7 +61,7 @@ class SPPracticeRoleValidator(BaseModel):
     sp_app_image: str
     practices: SPRegionsValidator = []
     roles: typing.Optional[SPRolesValidator]
-    is_selected: typing.Optional[bool] = Field(alias='Selected')
+    is_selected: typing.Optional[bool] = Field(alias='selected')
     
     class Config:
         allow_population_by_field_name = True
