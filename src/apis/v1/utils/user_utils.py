@@ -34,7 +34,7 @@ def format_data_for_create_user(user_data) -> tuple:
 def get_encrypted_text(text):
     try:
         if text:
-            key = Settings().fernet_secret_key
+            key = Settings().FERNET_SECRET_KEY
             cipher_suite = Fernet(key)
             encoded_text = cipher_suite.encrypt(text)
             return encoded_text
