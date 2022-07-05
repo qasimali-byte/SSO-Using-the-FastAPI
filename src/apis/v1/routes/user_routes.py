@@ -117,5 +117,3 @@ async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = De
 async def delete_user(user_id:int,db: Session = Depends(get_db)):
     user_to_delete = UserController(db).delete_user(user_id)
     return user_to_delete
-    resp = UserController(db).update_user_image(user_email=current_user_email,data_image=image)
-    return resp
