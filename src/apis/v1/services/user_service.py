@@ -279,7 +279,6 @@ class UserService():
                 return "User not found", status.HTTP_404_NOT_FOUND
             
         except Exception as e:
-            print(e)
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_service.py")
 
 

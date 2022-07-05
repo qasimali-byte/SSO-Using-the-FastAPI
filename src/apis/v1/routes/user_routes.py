@@ -101,7 +101,7 @@ async def update_user_practices_roles_by_id(user_id:int,user_validator:CreateInt
     resp = UserController(db).update_user_practices_roles_by_id(user_id=user_id,user_data=user_validator.dict())
     return resp
 
-@router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=200)
+@router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=201)
 async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image, uses request.body.file
@@ -109,11 +109,15 @@ async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = De
 
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
-    resp = UserController(db).update_user_info(user_email=current_user_email,user_data=updateuser.dict())
+    resp = UserController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp
 
 
 @router.delete("/user/{user_id}", summary="Delete a user",responses={200:{"description":"Delete a user and all associated applications and it's rights"}})
-async def delete_user(user_id:int,db: Session = Depends(get_db)):
+async def delete_user(user_id:int,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+    """
+        This api deletes the user app, practices and roles
+    """
+    authorize.jwt_required()
     user_to_delete = UserController(db).delete_user(user_id)
     return user_to_delete
