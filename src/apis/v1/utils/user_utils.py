@@ -3,6 +3,7 @@ import shortuuid
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from fastapi import status
+from cryptography.fernet import Fernet
 
 def format_data_for_create_user(user_data) -> tuple:
     """
@@ -28,6 +29,31 @@ def format_data_for_create_user(user_data) -> tuple:
         selected_roles_list.append(selected_roles_tuple)
 
     return apps_ids_list, practices_ids_list, selected_roles_list
+
+
+def get_encrypted_text(text):
+    try:
+        if text:
+            key = Settings().fernet_secret_key
+            cipher_suite = Fernet(key)
+            encoded_text = cipher_suite.encrypt(text)
+            return encoded_text
+            decoded_text = cipher_suite.decrypt(encoded_text)
+    except Exception as e:
+        print(str(e))
+        return None
+
+
+def get_decrypted_text(text):
+    try:
+        if text:
+            key = Settings().fernet_secret_key
+            cipher_suite = Fernet(key)
+            decoded_text = cipher_suite.decrypt(text)
+            return decoded_text
+    except Exception as e:
+        print(str(e))
+        return None
 
 
 def image_writer(data_image):

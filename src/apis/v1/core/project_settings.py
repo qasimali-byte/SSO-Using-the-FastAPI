@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB")
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
     authjwt_secret_key = os.environ.get("SECRET_KEY")
+    fernet_secret_key = os.environ.get("FERNET_SECRET_KEY")
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access","refresh"}
     authjwt_access_token_expires: timedelta = timedelta(minutes=3)

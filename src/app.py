@@ -1,4 +1,6 @@
 from sys import prefix
+
+from celery import Celery
 from fastapi import FastAPI, Request
 from src.apis.v1.routes import sps_routes, idp_routes,auth_routes,user_routes,\
      frontend_routes,staticfiles_routes, roles_routes, practices_routes, users_routes

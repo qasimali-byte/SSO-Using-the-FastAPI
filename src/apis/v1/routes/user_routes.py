@@ -3,6 +3,8 @@ from typing import List
 from uuid import uuid4
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File, Form
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response
+from starlette import status
+
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
@@ -10,6 +12,7 @@ from ..helpers.auth import AuthJWT
 from . import oauth2_scheme
 from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
+from ..helpers.customize_response import custom_response
 
 router = APIRouter(tags=["User-Management"])
 
@@ -97,4 +100,13 @@ async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = De
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
     resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
+    return resp
+
+@router.get("/user/email_test")
+async def get_user_info():
+    """
+        This api get the user information for profile
+    """
+    UsersController.send_email_to_user(1,"saabnaqi@gmail.com")
+    resp = custom_response(status_code=status.HTTP_200_OK)
     return resp
