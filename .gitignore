@@ -7,8 +7,8 @@ __pycache__/
 *.coverage
 venv/
 envs/
-.env.dev
-.env.prod
-load_env.py
+# .env.dev
+# .env.prod
+# load_env.py
 
 
