@@ -101,6 +101,9 @@ class UsersController():
         return response
     
     def delete_user(self,user_id):
+        """
+            this function will delete the user
+        """
         try:
             message,status_code=UserService(self.db).delete_users_info_db(user_id)
             UserDeleteValidatorOut(message=message,status_code=status_code)
