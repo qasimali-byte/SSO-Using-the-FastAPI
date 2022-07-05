@@ -16,5 +16,6 @@ class UsersController():
             response = custom_response(data=data,status_code=status.HTTP_200_OK)
             return response
         except Exception as e:
-            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_controller.py")
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_controller.py")
+
         

@@ -2,7 +2,7 @@ from . import Base
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
-from src.apis.v1.models.idp_users_model import idp_users
+# from src.apis.v1.models.idp_users_model import idp_users
 
 
 class SPAPPS(Base):

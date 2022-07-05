@@ -11,3 +11,4 @@ router = APIRouter(tags=["Users Management"])
 async def get_users(db: Session = Depends(get_db)):
     db_users = UsersController(db).get_users()
     return db_users
+

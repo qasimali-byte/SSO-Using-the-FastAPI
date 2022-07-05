@@ -85,3 +85,9 @@ async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT 
     current_user_email = authorize.get_jwt_subject()
     resp = UsersController(db).update_user_info(user_email=current_user_email,user_data=updateuser.dict())
     return resp
+
+
+@router.delete("/user/{user_id}", summary="Delete a user",responses={200:{"description":"Delete a user and all associated applications and it's rights"}})
+async def delete_user(user_id:int,db: Session = Depends(get_db)):
+    user_to_delete = UsersController(db).delete_user(user_id)
+    return user_to_delete

@@ -30,4 +30,3 @@ class UsersService():
             return user_data
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in use_service.py")
-

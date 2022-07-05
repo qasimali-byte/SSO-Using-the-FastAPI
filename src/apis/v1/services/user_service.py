@@ -1,3 +1,5 @@
+from src.apis.v1.models import user_idp_sp_apps_model
+from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
@@ -11,8 +13,10 @@ from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from fastapi import status
 from sqlalchemy.orm import aliased, load_only,Load
-
 from src.apis.v1.validators.user_validator import GetUserInfoValidator, UserInfoValidator
+
+
+
 class UserService():
 
     def __init__(self, db):
@@ -228,3 +232,21 @@ class UserService():
 
         self.db.bulk_save_objects(objects)
         self.db.commit()
+    
+    def delete_users_info_db(self,users_id):
+        try:
+            user=self.db.query(idp_users).filter(idp_users.id==users_id).one_or_none()
+            if user is not None:
+                self.db.query(idp_sp).filter(idp_sp.idp_users_id==users_id).delete() # this will return the list
+                self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
+                self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
+                self.db.query(idp_users).filter(idp_users.id==users_id).delete()
+                self.db.commit()
+                return "User deleted successfully", status.HTTP_200_OK
+            else:
+                return "User not found", status.HTTP_404_NOT_FOUND
+            
+        except Exception as e:
+            print(e)
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_service.py")
+

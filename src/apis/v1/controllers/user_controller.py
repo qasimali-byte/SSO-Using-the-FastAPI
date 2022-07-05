@@ -1,6 +1,7 @@
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
+from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.controllers.sps_controller import SPSController
@@ -8,7 +9,8 @@ from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
-from src.apis.v1.validators.user_validator import  CreateUserValidator, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+from src.apis.v1.validators.user_validator import  CreateUserValidator, UserDeleteValidatorOut, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut
+from src.apis.v1.validators.users_validator import UsersValidatorOut
 from ..utils.user_utils import format_data_for_create_user
 class UsersController():
     def __init__(self, db) -> None:
@@ -97,4 +99,12 @@ class UsersController():
         user_info_resp = UserInfoValidator(user_info= user_data, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
         response = custom_response(status_code=status.HTTP_201_CREATED, data=user_info_resp)
         return response
-        
+    
+    def delete_user(self,user_id):
+        try:
+            message,status_code=UserService(self.db).delete_users_info_db(user_id)
+            UserDeleteValidatorOut(message=message,status_code=status_code)
+            response = custom_response(data=message,status_code=status_code)
+            return response
+        except Exception as e:
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_controller.py")
