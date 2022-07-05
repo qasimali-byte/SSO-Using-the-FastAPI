@@ -1,4 +1,3 @@
-from email import message
 from pydantic import BaseModel, Field
 from pydantic.typing import List,Dict, Optional, Literal
 
@@ -20,23 +19,6 @@ class ListSPRolesValidator(BaseModel):
     id: int
     name: str
 
-# class SPRolesValidator(BaseModel):
-#     """
-#         List SP Roles Validator
-#     """
-#     __root__: List[ListSPRolesValidator]
-
-# class ListRolesValidator(BaseModel):
-#     id: int
-#     name: str = Field(alias='label')
-
-#     class Config:
-#         orm_mode = True
-
-# class RolesValidator(BaseModel):
-#     id: int
-#     name: str
-#     roles: Optional[List[ListRolesValidator]] = []
 
 
 class ListSubRolesValidator(BaseModel):
@@ -66,13 +48,19 @@ class RolesValidator(BaseModel):
 class SubRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str 
-    is_selected: Optional[bool]
+    is_selected: Optional[bool] = Field(alias='isSelected')
+
+    class Config:
+        allow_population_by_field_name = True
 class ListRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str
-    is_selected: Optional[bool]
+    is_selected: Optional[bool] = Field(alias='isSelected')
     sub_roles : Optional[List[SubRolesValidatorWithOutOrm]] = []
 
+    class Config:
+        allow_population_by_field_name = True
+        
 class RolesValidatorWithOutOrm(BaseModel):
     roles: Optional[List[ListRolesValidatorWithOutOrm]] = []
 
