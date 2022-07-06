@@ -123,8 +123,5 @@ class SPSController():
             return apps_list
 
         for apps_object in total_allowed_apps:
-            thread = threading.Thread(target=self.get_practices_roles_by_apps, args=(apps_list, apps_object, selected_apps, user_id, selected_id))
-            thread.start()
-
-        thread.join()
+            self.get_practices_roles_by_apps(apps_list,apps_object, selected_apps, user_id, selected_id)
         return apps_list

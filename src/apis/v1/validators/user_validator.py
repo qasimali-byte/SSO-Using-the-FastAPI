@@ -77,6 +77,7 @@ class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
     lastname: str 
     email: EmailStr
     type_of_user: typing.Literal['internal','external']
+    is_active: typing.Optional[bool] 
 
 class PracticesRolesId(BaseModel):
     practice_id: int
