@@ -111,7 +111,7 @@ class UserController():
         type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
         type_of_user = type_of_user['name']
         data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname, 
-        email=selected_email, type_of_user=type_of_user, sp_practice_roles=allowed_apps)
+        email=selected_email, type_of_user=type_of_user, sp_practice_roles=allowed_apps, is_active=selected_user_info.is_active)
         response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
