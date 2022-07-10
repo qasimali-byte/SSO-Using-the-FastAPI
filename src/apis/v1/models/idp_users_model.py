@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
@@ -34,4 +36,6 @@ class idp_users(Base):
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))
     dr_iq_gender_id = Column(Integer, ForeignKey("gender.id"))
     sp_apps_role = relationship("sp_apps_role", secondary="idp_user_apps_roles", back_populates='idp_users')
+    verification_id = Column(String(255), nullable=True,unique=False,default="")
+    verification_time_tag = Column(DateTime, nullable=True, unique=False,default=datetime.datetime.utcnow())
     # SPAPPS = relationship("SPAPPS", secondary="idp_sp", back_populates='idp_users')

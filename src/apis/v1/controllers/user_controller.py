@@ -2,7 +2,7 @@ import logging
 
 import shortuuid as shortuuid
 
-from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text
+from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text, get_decrypted_text
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -12,12 +12,13 @@ from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
-from src.apis.v1.workers.worker import create_task
+from src.apis.v1.workers.worker import email_sender
 from fastapi import status
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import CreateUserValidator, UserInfoValidator, \
     UserSPPracticeRoleValidatorOut, UserValidatorOut
 from ..utils.user_utils import format_data_for_create_user, format_data_for_update_user_image
+from datetime import datetime as dt
 
 
 class UsersController():
@@ -65,17 +66,10 @@ class UsersController():
         RolesController(self.db).assign_roles_to_user(user_id=user_id, roles_list=selected_roles_list)
 
         data = UserValidatorOut()
-        self.send_email_to_user(user_id=user_id, user_email=user_data['email'])
+        # generate_url(user_created_data)
+        self.send_email_to_user(user_data=user_created_data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=data)
         return response
-
-    def send_email_to_user(self, user_id, user_email):
-        encrypted_id = get_encrypted_text(user_id)
-        task = create_task.delay(encrypted_user_id=encrypted_id, user_email=user_email)
-        self.log.info(f"Task created: task={task.id},user_id={user_id}, encrypted_id={encrypted_id}, \
-        user_email={user_email}")
-        print(f"Task created: task={task.id},user_id={user_id}, encrypted_id={encrypted_id}, user_email={user_email}")
-
 
     def get_sps_practice_roles(self, user_email):
 
@@ -132,3 +126,24 @@ class UsersController():
         validated_data = SuccessfulJsonResponseValidator(**data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
+
+    def generate_encrypted_url(user_date):
+        unique_id = shortuuid.ShortUUID().random(length=8)
+        url_key = get_encrypted_text(user_date.id) + unique_id + get_encrypted_text(dt.now())
+        url = Settings().BASE_URL + "/api/v1/user/verify_email?key=" + url_key
+        return url
+
+    def send_email_to_user(self, user_date):
+        user_verification_url = self.generate_encrypted_url(user_date)
+        user_email = user_date["email"]
+        task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+        # self.log.info(f"Task created: task={task.id},user_id={user_id}, encrypted_id={encrypted_id}, \
+        # user_email={user_email}")
+        print(f"Task created: task={task.id}, user_verification_url={user_verification_url}, user_email={user_email}")
+
+    def verify_user_through_email(self, user_key):
+        user_id = get_decrypted_text(user_key[:64])
+        unique_id = user_key[64:74]
+        time_tag = get_decrypted_text(user_key[74:])
+        # here we will implement the logic for key expiry for time_tag.
+        verification_response = UserService(self.db).verify_user_email_db(user_id=user_id, unique_id=unique_id)

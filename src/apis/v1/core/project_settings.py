@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     REDIS_HOST_URL = os.environ.get("REDIS_HOST_URL")
     REDIS_PORT = os.environ.get("REDIS_PORT")
     REDIS_DB = os.environ.get("REDIS_DB")
+    EMAIL_SUBJECT = os.environ.get("EMAIL_SUBJECT")
+    EMAIL_SENDER = os.environ.get("EMAIL_SENDER")
+    EMAIL_SENDER_PASSWORD = os.environ.get("EMAIL_SENDER_PASSWORD")
+
+
 
 def settings():
     return Settings()

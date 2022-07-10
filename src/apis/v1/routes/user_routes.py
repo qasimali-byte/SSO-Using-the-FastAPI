@@ -1,4 +1,9 @@
+import smtplib
 from datetime import datetime
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import List
 from uuid import uuid4
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File, Form
@@ -102,11 +107,23 @@ async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = De
     resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp
 
+@router.get("/user/verify_email")
+async def verify_user_email(user_key: str,db: Session = Depends(get_db)):
+    """
+        This api verifies the url hit by the user through emai.
+    """
+    resp = UsersController(db).verify_user_through_email(user_key=user_key)
+    return resp
+
+
+
+
 @router.get("/user/email_test")
-async def get_user_info():
+async def get_email_test():
     """
         This api get the user information for profile
     """
-    UsersController.send_email_to_user(1,"saabnaqi@gmail.com")
-    resp = custom_response(status_code=status.HTTP_200_OK)
+    from src.apis.v1.workers.worker import email_sender
+    task = email_sender.delay(user_verification_url="user_verification_url", user_email="asadbukharee@gmail.com")
+    resp = custom_response(status_code=status.HTTP_200_OK,data={})
     return resp
