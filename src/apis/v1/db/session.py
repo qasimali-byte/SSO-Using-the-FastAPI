@@ -9,7 +9,7 @@ from typing import Generator
 
 # For postgrSQL database
 SQLALCHEMY_DATABASE_URL = settings_by_env.DATABASE_URL
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine("postgres://rzgkwrpyrytfqy:5e54fb5402d0bee5b63b6914ed99fad2ec10c1a6901f3a92bc239b5bda4f5c20@ec2-3-219-229-143.compute-1.amazonaws.com:5432/d32v36qske75hi")
 
 # For SQlLite Database
 # By default SQLite will only allow one thread to communicate.
