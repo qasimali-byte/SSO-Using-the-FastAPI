@@ -12,3 +12,4 @@ venv/
 # load_env.py
 
 .idea
+local_test.py
