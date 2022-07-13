@@ -132,12 +132,12 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     session = uuid4()
     # store the cookie in db
     IDPController(db).store_frontend_saml(session,SAMLRequest)
-    # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
     host_port = str(host) +":"+ str(port)
     # logout the user from frontend as well
     
-    response = RedirectResponse(url="http://{}/sign-in".format("localhost:3001"))
+    # response = RedirectResponse(url="http://{}/sign-in".format("localhost:8088"))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     return response

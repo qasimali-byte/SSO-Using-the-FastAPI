@@ -40,6 +40,7 @@ class LoginProcessView():
 
     def get_user(self, email,password, db: Session):
         user = db.query(User).filter(User.email == email).first()
+        print("====================User",user.email)
         if user :
             if user.password == password:
                 return user
