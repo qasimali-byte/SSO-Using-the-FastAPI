@@ -27,7 +27,7 @@ router = APIRouter(tags=["Authentication"])
 
 
 # Setup our redis connection for storing the denylist tokens
-redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=Settings().REDIS_HOST_PORT, db=0, decode_responses=True)
+redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=Settings().REDIS_HOST_PORT, db=0, decode_responses=True,password=Settings().REDIS_HOST_PASSWORD)
 
 
 @AuthJWT.load_config
