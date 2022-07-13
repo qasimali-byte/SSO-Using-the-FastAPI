@@ -14,37 +14,6 @@ class UsersService():
     def __init__(self, db):
         self.db = db
 
-    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int) -> tuple:
-        try:
-            count_records = self.db.query(idp_users.id).filter(idp_users.user_type_id == user_type_id).count()
-            subquery = self.db.query(idp_users.id).filter(idp_users.user_type_id == user_type_id).order_by(idp_users.id.asc()).limit(page_limit).offset(page_offset*page_limit).subquery()
-            users_info_object = self.db.query(idp_users,SPAPPS).order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))) \
-            .join(idp_sp, idp_users.id == idp_sp.idp_users_id,isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id,isouter=True).all()
-
-            user_data = {}
-            for user, apps in users_info_object:
-                if user_data.get(user.id) is None:
-                    user_data[user.id] = dict({
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "email": user.email,
-                        "id": user.id,
-                        "products":[]
-                        })
-                    if apps is not None:
-                        user_data[user.id]["products"].append(apps.name)
-                else:
-                    if apps is not None:
-                        user_data[user.id]["products"].append(apps.name)
-
-            
-            user_data = [values for values in user_data.values()]
-            return user_data, count_records
-
-        except Exception as e:
-            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")
-
-
     def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int) -> tuple:
         try:
             if user_role == "super-admin":

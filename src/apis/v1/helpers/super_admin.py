@@ -6,7 +6,6 @@ from uuid import UUID, uuid4
 from datetime import datetime
 
 from src.apis.v1.utils.auth_utils import create_password_hash
-from src.apis.v1.models.user_idp_sp_apps_model import user_idp_sp_app
 def create_super_admin(db: Session):
     
 

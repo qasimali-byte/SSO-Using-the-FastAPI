@@ -1,4 +1,8 @@
 from sqlalchemy import and_
+from src.apis.v1.models.driq_practices_role_model import driq_practices_role
+
+from src.apis.v1.models.sp_apps_role_driq_practice_role_model import sp_apps_role_driq_practice_role
+from src.apis.v1.utils.roles_utils import format_roles_with_selected_roles
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.sp_apps_model import SPAPPS
@@ -96,5 +100,36 @@ class RolesService():
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+" - error occured in roles service")
 
+    def get_user_selected_role_db_appid_userid(self, app_id, selected_userid):
 
+        selected_roles = self.db.query(idp_user_apps_roles, roles, driq_practices_role) \
+        .join(sp_apps_role, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id) \
+        .join(roles, roles.id == sp_apps_role.roles_id) \
+        .join(driq_practices_role,driq_practices_role.id == idp_user_apps_roles.sub_roles_id , isouter=True) \
+        .filter(and_(idp_user_apps_roles.idp_users_id == selected_userid, sp_apps_role.sp_apps_id == app_id)) \
+        .first()
+
+        return selected_roles
+    
+    def get_ezlogin_roles(self, user_id):
+        role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)
+        if role_name == "super-admin":
+            user_roles = [{"id":1,"name":"Sub Admin","sub_roles":[]}, {"id":16, "name":"Practice Admin","sub_roles":[]}]
+        elif role_name == "sub-admin":
+            user_roles = [{"id":16, "name":"Practice Admin","sub_roles":[]}]
+        else:
+            user_roles = []
+
+        return user_roles
+
+    def get_selected_roles_db_by_id(self, app_id, user_id, selected_userid):
         
+        if app_id == 7:
+            all_app_roles = self.get_ezlogin_roles(user_id=user_id)
+        else:
+            all_app_roles = self.get_apps_practice_roles(app_id)
+
+        selected_roles = self.get_user_selected_role_db_appid_userid(app_id=app_id, selected_userid=selected_userid)
+
+        all_app_roles = format_roles_with_selected_roles(all_app_roles, selected_roles)
+        return all_app_roles

@@ -137,7 +137,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     host_port = str(host) +":"+ str(port)
     # logout the user from frontend as well
     
-    response = RedirectResponse(url="http://{}/sign-in".format("localhost:3001"))
+    response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
     return response

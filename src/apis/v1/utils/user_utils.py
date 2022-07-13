@@ -68,3 +68,10 @@ def format_data_for_update_user_image(image) -> dict:
     except Exception as e:
         raise CustomException(message= f"There was an error uploading the file(s),{e} - error occured in user utils", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+
+def check_driq_gender_id_exsist(user_data):
+    if user_data['dr_iq_gender_id']:
+        driq_gender_id = user_data['dr_iq_gender_id']
+        return driq_gender_id
+        
+    return None

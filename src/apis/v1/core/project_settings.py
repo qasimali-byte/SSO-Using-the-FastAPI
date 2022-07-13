@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     authjwt_secret_key = os.environ.get("SECRET_KEY")
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access","refresh"}
-    authjwt_access_token_expires: timedelta = timedelta(minutes=3)
+    authjwt_access_token_expires: timedelta = timedelta(minutes=15)
     authjwt_refresh_token_expires: timedelta = timedelta(days=3)
     REDIS_HOST_URL = os.environ.get("REDIS_HOST_URL")
 

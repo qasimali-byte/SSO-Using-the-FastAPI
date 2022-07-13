@@ -27,3 +27,7 @@ sudo docker ps -a -q |sudo  xargs docker stop
 - https://docs.axway.com/bundle/SecureTransport_54_AdministratorGuide_allOS_en_HTML5/page/Content/AdministratorsGuide/LDAP_integration/c_st_about_SSO.htm
 - https://social.msdn.microsoft.com/Forums/azure/en-US/dba7dabe-8797-429c-8d5b-6c830705ad82/error-8211-saml-single-logout-request-does-not-correspond-to-the-loggedin-session-participant?forum=Geneva
 - https://docs.servicenow.com/bundle/sandiego-platform-administration/page/integrate/saml/task/t_EnableSignedLogoutRequests.html
+
+## alembic migrations
+alembic revision  --autogenerate -m "changing unique contraint in uuid
+alembic upgrade head

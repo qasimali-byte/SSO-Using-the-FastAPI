@@ -1,6 +1,6 @@
 from datetime import datetime
 from ..helpers.custom_exceptions import CustomException
-from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
+from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from sqlalchemy import desc
@@ -50,7 +50,7 @@ class SPSService():
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
-                serviceproviders.append({"id": y.id, "name": y.display_name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible})
+                serviceproviders.append({"id": y.id, "name": y.display_name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,"sp_app_name": y.name})
 
             return serviceproviders
 
