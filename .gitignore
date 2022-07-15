@@ -12,3 +12,4 @@ envs/
 .env.prod
 load_env.py
 .idea
+/src/apis/v1/workers/.env.worker

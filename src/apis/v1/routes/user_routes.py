@@ -1,33 +1,30 @@
-import smtplib
-from datetime import datetime
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from typing import List
-from uuid import uuid4
+from typing import Any
+from fastapi import Depends, FastAPI, Request, Response
+from fastapi_redis_session import deleteSession, getSession, getSessionId, getSessionStorage, setSession, SessionStorage
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response, UploadFile, File, Form
 from fastapi import Depends, HTTPException, Header, Request, APIRouter, Response
-from starlette import status
+from starlette.responses import RedirectResponse
 
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
 from ..helpers.auth import AuthJWT
 from . import oauth2_scheme
-from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
+from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, \
+    CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, \
+    UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
-from ..helpers.customize_response import custom_response
 
 router = APIRouter(tags=["User-Management"])
 
 
 @router.post("/user/admin", summary="Create Admin User Api")
-async def create_user(user_validator:AdminUserValidator,request: Request,db: Session = Depends(get_db)):
+async def create_user(user_validator: AdminUserValidator, request: Request, db: Session = Depends(get_db)):
     """
         Create Admin User 
     """
     pass
+
 
 # @router.post("/user", summary="Create User Api", responses={201:{"model":UserValidatorOut},
 #             404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"},
@@ -39,18 +36,21 @@ async def create_user(user_validator:AdminUserValidator,request: Request,db: Ses
 #     resp = UsersController(db).create_user(user_validator.dict())
 #     return resp
 
-@router.post("/user/external", summary="Create External User Api", responses={201:{"model":UserValidatorOut}})
-async def create_external_user(user_validator:ExternalUserValidator,request: Request,db: Session = Depends(get_db)):
+@router.post("/user/external", summary="Create External User Api", responses={201: {"model": UserValidatorOut}})
+async def create_external_user(user_validator: ExternalUserValidator, request: Request, db: Session = Depends(get_db)):
     """
         Create External User 
     """
     req = await request.json()
     pass
 
+
 @router.get("/user/service-providers/practices/roles", summary="Get All Service Providers With Practices And RolesApi",
-            responses={200:{"model":UserSPPracticeRoleValidatorOut,"description":"Succesfully returned service providers with their practices and roles"},})
-async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
-# async def get_practice_roles(db: Session = Depends(get_db)):
+            responses={200: {"model": UserSPPracticeRoleValidatorOut,
+                             "description": "Succesfully returned service providers with their practices and roles"}, })
+async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),
+                             db: Session = Depends(get_db)):
+    # async def get_practice_roles(db: Session = Depends(get_db)):
     """
         Get All Service Providers Practice Roles
     """
@@ -60,10 +60,14 @@ async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depend
     return resp
 
 
-@router.post("/user", summary="Create User Api", responses={201:{"model":UserValidatorOut},
-            404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"},
-            500:{"description":"Internal Server Error","model":ErrorResponseValidator}})
-async def create_internal_external_user(user_validator:CreateInternalExternalUserValidatorIn, authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+@router.post("/user", summary="Create User Api", responses={201: {"model": UserValidatorOut},
+                                                            404: {"model": ErrorResponseValidator,
+                                                                  "description": "Error Occured when not found"},
+                                                            500: {"description": "Internal Server Error",
+                                                                  "model": ErrorResponseValidator}})
+async def create_internal_external_user(user_validator: CreateInternalExternalUserValidatorIn,
+                                        authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),
+                                        db: Session = Depends(get_db)):
     """
         Create User 
     """
@@ -73,8 +77,9 @@ async def create_internal_external_user(user_validator:CreateInternalExternalUse
     return resp
 
 
-@router.get("/user", summary="Get User Information", responses={200:{"model":UserInfoValidator}})
-async def get_user_info(authorize: AuthJWT = Depends(),token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+@router.get("/user", summary="Get User Information", responses={200: {"model": UserInfoValidator}})
+async def get_user_info(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),
+                        db: Session = Depends(get_db)):
     """
         This api get the user information for profile
     """
@@ -84,46 +89,74 @@ async def get_user_info(authorize: AuthJWT = Depends(),token: str = Depends(oaut
     return resp
 
 
-@router.put("/user", summary="Update User Information", responses={201:{"model":UserInfoValidator}}, status_code=201)
-async def update_user_info(updateuser:UpdateUserValidatorIn, authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+@router.put("/user", summary="Update User Information", responses={201: {"model": UserInfoValidator}}, status_code=201)
+async def update_user_info(updateuser: UpdateUserValidatorIn, authorize: AuthJWT = Depends(),
+                           token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
         This api updates the user information for profile
     """
 
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
-    resp = UsersController(db).update_user_info(user_email=current_user_email,user_data=updateuser.dict())
+    resp = UsersController(db).update_user_info(user_email=current_user_email, user_data=updateuser.dict())
     return resp
 
 
-@router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=200)
-async def update_user_image(image:UploadFile = Form(...),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+@router.put("/user/profile-image", summary="Update User Profile Image",
+            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def update_user_image(image: UploadFile = Form(...), authorize: AuthJWT = Depends(),
+                            token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image, uses request.body.file
     """
 
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
-    resp = UsersController(db).update_user_image(user_email=current_user_email,data_image=image)
+    resp = UsersController(db).update_user_image(user_email=current_user_email, data_image=image)
     return resp
 
-@router.get("/user/verify_email")
-async def verify_user_email(user_key: str,db: Session = Depends(get_db)):
+
+@router.get("/user/verify_email/{user_key}", summary="Verify User email through url sent in email.",
+             responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def verify_user_email(
+        user_key: str,request: Request, response: Response, db: Session = Depends(get_db),
+        session: Any = Depends(getSession),
+        sessionStorage: SessionStorage = Depends(getSessionStorage)
+    ):
     """
         This api verifies the url hit by the user through emai.
     """
-    resp = UsersController(db).verify_user_through_email(user_key=user_key)
+    sessionData = user_key
+    setSession(response, sessionData, sessionStorage)
+    response = UsersController(db).verify_user_through_email(user_key=user_key)
+    # response = RedirectResponse(url="http://{}/sign-in".format("localhost:3001"))
+    response = RedirectResponse(url="http://localhost:8088/sign-in/")
+    response.set_cookie(key="user_info", value=user_key)
+    # cookie_frontend.attach_to_response(response, session)
+    return response
+
     return resp
 
 
-
-
-@router.get("/user/email_test")
-async def get_email_test():
+@router.get("/user/reset_password/{user_email}", summary="Takes user email to identify user.",
+            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def reset_password(user_email: str, db: Session = Depends(get_db)):
     """
-        This api get the user information for profile
+        This api verifies the url hit by the user through emai.
     """
-    from src.apis.v1.workers.worker import email_sender
-    task = email_sender.delay(user_verification_url="user_verification_url", user_email="asadbukharee@gmail.com")
-    resp = custom_response(status_code=status.HTTP_200_OK,data={})
+    resp = UsersController(db).reset_password_through_email(user_email=user_email)
     return resp
+
+
+@router.get("/user/getSession")
+async def _getSession(session: Any = Depends(getSession)):
+    print(session)
+    return session
+
+
+@router.post("/user/deleteSession")
+async def _deleteSession(
+    sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
+):
+    deleteSession(sessionId, sessionStorage)
+    return None

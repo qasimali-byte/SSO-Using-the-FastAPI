@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import shortuuid as shortuuid
 
@@ -32,7 +33,6 @@ class UsersController():
         """
         # ## verify valid ids of sp applications , roles, sub roles and practices
         # ## roles must be atleast selected when the app is selected roles cannot be empty
-
         # ## format data for create user
         apps_ids_list, practices_ids_list, selected_roles_list = format_data_for_create_user(user_data)
 
@@ -124,26 +124,53 @@ class UsersController():
             "statuscode": status.HTTP_201_CREATED
         }
         validated_data = SuccessfulJsonResponseValidator(**data)
-        response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
+        response = custom_response(status_code=status.HTTP_, data=validated_data)
         return response
 
-    def generate_encrypted_url(user_date):
-        unique_id = shortuuid.ShortUUID().random(length=8)
-        url_key = get_encrypted_text(user_date.id) + unique_id + get_encrypted_text(dt.now())
-        url = Settings().BASE_URL + "/api/v1/user/verify_email?key=" + url_key
+    def generate_encrypted_url(self, user_data):
+        unique_id = uuid.uuid4().hex
+        url_key = get_encrypted_text(str(user_data.id) + "?" + str(unique_id) + "?" + str(dt.now()))
+
+        verification_save_response = UserService(self.db).save_user_verify_db(user_id=user_data.id,
+                                                                              verification_id=unique_id)
+        url = Settings().BASE_URL + "/api/v1/user/verify_email/" + url_key
         return url
 
-    def send_email_to_user(self, user_date):
-        user_verification_url = self.generate_encrypted_url(user_date)
-        user_email = user_date["email"]
+    def send_email_to_user(self, user_data):
+        user_verification_url = self.generate_encrypted_url(user_data)
+        user_email = user_data.email
         task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
-        # self.log.info(f"Task created: task={task.id},user_id={user_id}, encrypted_id={encrypted_id}, \
-        # user_email={user_email}")
+        self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
+        user_email={user_email}")
         print(f"Task created: task={task.id}, user_verification_url={user_verification_url}, user_email={user_email}")
 
     def verify_user_through_email(self, user_key):
-        user_id = get_decrypted_text(user_key[:64])
-        unique_id = user_key[64:74]
-        time_tag = get_decrypted_text(user_key[74:])
+        decrypted_values_list = get_decrypted_text(user_key).split('?')
+        user_id, unique_id, time_tag = decrypted_values_list[0], decrypted_values_list[1], decrypted_values_list[2]
         # here we will implement the logic for key expiry for time_tag.
-        verification_response = UserService(self.db).verify_user_email_db(user_id=user_id, unique_id=unique_id)
+        verification_response = UserService(self.db).verify_user_email_db(user_id=user_id, verification_id=unique_id)
+        return verification_response
+
+    def reset_password_through_email(self, user_email):
+        user_data = UserService(self.db).get_user_info_db(user_email=user_email)
+        if user_data:
+            user_verification_url = self.generate_encrypted_url(user_data)
+            user_email = user_data.email
+            task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+            self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
+                    user_email={user_email}")
+            data = {
+                "message": "reset url sent Successfully",
+                "statuscode": status.HTTP_202_ACCEPTED
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
+        else:
+            data = {
+                "message": "User not found with this email",
+                "statuscode": status.HTTP_404_NOT_FOUND
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+
+        return response

@@ -1,17 +1,11 @@
 import base64
 import logging
 import traceback
-from email import encoders
-from email.mime.base import MIMEBase
-
 import shortuuid
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from fastapi import status
 from cryptography.fernet import Fernet
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 
 def format_data_for_create_user(user_data) -> tuple:
@@ -44,12 +38,12 @@ def get_encrypted_text(text):
         # convert integer etc to string firsts
         txt = str(text)
         # get the key from settings
-        cipher_suite = Fernet(Settings().FERNET_SECRET_KEY)  # key should be byte
+        cipher_suite = Fernet(Settings().FERNET_SECRET_KEY.encode())  # key should be byte
         # #input should be byte, so convert the text to byte
         encrypted_text = cipher_suite.encrypt(txt.encode('ascii'))
         # encode to urlsafe base64 format
         encrypted_text = base64.urlsafe_b64encode(encrypted_text).decode("ascii")
-        return encrypted_text
+        return str(encrypted_text)
     except Exception as e:
         # log the error if any
         logging.getLogger("error_logger").error(traceback.format_exc())
@@ -61,7 +55,7 @@ def get_decrypted_text(text):
         # base64 decode
         if text:
             txt = base64.urlsafe_b64decode(text)
-            cipher_suite = Fernet(Settings.FERNET_SECRET_KEY)
+            cipher_suite = Fernet(Settings().FERNET_SECRET_KEY.encode())
             decoded_text = cipher_suite.decrypt(txt).decode("ascii")
             return decoded_text
         else:
@@ -114,39 +108,3 @@ def format_data_for_update_user_image(image) -> dict:
     except Exception as e:
         raise CustomException(message=f"There was an error uploading the file(s),{e} - error occured in user utils",
                               status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-
-def send_email(url, recipient, attachment=None):
-    try:
-        recipient = "asadbukharee@gmail.com"
-        mail_content = f"Hi,\n \tPlease verify your account by visiting the following link.\n\n {url}\n\n Thank you."
-        # The mail addresses and password
-        sender_address = Settings().EMAIL_SENDER
-        sender_pass = Settings().EMAIL_SENDER_PASSWORD
-        # Setup the MIME
-        message = MIMEMultipart()
-        message['From'] = sender_address
-        message['To'] = recipient
-        message['Subject'] = Settings().EMAIL_SUBJECT
-        # The body and the attachments for the mail
-        message.attach(MIMEText(mail_content, 'plain'))
-        # attach files if given
-        if attachment:
-            attach_file = open(attachment, 'rb')  # Open the file as binary mode
-            payload = MIMEBase('application', 'octate-stream')
-            payload.set_payload((attach_file).read())
-            encoders.encode_base64(payload)  # encode the attachment
-            # add payload header with filename
-            payload.add_header('Content-Decomposition', 'attachment', filename=attachment.split("\"")[-1])
-            message.attach(payload)
-        # Create SMTP session for sending the mail
-        session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
-        session.starttls()  # enable security
-        session.login(sender_address, sender_pass)  # login with mail_id and password
-        text = message.as_string()
-        session.sendmail(sender_address, recipient, text)
-        session.quit()
-        return True
-    except Exception as e:
-        print(str(e))
-        return False
