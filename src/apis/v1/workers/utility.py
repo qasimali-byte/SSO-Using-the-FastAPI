@@ -8,7 +8,30 @@ from email.mime.text import MIMEText
 
 def send_email(url, recipient, attachment=None):
     try:
-        mail_content = f"Hi,\n \tPlease verify your account by visiting the following link.\n\n {url}\n\n Thank you."
+        print("===================================================")
+        print("                Email Task Started                 ")
+        print("===================================================")
+
+        html = f"""<html>
+          <body style="font-family: 'Muli',sans-serif;">
+            <p>Hi,</p>
+            <br style = "line-height:70px;"> 
+            <p>You have requested to signup using this email. Please verify it
+               by clicking the following button.<br>Please ignore it if that were not you.
+            </p>
+            <br>
+            <br>
+            <div style="margin: 0; position: absolute; top: 50%; left: 50%; -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);" >
+                 <a href="{url}"><button style="background-color: turquoise; cursor: pointer;;border:\
+                 none; border-radius: 5px; color: #333; /* Dark grey */ padding: 15px 32px">Click here to verify</button>
+                 </a>
+             </div>
+            <br style = "line-height:150px;"> 
+            <p>Thank you.</p>
+          </body>
+        </html>"""
+        mail_content = MIMEText(html, "html")
+        # The mail addresses and password
         # The mail addresses and password
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
@@ -18,7 +41,7 @@ def send_email(url, recipient, attachment=None):
         message['To'] = recipient
         message['Subject'] = os.environ.get("EMAIL_SUBJECT")
         # The body and the attachments for the mail
-        message.attach(MIMEText(mail_content, 'plain'))
+        message.attach(mail_content)
         # attach files if given
         if attachment:
             attach_file = open(attachment, 'rb')  # Open the file as binary mode
@@ -35,8 +58,10 @@ def send_email(url, recipient, attachment=None):
         text = message.as_string()
         session.sendmail(sender_address, recipient, text)
         session.quit()
+        print("===================================================")
+        print(f"      Success: {recipient}")
+        print("===================================================")
         return True
     except Exception as e:
         print(str(e))
         return False
-

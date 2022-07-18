@@ -151,6 +151,7 @@ class UsersController():
         verification_response = UserService(self.db).verify_user_email_db(user_id=user_id, verification_id=unique_id)
         return verification_response
 
+
     def reset_password_through_email(self, user_email):
         user_data = UserService(self.db).get_user_info_db(user_email=user_email)
         if user_data:
@@ -160,7 +161,7 @@ class UsersController():
             self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
                     user_email={user_email}")
             data = {
-                "message": "reset url sent Successfully",
+                "message": "Reset url sent successfully through email",
                 "statuscode": status.HTTP_202_ACCEPTED
             }
             validated_data = SuccessfulJsonResponseValidator(**data)
@@ -172,5 +173,31 @@ class UsersController():
             }
             validated_data = SuccessfulJsonResponseValidator(**data)
             response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+
+        return response
+
+    def set_password(self, session, password):
+
+        user_id = get_decrypted_text(session)
+        response = UserService(self.db).set_user_password_db(user_id=user_id, password=password)
+        return response
+
+    def change_password(self, password):
+
+        if password:
+            print("\nPassword:",password,"\n")
+            data = {
+                "message": "Password updated successfully",
+                "statuscode": status.HTTP_202_ACCEPTED
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
+        else:
+            data = {
+                "message": "Password couldn't be Updated.",
+                "statuscode": status.HTTP_406_NOT_ACCEPTABLE
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data=validated_data)
 
         return response

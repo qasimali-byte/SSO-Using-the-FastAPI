@@ -14,6 +14,7 @@ from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInte
     CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, \
     UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
+from ..utils.user_utils import get_decrypted_text, get_encrypted_text
 
 router = APIRouter(tags=["User-Management"])
 
@@ -117,34 +118,54 @@ async def update_user_image(image: UploadFile = Form(...), authorize: AuthJWT = 
 
 
 @router.get("/user/verify_email/{user_key}", summary="Verify User email through url sent in email.",
-             responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
 async def verify_user_email(
-        user_key: str,request: Request, response: Response, db: Session = Depends(get_db),
+        user_key: str, request: Request, response: Response, db: Session = Depends(get_db),
         session: Any = Depends(getSession),
         sessionStorage: SessionStorage = Depends(getSessionStorage)
-    ):
+):
     """
         This api verifies the url hit by the user through emai.
     """
-    sessionData = user_key
-    setSession(response, sessionData, sessionStorage)
-    response = UsersController(db).verify_user_through_email(user_key=user_key)
-    # response = RedirectResponse(url="http://{}/sign-in".format("localhost:3001"))
-    response = RedirectResponse(url="http://localhost:8088/sign-in/")
-    response.set_cookie(key="user_info", value=user_key)
-    # cookie_frontend.attach_to_response(response, session)
-    return response
+    resp = UsersController(db).verify_user_through_email(user_key=user_key)
+    if resp.status_code==202 or resp.status_code==302:
+        print("\nEmail user verified.")
+        sessionData = get_encrypted_text(get_decrypted_text(user_key).split('?')[0])
+        response = RedirectResponse(url="http://localhost:8088/reset-password")
+        response.set_cookie(key="user_secret", value=sessionData)
+        setSession(response, sessionData, sessionStorage)
+        # cookie_frontend.attach_to_response(response, session)
+        return response
 
+
+
+@router.post("/user/forget_password/{email}", summary="Takes user email to identify user.",
+             responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=201)
+async def forget_password(email: str, db: Session = Depends(get_db)):
+    """
+        This api verifies the url hit by the user through emai.
+    """
+    resp = UsersController(db).reset_password_through_email(user_email=email)
     return resp
 
 
-@router.get("/user/reset_password/{user_email}", summary="Takes user email to identify user.",
-            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def reset_password(user_email: str, db: Session = Depends(get_db)):
+@router.post("/user/set_password/{password}", summary="Takes password as input string.",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def set_password(password: str, session: Any = Depends(getSession), db: Session = Depends(get_db)):
     """
-        This api verifies the url hit by the user through emai.
+        This api takes password from front-end evaluating the session cookie data and saves in db.
     """
-    resp = UsersController(db).reset_password_through_email(user_email=user_email)
+    resp = UsersController(db).set_password(session=session, password=password)
+    return resp
+
+
+@router.post("/user/change_password/{old_password}", summary="Takes password as input string.",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def forget_password(old_password: str, db: Session = Depends(get_db)):
+    """
+        This api takes password from front-end and saves in db.
+    """
+    resp = UsersController(db).set_password(password=old_password)
     return resp
 
 
@@ -156,7 +177,7 @@ async def _getSession(session: Any = Depends(getSession)):
 
 @router.post("/user/deleteSession")
 async def _deleteSession(
-    sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
+        sessionId: str = Depends(getSessionId), sessionStorage: SessionStorage = Depends(getSessionStorage)
 ):
     deleteSession(sessionId, sessionStorage)
     return None

@@ -15,6 +15,7 @@ from fastapi import status
 from sqlalchemy.orm import aliased, load_only, Load
 
 from src.apis.v1.validators.user_validator import GetUserInfoValidator, UserInfoValidator
+from ..utils.auth_utils import create_password_hash
 from ..validators.common_validators import SuccessfulJsonResponseValidator
 
 
@@ -94,6 +95,30 @@ class UserService():
             else:
                 data = {
                     "message": "User not found",
+                    "statuscode": status.HTTP_404_NOT_FOUND
+                }
+                validated_data = SuccessfulJsonResponseValidator(**data)
+                response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+            return response
+        except Exception as e:
+            raise CustomException(message=str(e) + "- error occured in user service",
+                                  status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def set_user_password_db(self,user_id, password) -> str:
+        try:
+            user_info_object = self.db.query(idp_users).filter(idp_users.id == user_id).first()
+            if user_info_object:
+                user_info_object.password_hash = create_password_hash(password)
+                self.db.commit()
+                data = {
+                    "message": "Password saved successfully",
+                    "statuscode": status.HTTP_202_ACCEPTED
+                }
+                validated_data = SuccessfulJsonResponseValidator(**data)
+                response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
+            else:
+                data = {
+                    "message": "Failed to recognize.",
                     "statuscode": status.HTTP_404_NOT_FOUND
                 }
                 validated_data = SuccessfulJsonResponseValidator(**data)
