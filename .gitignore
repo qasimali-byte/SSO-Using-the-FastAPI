@@ -6,9 +6,10 @@ __pycache__/
 *.pytest_cache
 *.coverage
 venv/
-envs/
+# envs/
 # .env.dev
 # .env.prod
 # load_env.py
 
 .idea
+local_test.py

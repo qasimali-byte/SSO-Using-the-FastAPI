@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     authjwt_access_token_expires: timedelta = timedelta(minutes=15)
     authjwt_refresh_token_expires: timedelta = timedelta(days=3)
     REDIS_HOST_URL = os.environ.get("REDIS_HOST_URL")
-
+    REDIS_HOST_PORT = int(os.environ.get("REDIS_HOST_PORT"))
+    REDIS_HOST_PASSWORD = os.environ.get("REDIS_HOST_PASSWORD")
+    
 def settings():
     return Settings()

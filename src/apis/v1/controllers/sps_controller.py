@@ -92,7 +92,7 @@ class SPSController():
 
     def get_practices_roles_by_apps(self,apps_list,app, selected_apps, user_id, selected_id):
 
-        apps = SPPracticeRoleValidator(id=app["id"],name=app["name"],
+        apps = SPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
         sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
         roles=RolesController(self.db).get_allowed_roles_by_userid(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid(app["id"],user_id,selected_id)) 
@@ -123,8 +123,5 @@ class SPSController():
             return apps_list
 
         for apps_object in total_allowed_apps:
-            thread = threading.Thread(target=self.get_practices_roles_by_apps, args=(apps_list, apps_object, selected_apps, user_id, selected_id))
-            thread.start()
-
-        thread.join()
+            self.get_practices_roles_by_apps(apps_list,apps_object, selected_apps, user_id, selected_id)
         return apps_list

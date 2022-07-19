@@ -111,7 +111,7 @@ class UserController():
         type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
         type_of_user = type_of_user['name']
         data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname, 
-        email=selected_email, type_of_user=type_of_user, sp_practice_roles=allowed_apps)
+        email=selected_email, type_of_user=type_of_user, sp_practice_roles=allowed_apps, is_active=selected_user_info.is_active)
         response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
@@ -186,13 +186,12 @@ class UserController():
         """
             this function will delete the user
         """
-        try:
-            message,status_code=UserService(self.db).delete_users_info_db(user_id)
-            UserDeleteValidatorOut(message=message,status_code=status_code)
-            response = custom_response(data=message,status_code=status_code)
-            return response
-        except Exception as e:
-            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_controller.py")
+
+        message,status_code=UserService(self.db).delete_users_info_db(user_id)
+        data = UserDeleteValidatorOut(message=message,status_code=status_code)
+        response = custom_response(data=data,status_code=status_code)
+        return response
+  
 
     def update_user_image(self,user_email,data_image):
         """

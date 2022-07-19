@@ -1,6 +1,3 @@
-# from core.config import settings
-# from core.config import settings
-# from main import settings_by_env
 from src.apis.v1.core.project_settings import Settings
 settings_by_env = Settings()
 from sqlalchemy import create_engine

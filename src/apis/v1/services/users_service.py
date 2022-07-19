@@ -14,7 +14,6 @@ class UsersService():
     def __init__(self, db):
         self.db = db
 
-
     def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int) -> tuple:
         try:
             if user_role == "super-admin":

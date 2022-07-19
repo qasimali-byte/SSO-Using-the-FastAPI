@@ -18,5 +18,7 @@ def format_roles_with_selected_roles(all_app_roles, selected_roles):
                     sub_roles['is_selected'] = True
                 else:
                     sub_roles['is_selected'] = False
+            else:
+                sub_roles['is_selected'] = False
 
     return all_app_roles

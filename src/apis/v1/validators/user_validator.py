@@ -61,7 +61,7 @@ class SPPracticeRoleValidator(BaseModel):
     sp_app_image: str
     practices: SPRegionsValidator = []
     roles: typing.Optional[SPRolesValidator]
-    is_selected: typing.Optional[bool] = Field(alias='Selected')
+    is_selected: typing.Optional[bool] = Field(alias='selected')
     
     class Config:
         allow_population_by_field_name = True
@@ -77,6 +77,7 @@ class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
     lastname: str 
     email: EmailStr
     type_of_user: typing.Literal['internal','external']
+    is_active: typing.Optional[bool] 
 
 class PracticesRolesId(BaseModel):
     practice_id: int
