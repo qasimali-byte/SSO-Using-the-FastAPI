@@ -11,6 +11,16 @@ class AdminUserValidator(BaseModel):
     email: str
     password: str
 
+class ForgetPasswordValidator(BaseModel):
+    email: str
+
+class SetPasswordValidator(BaseModel):
+    password: str
+
+class ChangePasswordValidator(BaseModel):
+    old_password: str
+
+
 class IdsList(BaseModel):
     id: int
 class UserRolesValidatorIn(BaseModel):

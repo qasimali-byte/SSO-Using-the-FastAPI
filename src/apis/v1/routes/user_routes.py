@@ -8,11 +8,14 @@ from starlette.responses import RedirectResponse
 from src.apis.v1.controllers.user_controller import UsersController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
+
+from ..core.project_settings import Settings
 from ..helpers.auth import AuthJWT
 from . import oauth2_scheme
 from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, \
     CreateUserValidator, ExternalUserValidator, UpdateUserValidatorIn, UserInfoValidator, \
-    UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
+    UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut, ForgetPasswordValidator, SetPasswordValidator, \
+    ChangePasswordValidator
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from ..utils.user_utils import get_decrypted_text, get_encrypted_text
 
@@ -131,7 +134,7 @@ async def verify_user_email(
     if resp.status_code==202 or resp.status_code==302:
         print("\nEmail user verified.")
         sessionData = get_encrypted_text(get_decrypted_text(user_key).split('?')[0])
-        response = RedirectResponse(url="http://localhost:8088/reset-password")
+        response = RedirectResponse(url=f"{Settings().BASE_URL}/reset-password")
         response.set_cookie(key="user_secret", value=sessionData)
         setSession(response, sessionData, sessionStorage)
         # cookie_frontend.attach_to_response(response, session)
@@ -139,33 +142,34 @@ async def verify_user_email(
 
 
 
-@router.post("/user/forget_password/{email}", summary="Takes user email to identify user.",
+@router.post("/user/forget_password", summary="Takes email as request body parameter.",
              responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=201)
-async def forget_password(email: str, db: Session = Depends(get_db)):
+async def forget_password(email_validator:ForgetPasswordValidator, db: Session = Depends(get_db)):
     """
         This api verifies the url hit by the user through emai.
     """
-    resp = UsersController(db).reset_password_through_email(user_email=email)
+
+    resp = UsersController(db).reset_password_through_email(user_email=email_validator.email)
     return resp
 
 
-@router.post("/user/set_password/{password}", summary="Takes password as input string.",
+@router.post("/user/set_password", summary="Takes new_password as request body parameter.",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def set_password(password: str, session: Any = Depends(getSession), db: Session = Depends(get_db)):
+async def set_password(set_password_validator: SetPasswordValidator, session: Any = Depends(getSession), db: Session = Depends(get_db)):
     """
         This api takes password from front-end evaluating the session cookie data and saves in db.
     """
-    resp = UsersController(db).set_password(session=session, password=password)
+    resp = UsersController(db).set_password(session=session, password=set_password_validator.password)
     return resp
 
 
-@router.post("/user/change_password/{old_password}", summary="Takes password as input string.",
+@router.post("/user/change_password", summary="Takes old_password as request body parameter.",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def forget_password(old_password: str, db: Session = Depends(get_db)):
+async def forget_password(password_validator: ChangePasswordValidator, db: Session = Depends(get_db)):
     """
         This api takes password from front-end and saves in db.
     """
-    resp = UsersController(db).set_password(password=old_password)
+    resp = UsersController(db).set_password(password=password_validator.old_password)
     return resp
 
 
