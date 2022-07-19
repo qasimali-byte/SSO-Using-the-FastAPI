@@ -74,7 +74,7 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
                 response = custom_response(data=auth_result[0],status_code=auth_result[1])
                 return response
 
-            resp = req.get(verified_data[0].saml_req,email)
+            resp = req.get(verified_data[0].saml_req,email,db)
             # delete frontend cookie
             idp_controller.delete_frontend_session(verified_id[0])
             # create idp cookie
