@@ -3,6 +3,8 @@ import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
+
+from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from . import Base
 # from src.apis.v1.models.user_idp_sp_apps_model import idp_sp, user_idp_sp_app
 

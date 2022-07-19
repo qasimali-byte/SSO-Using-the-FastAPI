@@ -1,8 +1,7 @@
-import os
+from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
-from src.apis.v1.models.roles_model import roles
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.services.gender_service import GenderService
 from src.apis.v1.services.roles_service import RolesService
@@ -12,12 +11,9 @@ from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.helpers.customize_response import file_remover, custom_response
 from fastapi import status
-from sqlalchemy.orm import aliased, load_only, Load
-
-from src.apis.v1.validators.user_validator import GetUserInfoValidator, UserInfoValidator
 from ..utils.auth_utils import create_password_hash
 from ..validators.common_validators import SuccessfulJsonResponseValidator
-
+from sqlalchemy.orm import aliased, load_only,Load
 
 class UserService():
 
@@ -33,6 +29,16 @@ class UserService():
         except Exception as e:
             raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def get_user_info_db_by_id(self, user_id):
+        try:
+            user_info_object = self.db.query(idp_users).options(Load(idp_users) \
+            .load_only("id","first_name","last_name","email")).filter(idp_users.id == user_id).scalar()
+            return user_info_object
+
+        except Exception as e:
+            raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
     def update_user_info_db(self, user_data) -> str:
         try:
             self.db.query(idp_users).filter(idp_users.email == user_data['email']).update(user_data)
@@ -42,7 +48,17 @@ class UserService():
         except Exception as e:
             raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def update_user_image_db(self, user_email, user_image_url) -> str:
+
+    def update_user_info_db_by_id(self, user_data) -> str:
+        try:
+            self.db.query(idp_users).filter(idp_users.id == user_data['id']).update(user_data)
+            self.db.commit()
+            return "User Info Updated"
+
+        except Exception as e:
+            raise CustomException(message= str(e) + self.error_string, status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update_user_image_db(self,user_email,user_image_url) -> str:
         try:
             user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
             existing_image_file_name = user_info_object.profile_image.split('/')[-1]
@@ -324,3 +340,35 @@ class UserService():
 
         self.db.bulk_save_objects(objects)
         self.db.commit()
+
+    
+    def delete_users_info_db(self,users_id):
+        try:
+            user=self.db.query(idp_users).filter(idp_users.id==users_id).one_or_none()
+            if user is not None:
+                self.db.query(idp_sp).filter(idp_sp.idp_users_id==users_id).delete() # this will return the list
+                self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
+                self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
+                self.db.query(idp_users).filter(idp_users.id==users_id).delete()
+                self.db.commit()
+                return "User deleted successfully", status.HTTP_200_OK
+            else:
+                return "User not found", status.HTTP_404_NOT_FOUND
+            
+        except Exception as e:
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in user_service.py")
+
+
+
+    def delete_user_practices_roles_db(self, user_id) -> int:
+        try:
+            self.db.query(idp_sp).filter(idp_sp.idp_users_id == user_id) \
+            .delete(synchronize_session=False)
+            self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id == user_id) \
+            .delete(synchronize_session=False)
+            self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id == user_id) \
+            .delete(synchronize_session=False)
+            self.db.commit()
+            return 200
+        except Exception as e:
+            raise CustomException(str(e)+"error occured in user service", status.HTTP_500_INTERNAL_SERVER_ERROR)

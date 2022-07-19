@@ -4,7 +4,10 @@ application = create_app()
 
 @application.on_event("startup")
 async def startup_event():
-    import populate
+    try:
+        import populate
+    except:
+        pass
     
 
 if __name__ == "__main__":

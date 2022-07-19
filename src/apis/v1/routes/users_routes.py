@@ -9,7 +9,7 @@ from . import oauth2_scheme
 router = APIRouter(tags=["Display Users"])
 
 
-@router.get("/users/", summary="List Users",responses={200:{"model":UsersValidatorOut,"description":"Get All the users and their APP permissions"}})
+@router.get("/users", summary="List Users",responses={200:{"model":UsersValidatorOut,"description":"Get All the users and their APP permissions"}})
 async def get_users(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme), limit:int = Query(default=10), offset:int = Query(default=1,gt=0), db: Session = Depends(get_db)):
     """
         List all the users with their products accroding to the user defined role

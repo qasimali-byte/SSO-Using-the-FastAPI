@@ -3,7 +3,6 @@ __pycache__/
 *.bak
 *.dat
 .vscode/
-/public/assets/
 *.pytest_cache
 *.coverage
 venv/
@@ -13,3 +12,11 @@ envs/
 load_env.py
 .idea
 /src/apis/v1/workers/.env.worker
+# envs/
+# .env.dev
+# .env.prod
+# load_env.py
+
+.idea
+local_test.py
+/public/assets/
