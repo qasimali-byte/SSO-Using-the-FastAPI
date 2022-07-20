@@ -56,7 +56,7 @@ class LoginProcessView():
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
         user_info_data = UserService(db).get_user_info_db(email)
         practice_roles_data,practice_roles_status=UserService(db).get_all_sps_practice_roles_db(email)
-        
+        print('---------------------------',practice_roles_data)
         users_info = dict({
             "username": user_info_data.username,
             "email": user_info_data.email,
