@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime
 from src.apis.v1.services.type_of_user_service import TypeOfUserService
@@ -26,7 +27,7 @@ from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_crea
 class UserController():
     def __init__(self, db) -> None:
         self.db = db
-
+        self.log = logging.getLogger(__name__)
     def assign_practices_apps_roles(self, user_id: int, apps_ids_list, practices_ids_list, selected_roles_list) -> int:
 
         # assign sp apps to user
