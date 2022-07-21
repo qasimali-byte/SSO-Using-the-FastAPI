@@ -6,7 +6,13 @@ __pycache__/
 *.pytest_cache
 *.coverage
 venv/
-# envs/
+envs/
+.env.dev
+.env.prod
+load_env.py
+.idea
+/src/apis/v1/workers/.env.worker
+# envs/git
 # .env.dev
 # .env.prod
 # load_env.py
@@ -14,3 +20,5 @@ venv/
 .idea
 local_test.py
 /public/assets/
+/alembic/
+/build/

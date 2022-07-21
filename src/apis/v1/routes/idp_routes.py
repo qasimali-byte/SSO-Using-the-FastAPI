@@ -1,12 +1,12 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.idp_controller import IDPController
-from fastapi_sessions.frontends.implementations.cookie import CookieParameters,CookieParameters2
+from fastapi_sessions.frontends.implementations.cookie import CookieParameters, CookieParameters2
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Form, status
-from fastapi.responses import RedirectResponse,HTMLResponse, Response
+from fastapi.responses import RedirectResponse, HTMLResponse, Response
 import requests
 from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
 from pydantic import BaseModel
@@ -28,11 +28,14 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
+
 router = APIRouter(tags=["Identity Provider"])
 templates = Jinja2Templates(directory="templates/")
 
+
 class SessionData(BaseModel):
     username: str
+
 
 cookie_params = CookieParameters()
 cookie_params_2 = CookieParameters2()
@@ -58,12 +61,12 @@ backend = InMemoryBackend[UUID, SessionData]()
 
 class BasicVerifier(SessionVerifier[UUID, SessionData]):
     def __init__(
-        self,
-        *,
-        identifier: str,
-        auto_error: bool,
-        backend: str,
-        auth_http_exception: HTTPException,
+            self,
+            *,
+            identifier: str,
+            auto_error: bool,
+            backend: str,
+            auth_http_exception: HTTPException,
     ):
         self._identifier = identifier
         self._auto_error = auto_error
@@ -90,6 +93,7 @@ class BasicVerifier(SessionVerifier[UUID, SessionData]):
         """If the session exists, it is valid"""
         return True
 
+
 verifier = BasicVerifier(
     identifier="general_verifier",
     auto_error=True,
@@ -98,20 +102,21 @@ verifier = BasicVerifier(
 )
 
 
-@router.post("/sso/",summary="Only Redirect Request from Service Provider")
-async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
-    verified_id = SessionController().verify_session(cookie_frontend,request)
+@router.post("/sso/", summary="Only Redirect Request from Service Provider")
+async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends(get_db)):
+    verified_id = SessionController().verify_session(cookie_frontend, request)
     idp_controller = IDPController(db)
-    verified_data = idp_controller.get_frontend_session_saml(verified_id[0]) 
+    verified_data = idp_controller.get_frontend_session_saml(verified_id[0])
     req = LoginProcessView()
-    resp = req.get(verified_data[0].saml_req,"syed@gmail.com")
+    resp = req.get(verified_data[0].saml_req, "syed@gmail.com")
     return HTMLResponse(content=resp["data"]["data"])
-    
-@router.get("/sso/redirect/",summary="Only Redirect Request from Service Provider")
-async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(get_db)):
+
+
+@router.get("/sso/redirect/", summary="Only Redirect Request from Service Provider")
+async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends(get_db)):
     # validate saml request parameter
     # if not validate_saml_request(SAMLRequest):
-        # return Response(status_code=400, content="Invalid SAML Request")
+    # return Response(status_code=400, content="Invalid SAML Request")
     # get saml request data
     # give unique cookie to localhost + this cookie with the sp comes from with saml request should be stored in db
     # return to login page localhost:3000
@@ -121,30 +126,31 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     ## check the valid samrequest
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
 
-    verified_id = SessionController().verify_session(cookie,request)
+    verified_id = SessionController().verify_session(cookie, request)
     if verified_id[1] == 200:
-        verified_status = SessionController().check_session_db(db,verified_id[0])
+        verified_status = SessionController().check_session_db(db, verified_id[0])
         if verified_status[1] == 200:
-            email_ = req.get_userid(verified_id[0],db)
-            resp = req.get(SAMLRequest,email_)
+            email_ = req.get_userid(verified_id[0], db)
+            resp = req.get(SAMLRequest, email_)
             return HTMLResponse(content=resp["data"]["data"])
-    
+
     session = uuid4()
     # store the cookie in db
-    IDPController(db).store_frontend_saml(session,SAMLRequest)
+    IDPController(db).store_frontend_saml(session, SAMLRequest)
     # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
-    host_port = str(host) +":"+ str(port)
+    host_port = str(host) + ":" + str(port)
     # logout the user from frontend as well
-    
+
     response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
     cookie_frontend.attach_to_response(response, session)
-    print(cookie_frontend,vars(cookie_frontend),"---cookie--",vars(response))
+    print(cookie_frontend, vars(cookie_frontend), "---cookie--", vars(response))
     return response
-    
+
 
 @router.post("/sso/login", summary="Submit Login Page API submission")
-async def sso_login(response: Response,request: Request,email: str = Form(...),password: str = Form(...),saml_request: str = Form(...),db: Session = Depends(get_db)):
+async def sso_login(response: Response, request: Request, email: str = Form(...), password: str = Form(...),
+                    saml_request: str = Form(...), db: Session = Depends(get_db)):
     # print(vars(request.form))
     # print(request)
 
@@ -156,7 +162,7 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
     ### verify session if exsists
     if cookie.__call__(request) == "No session cookie attached to request":
         valid_session = False
-    
+
     ## session verification
     verify_session = await verifier.__call__(request)
     if verify_session[1] != True:
@@ -165,44 +171,44 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
 
     ## session verification in db
     resp = LoginProcessView()
-    if resp.get_session(verify_session[0],db) == "session not found":
+    if resp.get_session(verify_session[0], db) == "session not found":
         valid_session = False
-
 
     if valid_session == True:
         return "session found"
 
     # resp = LoginProcessView()
-    user = resp.get_user(email,password,db)
+    user = resp.get_user(email, password, db)
     if user == None:
-        return templates.TemplateResponse("loginform.html", {"request": request,"saml_request":saml_request, "error": "Invalid username or password"})
+        return templates.TemplateResponse("loginform.html", {"request": request, "saml_request": saml_request,
+                                                             "error": "Invalid username or password"})
     print(vars(request))
     # print(request.headers['referer'])
-    print(saml_request,"---saml_request")
+    print(saml_request, "---saml_request")
     session = uuid4()
     print(session)
     ## store session in the database
-    resp.store_session(session,email,db)
+    resp.store_session(session, email, db)
     resp = resp.get(saml_request, email)
     print(resp["data"]["data"])
-    response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
+    response = HTMLResponse(content=resp["data"]["data"])  #### thisone uncomment
     cookie.attach_to_response(response, session)
     return response
 
 
-def test_logout_request_from_idp(remove_sp,name_id):
+def test_logout_request_from_idp(remove_sp, name_id):
     from saml2.samlp import SessionIndex
     from saml2 import server
     idp_server = server.Server(config_file="idp/idp_conf.py")
     nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
-             text=name_id)
+                 text=name_id)
     t_l = [
         "loadbalancer-91.siroe.com",
         "loadbalancer-9.siroe.com"
     ]
     t_l_2 = {
-        "loadbalancer-9.siroe.com":"http://localhost:8000/slo/request",
-        "loadbalancer-91.siroe.com":"http://localhost:8010/slo/request"
+        "loadbalancer-9.siroe.com": "http://localhost:8000/slo/request",
+        "loadbalancer-91.siroe.com": "http://localhost:8010/slo/request"
     }
     t_l.remove(remove_sp)
 
@@ -212,21 +218,19 @@ def test_logout_request_from_idp(remove_sp,name_id):
         name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
         session_indexes=["_foo"])
 
-
     info = idp_server.apply_binding(
-    BINDING_SOAP, req, t_l_2[t_l[0]],
-    relay_state="relay2")
+        BINDING_SOAP, req, t_l_2[t_l[0]],
+        relay_state="relay2")
     redirect_url = None
     try:
         response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
     except Exception as e:
-        print(e,"----e")
-
+        print(e, "----e")
 
 
 # SAMLRequest: str
-@router.get("/sso/logout",summary=["Logout Request API From Service Provider"])
-async def logout(request: Request,response : Response,SAMLRequest: str,db: Session = Depends(get_db),):
+@router.get("/sso/logout", summary=["Logout Request API From Service Provider"])
+async def logout(request: Request, response: Response, SAMLRequest: str, db: Session = Depends(get_db), ):
     print(SAMLRequest)
     from base64 import decodebytes as b64decode
     from saml2 import server
@@ -235,7 +239,8 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
     samlreq = SAMLRequest
 
     req_info = idp_server.parse_logout_request(samlreq, BINDING_HTTP_REDIRECT)
-    print(vars(req_info),"---req_info---",req_info.message.name_id.text,vars(req_info.message),req_info.message.issuer.text)
+    print(vars(req_info), "---req_info---", req_info.message.name_id.text, vars(req_info.message),
+          req_info.message.issuer.text)
     # response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
 
     # verify_request_signature(req_info)
@@ -245,9 +250,9 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
 
     # find the users logged in database in which sp
     resp = idp_server.create_logout_response(req_info.message, [entity.BINDING_HTTP_REDIRECT])
-    print(vars(resp.issuer),"--req_info--")
+    print(vars(resp.issuer), "--req_info--")
     hinfo = idp_server.apply_binding(entity.BINDING_HTTP_REDIRECT, resp.__str__(), resp.destination, "/", response=True)
-    print(hinfo,"---hinfo---")
+    print(hinfo, "---hinfo---")
     # create logout request for sp2
     # test_logout_request_from_idp("loadbalancer-91.siroe.com")
     # html_response = {
@@ -259,17 +264,17 @@ async def logout(request: Request,response : Response,SAMLRequest: str,db: Sessi
         if key == 'Location':
             redirect_url = value
             break
-    print(redirect_url,"----redirect_url")
-    response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
-    verified_id = SessionController().verify_session(cookie,request)
+    print(redirect_url, "----redirect_url")
+    response = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
+    verified_id = SessionController().verify_session(cookie, request)
     print(verified_id)
     if verified_id[1] == 200:
-        verified_status = SessionController().check_session_db(db,verified_id[0])
+        verified_status = SessionController().check_session_db(db, verified_id[0])
         if verified_status[1] == 200:
-            SessionController().delete_session(db,verified_id[0])
+            SessionController().delete_session(db, verified_id[0])
             cookie.delete_from_response(response)
         else:
-            SessionController().delete_userid(db,req_info.message.name_id.text)
-    
+            SessionController().delete_userid(db, req_info.message.name_id.text)
+
     # test_logout_request_from_idp(req_info.message.issuer.text,req_info.message.name_id.text)
     return response

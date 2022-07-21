@@ -15,13 +15,16 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB")
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
     authjwt_secret_key = os.environ.get("SECRET_KEY")
+    FERNET_SECRET_KEY = str(os.environ.get("FERNET_SECRET_KEY"))
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access","refresh"}
     authjwt_access_token_expires: timedelta = timedelta(minutes=15)
     authjwt_refresh_token_expires: timedelta = timedelta(days=3)
     REDIS_HOST_URL = os.environ.get("REDIS_HOST_URL")
+    REDIS_PORT = 6379
+    REDIS_DB = 0
     REDIS_HOST_PORT = int(os.environ.get("REDIS_HOST_PORT"))
     REDIS_HOST_PASSWORD = os.environ.get("REDIS_HOST_PASSWORD")
-    
+
 def settings():
     return Settings()
