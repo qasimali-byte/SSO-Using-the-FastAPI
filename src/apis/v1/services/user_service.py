@@ -269,11 +269,11 @@ class UserService():
         try:
             user=self.db.query(idp_users).filter(idp_users.id==users_id).one_or_none()
             if user is not None:
-                self.db.query(idp_sp).filter(idp_sp.idp_users_id==users_id).delete() # this will return the list
-                self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
-                self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
-                self.db.query(idp_users).filter(idp_users.id==users_id).delete()
-                self.db.commit()
+                # self.db.query(idp_sp).filter(idp_sp.idp_users_id==users_id).delete() # this will return the list
+                # self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
+                # self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
+                # self.db.query(idp_users).filter(idp_users.id==users_id).delete()
+                # self.db.commit()
                 return "User deleted successfully", status.HTTP_200_OK
             else:
                 return "User not found", status.HTTP_404_NOT_FOUND
