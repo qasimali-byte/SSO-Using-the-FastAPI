@@ -60,7 +60,8 @@ async def sso_login(login_validator: LoginValidator, request: Request, db: Sessi
     # validate the cookie in db
     # if unique cookie is valid, use all emails
     # if email is admin: return cookie_idp + token
-    # if email is not admin and is valid sp email, return get samlrequest from uniquecookie to generate redirect response to sp
+    # if email is not admin and is valid sp email, return get samlrequest
+    # from uniquecookie to generate redirect response to sp
     # else: return "error"
     # if unique cookie is not valid, use only admin emails
     # if admin email is valid, return cookie_idp + token
@@ -73,20 +74,18 @@ async def sso_login(login_validator: LoginValidator, request: Request, db: Sessi
         verified_data = idp_controller.get_frontend_session_saml(verified_id[0])
         if verified_data[1] == 200:
             req = LoginProcessView()
-            ## validate email and password 
+            # validate email and password
             auth_result = AuthController(db).login_authentication(email, password)
             if auth_result[1] != 200:
                 response = custom_response(data=auth_result[0], status_code=auth_result[1])
                 return response
-
             resp = req.get(verified_data[0].saml_req, email)
             # delete frontend cookie
             idp_controller.delete_frontend_session(verified_id[0])
             # create idp cookie
             session = uuid4()
-            ## store session in the database
+            # store session in the database
             req.store_session(session, email, db)
-
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             access_token = authorize.create_access_token(subject=email, fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)
@@ -100,7 +99,6 @@ async def sso_login(login_validator: LoginValidator, request: Request, db: Sessi
             cookie.attach_to_response(response, session)
             delete_all_cookies(response, only_frontend=True)
             return response
-
     resp = AuthController(db).login(email, password, authorize)
     delete_all_cookies(resp)
     return resp

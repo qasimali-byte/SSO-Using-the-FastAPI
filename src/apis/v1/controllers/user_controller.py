@@ -20,6 +20,7 @@ from src.apis.v1.validators.common_validators import ErrorResponseValidator, Suc
 from datetime import datetime as dt
 from src.apis.v1.validators.user_validator import  CreateUserValidator, GetUsersValidatorUpdateApps, \
     UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut,UserDeleteValidatorOut
+from ..core.project_settings import Settings
 from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, format_data_for_update_user_image
 
 class UserController():
@@ -225,7 +226,7 @@ class UserController():
             "statuscode": status.HTTP_201_CREATED
         }
         validated_data = SuccessfulJsonResponseValidator(**data)
-        response = custom_response(status_code=status.HTTP_, data=validated_data)
+        response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
 
     def generate_encrypted_url(self, user_data):
@@ -234,7 +235,7 @@ class UserController():
 
         verification_save_response = UserService(self.db).save_user_verify_db(user_id=user_data.id,
                                                                               verification_id=unique_id)
-        url = Settings().BASE_URL + "/api/v1/user/verify_email/" + url_key
+        url = Settings().BASE_URL + "/api/v1/verify-email/" + url_key
         return url
 
     def send_email_to_user(self, user_data):
@@ -243,7 +244,6 @@ class UserController():
         task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
         self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
         user_email={user_email}")
-        print(f"Task created: task={task.id}, user_verification_url={user_verification_url}, user_email={user_email}")
 
     def verify_user_through_email(self, user_key):
         decrypted_values_list = get_decrypted_text(user_key).split('?')
