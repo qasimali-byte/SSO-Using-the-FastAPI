@@ -75,6 +75,8 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
                 return response
 
             resp = req.get(verified_data[0].saml_req,email)
+            application_entity_id = resp[1]['sp_entity_id']
+            resp = resp[0]
             # delete frontend cookie
             idp_controller.delete_frontend_session(verified_id[0])
             # create idp cookie
@@ -86,7 +88,7 @@ async def sso_login(login_validator:LoginValidator,request: Request,db: Session 
             access_token = authorize.create_access_token(subject=email,fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)
             data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="successfully authenticated",
-            roles=["super_admin"],token_type="Bearer",redirect_url=data[0],saml_response=data[1],
+            roles=["super_admin"],token_type="Bearer",redirect_url=data[0],saml_response=data[1], product_name=application_entity_id,
             statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
             response = custom_response(data=data_out
                 ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)

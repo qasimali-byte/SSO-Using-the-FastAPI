@@ -1,5 +1,3 @@
-from email import message
-from os import access
 from pydantic import BaseModel, validator, EmailStr
 from typing import Optional
 
@@ -35,6 +33,7 @@ class LoginValidatorError(BaseModel):
     statuscode: int
 
 class LoginValidatorOut(BaseModel):
+    product_name: str
     message: str
     access_token: str
     refresh_token: str
@@ -43,6 +42,7 @@ class LoginValidatorOut(BaseModel):
     statuscode: int
 
 class LoginValidatorOutRedirect(BaseModel):
+    product_name: str
     redirect_url: str
     saml_response: str
     message: str
