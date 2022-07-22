@@ -69,7 +69,8 @@ class UserController():
         idp_user_data = CreateUserValidator(uuid=create_unique_id(), firstname=user_data['firstname'],
                                             lastname=user_data['lastname'], email=user_data['email'],
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
-                                            user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,)
+                                            user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,
+                                            )
 
         # ## create user in db
         user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
@@ -79,7 +80,6 @@ class UserController():
                                          practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
 
         data = UserValidatorOut()
-        password = self.generate_save_user_password(user_created_data.id)
         self.send_email_to_user(user_data=user_created_data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=data)
         return response
@@ -223,14 +223,6 @@ class UserController():
         validated_data = SuccessfulJsonResponseValidator(**data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
-
-    def generate_save_user_password(self,user_id):
-        password = generate_password(size=12)
-        password_save_response = UserService(self.db).set_user_password_db(user_id=user_id, password=password)
-        if password_save_response.status_code == 202:
-            return password
-        else:
-            return password_save_response.status_code
 
     def generate_encrypted_url(self, user_data):
         unique_id = uuid.uuid4().hex

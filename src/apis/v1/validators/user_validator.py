@@ -4,7 +4,8 @@ from src.apis.v1.validators.practices_validator import SPRegionsValidator
 from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
 from src.apis.v1.validators.gender_validator import ListGenderValidator
 import uuid
-from src.apis.v1.utils.auth_utils import create_password_hash
+from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
+
 
 class AdminUserValidator(BaseModel):
     email: str
@@ -144,7 +145,7 @@ class CreateUserValidator(BaseModel):
         organization_id = "2"
         contact_no = "+92123456789"
         address = "enter address here"
-        password_hash = create_password_hash("admin")
+        password_hash = create_password_hash(generate_password(size=12))
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
         profile_image = "image/profile_image.jpg"
