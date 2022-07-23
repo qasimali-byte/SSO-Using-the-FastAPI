@@ -185,7 +185,7 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
     print(session)
     ## store session in the database
     resp.store_session(session,email,db)
-    resp = resp.get(saml_request, email)
+    resp = resp.get(saml_request, email,db)
     application_entity_id = resp[1]['sp_entity_id']
     resp = resp[0]
     print(application_entity_id,"application entity id")
