@@ -115,4 +115,4 @@ class LoginProcessView():
             "data": http_args,
             "type": "REDIRECT",
         }
-        return html_response
+        return html_response, resp_args

@@ -104,7 +104,8 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
     idp_controller = IDPController(db)
     verified_data = idp_controller.get_frontend_session_saml(verified_id[0]) 
     req = LoginProcessView()
-    resp = req.get(verified_data[0].saml_req,"syed@gmail.com",db)
+    resp = req.get(verified_data[0].saml_req,"syed@gmail.com")
+    resp = resp[0]
     return HTMLResponse(content=resp["data"]["data"])
     
 @router.get("/sso/redirect/",summary="Only Redirect Request from Service Provider")
@@ -126,7 +127,8 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
         verified_status = SessionController().check_session_db(db,verified_id[0])
         if verified_status[1] == 200:
             email_ = req.get_userid(verified_id[0],db)
-            resp = req.get(SAMLRequest,email_,db)
+            resp = req.get(SAMLRequest,email_)
+            resp = resp[0]
             return HTMLResponse(content=resp["data"]["data"])
     
     session = uuid4()
@@ -183,8 +185,11 @@ async def sso_login(response: Response,request: Request,email: str = Form(...),p
     print(session)
     ## store session in the database
     resp.store_session(session,email,db)
-    resp = resp.get(saml_request, email,db)
-    print(resp["data"]["data"])
+    resp = resp.get(saml_request, email)
+    application_entity_id = resp[1]['sp_entity_id']
+    resp = resp[0]
+    print(application_entity_id,"application entity id")
+    # print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     cookie.attach_to_response(response, session)
     print(vars(response))

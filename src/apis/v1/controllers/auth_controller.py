@@ -56,6 +56,7 @@ class AuthController:
         access_token = authorize.create_access_token(subject=email,fresh=True)
         refresh_token = authorize.create_refresh_token(subject=email)
         data = LoginValidatorOut(
+            product_name="ez-login",
             message="successfully authenticated",
             access_token= access_token, 
             refresh_token=refresh_token,

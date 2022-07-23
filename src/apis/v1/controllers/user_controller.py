@@ -207,4 +207,11 @@ class UserController():
         validated_data = SuccessfulJsonResponseValidator(**data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
+
+    def get_user_by_email(self, user_email):
+        """
+            Get User By Email Controller
+        """
+        user_info_data = UserService(self.db).get_user_info_db(user_email)
+        return user_info_data
         
