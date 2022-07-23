@@ -56,7 +56,6 @@ class LoginProcessView():
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
         user_info_data = UserService(db).get_user_info_db(email)
         practice_roles_data,practice_roles_status=UserService(db).get_all_sps_practice_roles_db(email)
-        print('---------------------------',practice_roles_data)
         users_info = dict({
             "username": user_info_data.username,
             "email": user_info_data.email,
@@ -65,9 +64,8 @@ class LoginProcessView():
 
 
         })
-        
-        app_role=RolesService(db).get_user_selected_role_db_appid_userid(7,user_info_data.id)
-        
+
+        app_role=RolesService(db).get_user_selected_role_db_appid_userid(4,user_info_data.id)
         apps = list()
 
         for i in range(len(practice_roles_data)):
@@ -93,6 +91,7 @@ class LoginProcessView():
         users_info['app_practices']=app_practices
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
+        print('json_updated_data---',json_updated_data)
         idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
         saml_msg =request_parms

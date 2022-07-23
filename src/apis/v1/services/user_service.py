@@ -230,7 +230,6 @@ class UserService():
             ## internal users should not have ez login option
             ## external users should have ez login option
             ## ez login sub-admin should have only practice-admin option
-
             type_of_user = self.db.query(idp_users,idp_user_types) \
                             .join(idp_user_types, idp_users.user_type_id == idp_user_types.id) \
                             .with_entities(idp_user_types.user_type, idp_users.id)\
