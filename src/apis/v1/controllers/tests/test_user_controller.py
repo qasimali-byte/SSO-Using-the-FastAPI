@@ -17,42 +17,92 @@ from src.apis.v1.core.project_settings import Settings
 #         {
 #         "id": 7,
 #         "practices": [],
-#         "role": {
-#                 "id": 1,
-#                 "sub_role": null
-#             }
+        # "role": {
+        #         "id": 1,
+        #         "sub_role": null
+        #     }
             
-#         },
+        # },
 #         {
 #         "id": 3,
-#         "practices": [
-#                 {
-#                 "id": 337
-#                 },
-#                 {
-#                 "id": 338
-#                 },
-#                 {
-#                 "id": 366
-#                 },
-#                 {
-#                 "id": 374
-#                 },
-#                 {
-#                 "id": 375
-#                 },
-#                 {
-#                 "id": 376
-#                 }
-#             ],
-#         "role": 
-#                 {
-#                 "id": 4,
-#                 "sub_role": 3
-#                 }
+        # "practices": [
+        #         {
+        #         "id": 337
+        #         },
+        #         {
+        #         "id": 338
+        #         },
+        #         {
+        #         "id": 366
+        #         },
+        #         {
+        #         "id": 374
+        #         },
+        #         {
+        #         "id": 375
+        #         },
+        #         {
+        #         "id": 376
+        #         }
+        #     ],
+        # "role": 
+        #         {
+        #         "id": 4,
+        #         "sub_role": 3
+        #         }
             
-#         }
+        # }
 #     ]
+# }
+
+
+### edit user practices and roles example for id 1773
+# {
+# 	"apps": [{
+# 			"id": 7,
+# 			"practices": [],
+# 			"role": {
+# 				"id": 1,
+# 				"sub_role": null
+# 			}
+# 		},
+# 		{
+# 			"id": 3,
+# 			"practices": [{
+# 					"id": 337
+# 				},
+# 				{
+# 					"id": 338
+# 				},
+# 				{
+# 					"id": 366
+# 				},
+# 				{
+# 					"id": 374
+# 				},
+# 				{
+# 					"id": 375
+# 				},
+# 				{
+# 					"id": 376
+# 				}
+# 			],
+# 			"role": {
+# 				"id": 4,
+# 				"sub_role": 3
+# 			}
+
+
+# 		}
+
+# 	],
+# 	"message": "successfully fetched sp practice roles",
+# 	"statuscode": 200,
+# 	"firstname": "string",
+# 	"lastname": "string 2",
+# 	"email": "faisal@example.com",
+# 	"type_of_user": "internal",
+# 	"is_active": true
 # }
 class TestController(unittest.TestCase):
     def setUp(self):

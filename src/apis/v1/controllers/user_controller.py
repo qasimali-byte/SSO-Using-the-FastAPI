@@ -294,3 +294,10 @@ class UserController():
             response = custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data=validated_data)
 
         return response
+    def get_user_by_email(self, user_email):
+        """
+            Get User By Email Controller
+        """
+        user_info_data = UserService(self.db).get_user_info_db(user_email)
+        return user_info_data
+        
