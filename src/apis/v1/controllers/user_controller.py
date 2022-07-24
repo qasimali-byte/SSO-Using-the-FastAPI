@@ -1,6 +1,8 @@
+import logging
+import uuid
 from datetime import datetime
 from src.apis.v1.services.type_of_user_service import TypeOfUserService
-from src.apis.v1.utils.user_utils import image_writer
+from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text, get_decrypted_text
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
@@ -11,17 +13,22 @@ from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
+from src.apis.v1.workers.worker import email_sender
 from src.apis.v1.validators.users_validator import UsersValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
-from src.apis.v1.validators.user_validator import  CreateUserValidator, GetUsersValidatorUpdateApps, \
-    UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut,UserDeleteValidatorOut
-from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, format_data_for_update_user_image
+from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersValidatorUpdateApps, \
+    UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut, \
+    UserDeleteValidatorOut
+from ..core.project_settings import Settings
+from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, \
+    format_data_for_update_user_image
+
 
 class UserController():
     def __init__(self, db) -> None:
         self.db = db
-
-    def assign_practices_apps_roles(self, user_id:int, apps_ids_list, practices_ids_list, selected_roles_list) -> int:
+        self.log = logging.getLogger(__name__)
+    def assign_practices_apps_roles(self, user_id: int, apps_ids_list, practices_ids_list, selected_roles_list) -> int:
 
         # assign sp apps to user
         SPSController(self.db).assign_sps_to_user(user_id=user_id, sps_object_list=apps_ids_list)
@@ -40,7 +47,7 @@ class UserController():
         """
         # ## verify valid ids of sp applications , roles, sub roles and practices
         # ## roles must be atleast selected when the app is selected roles cannot be empty
-        
+
         # ## format data for create user
         apps_ids_list, practices_ids_list, selected_roles_list = format_data_for_create_user(user_data)
 
@@ -58,16 +65,20 @@ class UserController():
         driq_gender_id = check_driq_gender_id_exsist(user_data)
 
         # ## create user data
-        idp_user_data = CreateUserValidator(uuid=create_unique_id(),firstname=user_data['firstname'], lastname=user_data['lastname'], email=user_data['email'],
-         username=str(user_data['firstname'])+str(user_data['lastname']),user_type_id=user_type_id,dr_iq_gender_id=driq_gender_id)
-        
+        idp_user_data = CreateUserValidator(uuid=create_unique_id(), firstname=user_data['firstname'],
+                                            lastname=user_data['lastname'], email=user_data['email'],
+                                            username=str(user_data['firstname']) + str(user_data['lastname']),
+                                            user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id)
+
         # ## create user in db
         user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
         user_id = user_created_data.id
 
-        self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list, practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
+        self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list,
+                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
 
         data = UserValidatorOut()
+        self.send_email_to_user(user_data=user_created_data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=data)
         return response
 
@@ -89,33 +100,33 @@ class UserController():
         response = custom_response(status_code=practice_roles_status, data=data)
         return response
 
-
-
-    def get_user_practices_roles_by_id(self, user_email:str, user_id:int):
+    def get_user_practices_roles_by_id(self, user_email: str, user_id: int):
         """
             Get User Practices And Selected Roles By ID
          """
         selected_user_id = user_id
-        user_service_object = UserService(self.db) 
-        user_info = user_service_object.get_user_info_db(user_email)  
+        user_service_object = UserService(self.db)
+        user_info = user_service_object.get_user_info_db(user_email)
         selected_user_info = user_service_object.get_user_info_db_by_id(user_id)
         if selected_user_info is None:
             data = ErrorResponseValidator(message="User Not Found")
             response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=data)
             return response
-        
+
         selected_email = selected_user_info.email
-        allowed_apps = SPSController(self.db).get_allowed_apps_by_userid(user_email, selected_email, user_info.id, selected_user_id)
+        allowed_apps = SPSController(self.db).get_allowed_apps_by_userid(user_email, selected_email, user_info.id,
+                                                                         selected_user_id)
         firstname = selected_user_info.first_name
         lastname = selected_user_info.last_name
         type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
         type_of_user = type_of_user['name']
-        data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname, 
-        email=selected_email, type_of_user=type_of_user, sp_practice_roles=allowed_apps, is_active=selected_user_info.is_active)
+        data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname,
+                                           email=selected_email, type_of_user=type_of_user,
+                                           sp_practice_roles=allowed_apps, is_active=selected_user_info.is_active)
         response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
-    def update_user_practices_roles_by_id(self, user_id:int, user_data):
+    def update_user_practices_roles_by_id(self, user_id: int, user_data):
         """
             Update User Practices, SP Applications And Roles By User ID
         """
@@ -125,22 +136,24 @@ class UserController():
         # ## get type of user
         user_type_id = TypeUserController(self.db).get_type_of_user(user_data['type_of_user'])['id']
 
-        user_service_object = UserService(self.db) 
+        user_service_object = UserService(self.db)
         selected_user_info = user_service_object.get_user_info_db_by_id(user_id)
         if selected_user_info is None:
             data = ErrorResponseValidator(message="User Not Found")
             response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=data)
             return response
-        
+
         ## delete user sp apps, practices and roles
         user_service_object.delete_user_practices_roles_db(user_id)
-        
+
         ## check and assign dr iq gender id to user
         driq_gender_id = check_driq_gender_id_exsist(user_data)
 
         idp_user_data = UpdateUserValidatorDataClass(firstname=user_data['firstname'], lastname=user_data['lastname'],
-        updated_date=datetime.now(),username=user_data['firstname']+user_data['lastname'], is_active=user_data['is_active'],
-        dr_iq_gender_id=driq_gender_id,user_type_id=user_type_id)
+                                                     updated_date=datetime.now(),
+                                                     username=user_data['firstname'] + user_data['lastname'],
+                                                     is_active=user_data['is_active'],
+                                                     dr_iq_gender_id=driq_gender_id, user_type_id=user_type_id)
 
         idp_user_data = idp_user_data.dict()
         idp_user_data['id'] = user_id
@@ -149,8 +162,9 @@ class UserController():
         user_service_object.update_user_info_db_by_id(idp_user_data)
 
         ## assign sp applications, practices and roles to user
-        self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list, practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
-        
+        self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list,
+                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
+
         data = {
             "message": "successfully updated user practices, apps and roles",
             "statuscode": status.HTTP_201_CREATED
@@ -164,36 +178,36 @@ class UserController():
             Get User Information Controller
         """
         user_info_data = UserService(self.db).get_user_info_db(user_email)
-        user_info_resp = UserInfoValidator(user_info = user_info_data,statuscode=status.HTTP_200_OK, message="User Info Found")
+        user_info_resp = UserInfoValidator(user_info=user_info_data, statuscode=status.HTTP_200_OK,
+                                           message="User Info Found")
         response = custom_response(status_code=status.HTTP_200_OK, data=user_info_resp)
         return response
-
 
     def update_user_info(self, user_email, user_data):
         """
             Update User Information Controller
         """
         user_data['email'] = user_email
-        
+
         ## update user info in db
         UserService(self.db).update_user_info_db(user_data)
 
-        user_info_resp = UserInfoValidator(user_info= user_data, statuscode=status.HTTP_201_CREATED, message="User Info Updated")
+        user_info_resp = UserInfoValidator(user_info=user_data, statuscode=status.HTTP_201_CREATED,
+                                           message="User Info Updated")
         response = custom_response(status_code=status.HTTP_201_CREATED, data=user_info_resp)
         return response
-    
-    def delete_user(self,user_id):
+
+    def delete_user(self, user_id):
         """
             this function will delete the user
         """
 
-        message,status_code=UserService(self.db).delete_users_info_db(user_id)
-        data = UserDeleteValidatorOut(message=message,status_code=status_code)
-        response = custom_response(data=data,status_code=status_code)
+        message, status_code = UserService(self.db).delete_users_info_db(user_id)
+        data = UserDeleteValidatorOut(message=message, status_code=status_code)
+        response = custom_response(data=data, status_code=status_code)
         return response
-  
 
-    def update_user_image(self,user_email,data_image):
+    def update_user_image(self, user_email, data_image):
         """
             Update User Image Controller
         """
@@ -208,6 +222,78 @@ class UserController():
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
 
+    def generate_encrypted_url(self, user_data):
+        unique_id = uuid.uuid4().hex
+        url_key = get_encrypted_text(str(user_data.id) + "?" + str(unique_id) + "?" + str(datetime.now()))
+
+        verification_save_response = UserService(self.db).save_user_verify_db(user_id=user_data.id,
+                                                                              verification_id=unique_id)
+        url = Settings().BASE_URL + "/api/v1/verify-email/" + url_key
+        return url
+
+    def send_email_to_user(self, user_data):
+        user_verification_url = self.generate_encrypted_url(user_data)
+        user_email = user_data.email
+        task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+        self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
+        user_email={user_email}")
+
+    def verify_user_through_email(self, user_key):
+        decrypted_values_list = get_decrypted_text(user_key).split('?')
+        user_id, unique_id, time_tag = decrypted_values_list[0], decrypted_values_list[1], decrypted_values_list[2]
+        # here we will implement the logic for key expiry for time_tag.
+        verification_response = UserService(self.db).verify_user_email_db(user_id=user_id, verification_id=unique_id)
+        return verification_response
+
+    def reset_password_through_email(self, user_email):
+        user_data = UserService(self.db).get_user_info_db(user_email=user_email)
+        if user_data:
+            user_verification_url = self.generate_encrypted_url(user_data)
+            user_email = user_data.email
+            task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+            self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
+                    user_email={user_email}")
+            data = {
+                "message": "Reset url sent successfully through email",
+                "statuscode": status.HTTP_202_ACCEPTED
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
+        else:
+            data = {
+                "message": "User not found with this email",
+                "statuscode": status.HTTP_404_NOT_FOUND
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+
+        return response
+
+    def set_password(self, session, password):
+
+        user_id = get_decrypted_text(session)
+        response = UserService(self.db).set_user_password_db(user_id=user_id, password=password)
+        return response
+
+    def change_password(self, password):
+
+        if password:
+            print("\nPassword:",password,"\n")
+            data = {
+                "message": "Password updated successfully",
+                "statuscode": status.HTTP_202_ACCEPTED
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
+        else:
+            data = {
+                "message": "Password couldn't be Updated.",
+                "statuscode": status.HTTP_406_NOT_ACCEPTABLE
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            response = custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data=validated_data)
+
+        return response
     def get_user_by_email(self, user_email):
         """
             Get User By Email Controller

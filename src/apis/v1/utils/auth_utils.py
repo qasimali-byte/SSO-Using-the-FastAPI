@@ -4,9 +4,11 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
 from src.apis.v1.core.project_settings import Settings
+
 settings = Settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -14,6 +16,7 @@ def verify_password(plain_password, hashed_password):
 
 def create_password_hash(password):
     return pwd_context.hash(password)
+
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
