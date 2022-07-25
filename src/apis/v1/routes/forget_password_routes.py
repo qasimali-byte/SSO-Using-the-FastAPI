@@ -1,3 +1,5 @@
+import uuid
+
 from src.apis.v1.db.session import get_db
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Query
@@ -34,7 +36,6 @@ async def verify_email(
         return response
 
 
-
 @router.post("/change-password", summary="Takes email as request body parameter.",
              responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=201)
 async def change_password(email_validator:ForgetPasswordValidator, db: Session = Depends(get_db)):
@@ -61,3 +62,19 @@ async def set_password(set_password_validator: SetPasswordValidator, request: Re
     deleteSession(sessionId, sessionStorage)
     return resp
 
+
+@router.get("/test/{email}", summary="For Session Test.",
+            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def test_(
+        email: str, response: Response, db: Session = Depends(get_db),
+        session_id: Any = Depends(getSession),
+        sessionStorage: SessionStorage = Depends(getSessionStorage)
+):
+    """
+        This api verifies the url hit by the user through emai.
+    """
+
+    session_id = uuid.uuid4()
+    sessionStorage[email] = session_id
+    response.set_cookie(key="response", value=session_id, httponly=True)
+    return {"message":str(response),"statuscode":5000}

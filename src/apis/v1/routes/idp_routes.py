@@ -1,4 +1,6 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
+from fastapi_redis_session import SessionStorage, getSessionStorage
+
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.idp_controller import IDPController
 from fastapi_sessions.frontends.implementations.cookie import CookieParameters, CookieParameters2
@@ -113,7 +115,10 @@ async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends
 
 
 @router.get("/sso/redirect/", summary="Only Redirect Request from Service Provider")
-async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends(get_db)):
+async def sso_redirect(request: Request, SAMLRequest: str,
+                       sessionStorage: SessionStorage = Depends(getSessionStorage),
+                       db: Session = Depends(get_db)
+                       ):
     # validate saml request parameter
     # if not validate_saml_request(SAMLRequest):
     # return Response(status_code=400, content="Invalid SAML Request")
@@ -136,7 +141,10 @@ async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends
 
     session = uuid4()
     # store the cookie in db
-    IDPController(db).store_frontend_saml(session, SAMLRequest)
+
+    # IDPController(db).store_frontend_saml(session, SAMLRequest)
+    # store session in the redis store.
+    sessionStorage[session] = SAMLRequest
     # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
     host_port = str(host) + ":" + str(port)

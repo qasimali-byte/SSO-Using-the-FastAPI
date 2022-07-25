@@ -3,6 +3,8 @@ from uuid import uuid4
 from fastapi import Depends, HTTPException, Request, APIRouter, Response
 from fastapi.responses import HTMLResponse
 from fastapi import status
+from fastapi_redis_session import SessionStorage, getSessionStorage
+
 from src.apis.v1.helpers.global_helpers import delete_all_cookies
 from src.apis.v1.helpers.html_parser import HTMLPARSER
 from src.apis.v1.controllers.idp_controller import IDPController
@@ -55,7 +57,9 @@ async def email_verifier(email_validator: EmailValidator, request: Request, db: 
 
 @router.post("/login", summary="Submit Login Page API submission",
              responses={200: {"model": LoginValidatorOut}, 307: {"model": LoginValidatorOutRedirect}})
-async def sso_login(login_validator: LoginValidator, request: Request, db: Session = Depends(get_db),
+async def sso_login(login_validator: LoginValidator, request: Request,
+                    sessionStorage: SessionStorage = Depends(getSessionStorage),
+                    db: Session = Depends(get_db),
                     authorize: AuthJWT = Depends()):
     # validate the cookie in db
     # if unique cookie is valid, use all emails
@@ -80,12 +84,13 @@ async def sso_login(login_validator: LoginValidator, request: Request, db: Sessi
                 response = custom_response(data=auth_result[0], status_code=auth_result[1])
                 return response
             resp = req.get(verified_data[0].saml_req, email)
-            # delete frontend cookie
+            # delete frontend cookie from redis store.
             idp_controller.delete_frontend_session(verified_id[0])
+
             # create idp cookie
             session = uuid4()
-            # store session in the database
-            req.store_session(session, email, db)
+            # store session in the redis store.
+            sessionStorage[session] = email
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             access_token = authorize.create_access_token(subject=email, fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)
@@ -96,6 +101,7 @@ async def sso_login(login_validator: LoginValidator, request: Request, db: Sessi
                                                  statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
             response = custom_response(data=data_out
                                        , status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+            # response.set_cookie(key="cookie_idp", value=session, httponly=True)this and lower line are same. can be removed
             cookie.attach_to_response(response, session)
             delete_all_cookies(response, only_frontend=True)
             return response
