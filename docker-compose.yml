@@ -28,6 +28,18 @@ services:
     image: "redis:alpine"
     ports:
      - 6379
+  celery_worker:
+    container_name: celery_worker
+    build: .
+    command: celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
+    volumes:
+      - .:/app
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    depends_on:
+      - app
+      - redis
 volumes:
     postgres_data:
                 
