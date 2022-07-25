@@ -37,7 +37,8 @@ def upgrade():
     # sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     # sa.PrimaryKeyConstraint('id')
     # )
-    op.drop_table('user_idp_sp_app')
+    # op.drop_table('user_idp_sp_app')
+    pass
     # ### end Alembic commands ###
 
 
