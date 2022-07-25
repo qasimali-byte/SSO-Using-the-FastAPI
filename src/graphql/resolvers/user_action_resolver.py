@@ -25,11 +25,11 @@ def decode_user_action_id(cursor: Optional[Cursor]):
     return 0
 
 async def get_user_actions(db,first: int, cursor: Optional[Cursor], direction: Optional[str],
-        search: Optional[str] = None,user_id = None, role_name: Optional[str] = None,action_level:Optional[str]=None,
+        search: Optional[str] = None,user_email = None, role_name: Optional[str] = None,action_level:Optional[str]=None,
         start_date_time:Optional[str]=None,end_date_time:Optional[str]=None):
 
     start_date_time, end_date_time = get_start_and_end_date_time(start_date_time, end_date_time)
-    filter_query = create_user_action_filter_query(search, user_id, role_name,action_level,start_date_time,end_date_time)
+    filter_query = create_user_action_filter_query(search, user_email, role_name,action_level,start_date_time,end_date_time)
     order_by_query = create_user_action_orderby_query(order_by="id")
     sub_query_filtered_results = get_filtered_results_query(filter_query)
     total_records_count = await get_filtered_records_count(db, sub_query_filtered_results)

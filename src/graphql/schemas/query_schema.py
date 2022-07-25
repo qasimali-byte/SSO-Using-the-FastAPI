@@ -14,9 +14,9 @@ class Query:
 
     @strawberry.field(permission_classes=[IsAuthenticated])
     async def user_actions(self, first: int = 10, cursor: Optional[Cursor] = None, direction: DirectionEnum = "forward",
-        search: Optional[str] = None,user_id: Optional[int] = None, role_name: Optional[RoleEnum] = None,action_level: Optional[ActionLevelEnum]=None,
+        search: Optional[str] = None,user_email: Optional[str] = None, role_name: Optional[RoleEnum] = None,action_level: Optional[ActionLevelEnum]=None,
         start_date_time:Optional[str]=None,end_date_time:Optional[str]=None) -> Connection[UserAction]:
         
         async with get_session() as s:
-            return await get_user_actions(db=s,first=first,cursor=cursor,direction=direction,search=search,user_id=user_id,
+            return await get_user_actions(db=s,first=first,cursor=cursor,direction=direction,search=search,user_email=user_email,
             role_name=role_name,action_level=action_level,start_date_time=start_date_time,end_date_time=end_date_time) 

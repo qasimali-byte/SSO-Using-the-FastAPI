@@ -6,13 +6,13 @@ from src.apis.v1.models.user_action_model import user_action
 from src.graphql.scalars.pagination_scalar import Connection, PageInfo
 
 
-def create_user_action_filter_query(search,user_id,role_name,action_level,start_date_time,end_date_time):
+def create_user_action_filter_query(search,user_email,role_name,action_level,start_date_time,end_date_time):
 
     filter_query = user_action.id != None
     if search is not None:
         filter_query = filter_query & (idp_users.username.ilike(f"%{search}%"))
     if user_id is not None:
-        filter_query = filter_query & (idp_users.id == user_id)
+        filter_query = filter_query & (idp_users.email == user_email)
     if role_name is not None:
         filter_query = filter_query & (user_action.role_name == role_name)
     if action_level is not None:
