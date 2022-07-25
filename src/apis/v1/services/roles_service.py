@@ -94,6 +94,8 @@ class RolesService():
                 user_selected_roles.append(roles_values.name)
 
             if sp_app_name == "ez-login":
+                if len(user_selected_roles) == 0:
+                    return None
                 return user_selected_roles[0]
             
             return user_selected_roles

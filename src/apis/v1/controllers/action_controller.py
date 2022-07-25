@@ -18,8 +18,8 @@ class ActionController():
             if current_user:
                 user_object = UserController(self.db).get_user_by_email(current_user)
                 user_id = user_object.id
-                role_name = None
-                role_name = role_name if RolesController(self.db).get_ezlogin_user_role(user_id) else None
+                role_name = RolesController(self.db).get_ezlogin_user_role(user_id)
+                role_name = role_name if role_name else None
                 action_service_obj.store_user_action_logs(action_list=actions, status=status_of_api, user_id=user_id, 
                 app_name=app_name, role_name=role_name)
                 print("stored action logs")
