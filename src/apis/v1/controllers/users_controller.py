@@ -14,7 +14,7 @@ class UsersController():
         self._metadata = {}
         
 
-    def get_users(self, user_email:str, page_limit:int, page_offset:int) -> dict:
+    def get_users(self, user_email:str, page_limit:int, page_offset:int,order_by:str, latest=bool) -> dict:
         """
             Get Users according to the roles of user email
         """
@@ -25,18 +25,18 @@ class UsersController():
 
         if user_selected_role == "super-admin":
             # get subadmins and practice admins and external users
-            users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='super-admin',page_limit=page_limit, page_offset=page_offset)
+            users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='super-admin',page_limit=page_limit, page_offset=page_offset,order_by=order_by, latest=latest)
 
         elif user_selected_role == "sub-admin":
             # get practice admins and external users
-            users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='sub-admin',page_limit=page_limit, page_offset=page_offset)
+            users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='sub-admin',page_limit=page_limit, page_offset=page_offset,order_by=order_by, latest=latest)
 
         elif user_selected_role == "practice-administrator":
             # get user type id of external user
             user_type_id = TypeUserController(self.db).get_type_of_user('external')['id']
 
             # get all external users from db for practice admin role
-            users_info, records_count = UsersService(self.db).get_external_users_info_db(user_type_id=user_type_id,page_limit=page_limit, page_offset=page_offset)
+            users_info, records_count = UsersService(self.db).get_external_users_info_db(user_type_id=user_type_id,page_limit=page_limit, page_offset=page_offset,order_by=order_by, latest=latest)
 
         ## structuring pagination data
         _metadata = {
