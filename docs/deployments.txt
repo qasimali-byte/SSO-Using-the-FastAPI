@@ -31,3 +31,6 @@ sudo docker ps -a -q |sudo  xargs docker stop
 ## alembic migrations
 alembic revision  --autogenerate -m "changing unique contraint in uuid
 alembic upgrade head
+
+## celery command
+celery worker -A worker.celery --loglevel=INFO -P eventlet

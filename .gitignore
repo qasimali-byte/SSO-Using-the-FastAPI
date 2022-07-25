@@ -5,11 +5,11 @@ __pycache__/
 .vscode/
 *.pytest_cache
 *.coverage
-venv/
-envs/
-.env.dev
-.env.prod
-load_env.py
+# venv/
+# envs/
+# .env.dev
+# .env.prod
+# load_env.py
 .idea
 /src/apis/v1/workers/.env.worker
 # envs/git
@@ -20,5 +20,5 @@ load_env.py
 .idea
 local_test.py
 /public/assets/
-/alembic/
-/build/
+# /alembic/
+# /build/

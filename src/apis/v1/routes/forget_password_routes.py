@@ -26,7 +26,7 @@ async def verify_email(
     if resp.status_code==202 or resp.status_code==302:
         print("\nEmail user verified.")
         sessionData = get_encrypted_text(get_decrypted_text(user_key).split('?')[0])
-        response = RedirectResponse(url="http://localhost:8088/reset-password")
+        response = RedirectResponse(url="http://18.134.217.103/reset-password")
         response.set_cookie(key="user_secret", value=sessionData)
         response.set_cookie(key="test", value="test value")
         setSession(response, sessionData, sessionStorage)

@@ -1,5 +1,3 @@
-from random import random
-from fastapi import Depends, HTTPException
 from passlib import pwd
 from passlib.context import CryptContext
 from typing import Optional
@@ -66,9 +64,15 @@ def generate_password(size=9, custom=True):
 #     if user is None:
 #         raise credentials_exception
 #     return user
+def get_current_logged_in_user(authorize, response_body):
+    current_user = None
+    try:
+        current_user = authorize.get_jwt_subject()
+    except:
+        current_user = None
 
+    if current_user == None:
+        access_token = response_body.get("access_token",None)
+        current_user = authorize._verified_token(access_token)['sub']
 
-# async def get_current_active_user(current_user: User = Depends(get_current_user)):
-#     if current_user.disabled:
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     return current_user
+    return current_user
