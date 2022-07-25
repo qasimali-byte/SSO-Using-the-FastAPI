@@ -6,21 +6,19 @@ from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text, get_d
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.type_user_controller import TypeUserController
-from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
-from src.apis.v1.workers.worker import email_sender
-from src.apis.v1.validators.users_validator import UsersValidatorOut
+from celery_worker import email_sender
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersValidatorUpdateApps, \
     UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut, \
     UserDeleteValidatorOut
 from ..core.project_settings import Settings
-from ..utils.auth_utils import generate_password
+from ..utils.auth_utils import create_password_hash, generate_password
 from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, \
     format_data_for_update_user_image
 
@@ -70,6 +68,7 @@ class UserController():
                                             lastname=user_data['lastname'], email=user_data['email'],
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
                                             user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,
+                                            password_hash=create_password_hash(generate_password(size=12)),
                                             )
 
         # ## create user in db

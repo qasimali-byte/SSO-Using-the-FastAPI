@@ -1,4 +1,9 @@
+"""prefork worker doesn't work in windows , so we have to use (-P solo) or (-P eventlet)\
+as following:
+celery -A celery_worker worker --loglevel=INFO -P eventlet
+"""
 import os
+from celery import Celery
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase
@@ -65,3 +70,14 @@ def send_email(url, recipient, attachment=None):
     except Exception as e:
         print(str(e))
         return False
+
+
+celery = Celery(__name__)
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
+import load_env
+
+
+@celery.task(name="email_sender")
+def email_sender(user_verification_url, user_email):
+    return send_email(url=user_verification_url,recipient=user_email)
