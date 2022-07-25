@@ -61,20 +61,3 @@ async def set_password(set_password_validator: SetPasswordValidator, request: Re
     resp = UserController(db).set_password(session=session, password=set_password_validator.password)
     deleteSession(sessionId, sessionStorage)
     return resp
-
-
-@router.get("/test/{email}", summary="For Session Test.",
-            responses={201: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def test_(
-        email: str, response: Response, db: Session = Depends(get_db),
-        session_id: Any = Depends(getSession),
-        sessionStorage: SessionStorage = Depends(getSessionStorage)
-):
-    """
-        This api verifies the url hit by the user through emai.
-    """
-
-    session_id = uuid.uuid4()
-    sessionStorage[email] = session_id
-    response.set_cookie(key="response", value=session_id, httponly=True)
-    return {"message":str(response),"statuscode":5000}

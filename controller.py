@@ -121,6 +121,16 @@ class SessionController(Generic[ID, SessionModel]):
             return "Error: {}".format(e), 500
 
     @staticmethod
+    def check_session_redis(sessionStorage, cookie_id):
+        try:
+
+            if sessionStorage[cookie_id]:
+                return "Session found", 200
+            return "Session not found", 404
+        except Exception as e:
+            return "Error: {}".format(e), 500
+
+    @staticmethod
     def verify_session(cookie,request):
         try:
             signed_session_id = request.cookies.get(cookie.model.name)
