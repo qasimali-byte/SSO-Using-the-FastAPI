@@ -127,7 +127,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,db: Session = Depends(
         verified_status = SessionController().check_session_db(db,verified_id[0])
         if verified_status[1] == 200:
             email_ = req.get_userid(verified_id[0],db)
-            resp = req.get(SAMLRequest,email_)
+            resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]
             return HTMLResponse(content=resp["data"]["data"])
     
