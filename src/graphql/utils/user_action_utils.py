@@ -11,7 +11,7 @@ def create_user_action_filter_query(search,user_email,role_name,action_level,sta
     filter_query = user_action.id != None
     if search is not None:
         filter_query = filter_query & (idp_users.username.ilike(f"%{search}%"))
-    if user_id is not None:
+    if user_email is not None:
         filter_query = filter_query & (idp_users.email == user_email)
     if role_name is not None:
         filter_query = filter_query & (user_action.role_name == role_name)
