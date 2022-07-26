@@ -18,7 +18,7 @@ class async_iterator_wrapper:
         return value
 
 def success_status_codes():
-    return (200,201,202,204)
+    return (200,201,202,204,307)
 
 def error_status_code():
     return (409,500,501)

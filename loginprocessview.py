@@ -84,14 +84,17 @@ class LoginProcessView():
             for index in range(len(app_practices_list[i]['practices'])):
                 temp_list.append(app_practices_list[i]['parent'])
                 temp_list.append(app_practices_list[i]['practices'][index]['name'])
-                temp_list.append(app_role[1].name)
+                try:
+                    temp_list.append(app_role[1].name)
+                except Exception as e:
+                    temp_list.append(None)
                 app_practices.append(str(temp_list))
                 temp_list = list([])
         
         users_info['app_practices']=app_practices
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
-        print('json_updated_data---',json_updated_data)
+        # print('json_updated_data---',json_updated_data)
         idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
         saml_msg =request_parms
