@@ -146,11 +146,16 @@ class CreateUserValidator(BaseModel):
         contact_no = "+92123456789"
         address = "enter address here"
         password_hash = "admin"
+<<<<<<< HEAD
         reset_password_token = 'reset_password_token',
         reset_password_token_expiry = 'reset_password_token_expiry',
+=======
+        reset_password_token = 'reset_password_token'
+        reset_password_token_expiry = 'reset_password_token_expiry'
+>>>>>>> feature/session_redis
         profile_image = "image/profile_image.jpg"
-        created_date = datetime.now(),
-        updated_date = datetime.now(),
+        created_date = datetime.now()
+        updated_date = datetime.now()
         last_login_date = datetime.now()
         user_type_id: int
         dr_iq_gender_id: typing.Optional[int]

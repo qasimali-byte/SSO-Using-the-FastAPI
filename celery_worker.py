@@ -9,6 +9,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import  load_env
 
 
 def send_email(url, recipient, attachment=None):
@@ -73,9 +74,8 @@ def send_email(url, recipient, attachment=None):
 
 
 celery = Celery(__name__)
-celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379")
-celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
-import load_env
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 
 
 @celery.task(name="email_sender")
