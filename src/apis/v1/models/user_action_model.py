@@ -19,7 +19,7 @@ class user_action(Base):
         return {
             "id": self.id,
             "idp_user_id": self.idp_user.id,
-            "idp_user_name": self.idp_user.username,
+            "idp_user_name": self.idp_user.first_name + " " + self.idp_user.last_name,
             "idp_user_email": self.idp_user.email,
             "action_id": self.action.id,
             "action_name": self.action.name,
