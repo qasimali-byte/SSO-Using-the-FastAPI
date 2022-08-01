@@ -348,7 +348,8 @@ class UserService():
                 # self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
                 # self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
                 # self.db.query(idp_users).filter(idp_users.id==users_id).delete()
-                # self.db.commit()
+                user.is_approved = False
+                self.db.commit()
                 return "User deleted successfully", status.HTTP_200_OK
             else:
                 return "User not found", status.HTTP_404_NOT_FOUND
