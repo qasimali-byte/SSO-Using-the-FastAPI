@@ -11,13 +11,13 @@ class AdminUserValidator(BaseModel):
     password: str
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 class ForgetPasswordValidator(BaseModel):
     email: str
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
 class SetPasswordValidator(BaseModel):
@@ -50,8 +50,8 @@ class CreateInternalExternalUserValidatorIn(BaseModel):
     is_active: typing.Optional[bool] = True
 
     @validator('email')
-    def validate(cls, v):
-        return v.lower()   
+    def validate_email(cls, v):
+        return v.lower()
 
 class UserValidatorOut(BaseModel):
     statuscode: int = 201
@@ -72,7 +72,7 @@ class ExternalUserValidator(BaseModel):
     appspracticeroles: typing.List['AppsPracticeRoles']
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 class SPPracticeRoleValidator(BaseModel):
     """
@@ -104,7 +104,7 @@ class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
     is_active: typing.Optional[bool] 
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
 class PracticesRolesId(BaseModel):
@@ -127,7 +127,7 @@ class UserValidatorIn(BaseModel):
     practices_apps_roles: typing.List['PracticesAppsRolesValidator']
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
 
@@ -140,7 +140,7 @@ class GetUserInfoValidator(BaseModel):
     image_url: typing.Optional[str] = Field(alias="profile_image")
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
     class Config:
@@ -181,7 +181,7 @@ class CreateUserValidator(BaseModel):
     is_active: bool = True
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
     class Config:

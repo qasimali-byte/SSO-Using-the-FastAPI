@@ -5,7 +5,7 @@ class EmailValidator(BaseModel):
     email: str
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 
 class LoginValidator(BaseModel):
@@ -13,7 +13,7 @@ class LoginValidator(BaseModel):
     password: str
 
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 class LogoutValidator(BaseModel):
     access_token: str
@@ -25,9 +25,9 @@ class EmailValidatorOut(BaseModel):
     roles: list
     email: str
     statuscode: int
-    
+
     @validator('email')
-    def validate(cls, v):
+    def validate_email(cls, v):
         return v.lower()
 class EmailValidatorError(BaseModel):
     message: str
