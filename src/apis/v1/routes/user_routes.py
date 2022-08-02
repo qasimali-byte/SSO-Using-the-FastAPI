@@ -76,6 +76,7 @@ async def create_internal_external_user(user_validator:CreateInternalExternalUse
     resp = UserController(db).create_user(user_validator.dict())
     return resp
 
+
 @router.get("/user/{user_id}/service-providers/practices/roles", summary="Get User Information with practices and roles",
             responses={200:{"model": GetUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
 async def get_user_practices_roles_by_id(user_id:int, authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):

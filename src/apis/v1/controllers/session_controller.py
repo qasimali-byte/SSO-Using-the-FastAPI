@@ -59,6 +59,7 @@ class SessionVerfication():
     def verify_cookie(cookie,request):
         signed_session_id = request.cookies.get(cookie.model.name)
 
+
 class SessionController(Generic[ID, SessionModel]):
 
     @property
