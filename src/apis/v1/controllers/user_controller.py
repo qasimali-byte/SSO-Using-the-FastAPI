@@ -234,7 +234,7 @@ class UserController():
     def send_email_to_user(self, user_data):
         user_verification_url = self.generate_encrypted_url(user_data)
         user_email = user_data.email
-        task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+        task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email,user_name=user_data.first_name)
         self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
         user_email={user_email}")
 
@@ -250,7 +250,7 @@ class UserController():
         if user_data:
             user_verification_url = self.generate_encrypted_url(user_data)
             user_email = user_data.email
-            task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email)
+            task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email,user_name=user_data.first_name )
             self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
                     user_email={user_email}")
             data = {

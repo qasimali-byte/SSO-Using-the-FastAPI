@@ -14,13 +14,13 @@ import  load_env
 from jinja2 import Environment, FileSystemLoader
 
 
-def populate_html_file(url):
+def populate_html_file(url,user_name):
     base_url = f"{os.environ.get('HOST_URL')}:{os.environ.get('HOST_PORT')}/static/media/"
     if not "http" in base_url:
         base_url = "http://"+base_url
     environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("email.html")
-    html_ = template.render(user_activation_url=url,base_url=base_url)
+    html_ = template.render(user_activation_url=url,base_url=base_url,user_name=user_name)
     # print(base_url)
     with open('email.html', 'wb') as f:
         f.write(html_.encode())
@@ -40,13 +40,13 @@ def wait_until_found_file(file_path):
         raise ValueError("%s isn't a file!" % file_path)
 
 
-def send_email(url, recipient, attachment=None):
+def send_email(url, recipient, user_name, attachment=None):
     try:
         print("===================================================")
         print("                Email Task Started                 ")
         print("===================================================")
 
-        populate_html_file(url)
+        populate_html_file(url,user_name)
         file_ = wait_until_found_file("email.html")
 
         mail_content = MIMEText(file_.read(), "html")
@@ -92,5 +92,5 @@ celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://re
 
 
 @celery.task(name="email_sender")
-def email_sender(user_verification_url, user_email):
-    return send_email(url=user_verification_url,recipient=user_email)
+def email_sender(user_verification_url, user_email,user_name):
+    return send_email(url=user_verification_url,recipient=user_email,user_name=user_name)
