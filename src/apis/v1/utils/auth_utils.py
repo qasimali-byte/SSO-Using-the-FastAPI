@@ -1,10 +1,9 @@
+from passlib import pwd
 from passlib.context import CryptContext
 from typing import Optional
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-
 from src.apis.v1.core.project_settings import Settings
-
 settings = Settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -28,6 +27,43 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
+
+def generate_password(size=9, custom=True):
+    """
+    minimum length returned is 9.
+    "ascii_62" (the default) – all digits and ascii upper & lowercase letters.
+    Provides ~5.95 entropy per character.
+    "ascii_50" – subset which excludes visually similar characters (1IiLl0Oo5S8B).
+    Provides ~5.64 entropy per character.
+    "ascii_72" – all digits and ascii upper & lowercase letters, as well as some punctuation.
+     Provides ~6.17 entropy per character.
+    "hex" – Lower case hexadecimal. Providers 4 bits of entropy per character.
+    """
+    if custom:
+        # confusing letters (1IiLl0OoS5) are excluded.
+        characters = "abcdefghjkmnpqrtuvwxyzABCDEFGHJKMNPQRSTUVWXYZ2346789!@#-$%&?;*"
+        return pwd.genword(length=size, entropy=52, chars=characters)
+    else:
+        return pwd.genword(length=size, entropy=52, charset="ascii_72")
+
+# async def get_current_user(token: str = Depends(oauth2_scheme)):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+#         username: str = payload.get("sub")
+#         if username is None:
+#             raise credentials_exception
+#         token_data = TokenData(username=username)
+#     except JWTError:
+#         raise credentials_exception
+#     user = get_user(fake_users_db, username=token_data.username)
+#     if user is None:
+#         raise credentials_exception
+#     return user
 def get_current_logged_in_user(authorize, response_body):
     current_user = None
     try:

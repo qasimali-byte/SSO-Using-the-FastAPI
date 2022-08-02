@@ -4,7 +4,8 @@ from src.apis.v1.validators.practices_validator import SPRegionsValidator
 from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
 from src.apis.v1.validators.gender_validator import ListGenderValidator
 import uuid
-from src.apis.v1.utils.auth_utils import create_password_hash
+from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
+
 
 class AdminUserValidator(BaseModel):
     email: str
@@ -160,6 +161,8 @@ class UpdateUserValidatorIn(BaseModel):
     address: str = Field(alias="address")
 
 class CreateUserValidator(BaseModel):
+
+
     uuid : uuid.UUID
     first_name: str = Field(alias="firstname")
     last_name: str = Field(alias="lastname")
@@ -179,6 +182,7 @@ class CreateUserValidator(BaseModel):
     user_type_id: int
     dr_iq_gender_id: typing.Optional[int]
     is_active: bool = True
+
 
     @validator('email')
     def validate_email(cls, v):

@@ -1,3 +1,5 @@
+import uuid
+
 from src.apis.v1.db.session import get_db
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, Query
@@ -28,11 +30,9 @@ async def verify_email(
         sessionData = get_encrypted_text(get_decrypted_text(user_key).split('?')[0])
         response = RedirectResponse(url="http://18.134.217.103/reset-password")
         response.set_cookie(key="user_secret", value=sessionData)
-        response.set_cookie(key="test", value="test value")
         setSession(response, sessionData, sessionStorage)
         # cookie_frontend.attach_to_response(response, session)
         return response
-
 
 
 @router.post("/change-password", summary="Takes email as request body parameter.",
@@ -60,4 +60,3 @@ async def set_password(set_password_validator: SetPasswordValidator, request: Re
     resp = UserController(db).set_password(session=session, password=set_password_validator.password)
     deleteSession(sessionId, sessionStorage)
     return resp
-

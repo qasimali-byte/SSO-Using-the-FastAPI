@@ -1,4 +1,6 @@
 from fastapi import Depends, Form, Request, APIRouter, Response
+from fastapi_redis_session import SessionStorage, getSessionStorage
+
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.idp_controller import IDPController
 from fastapi_sessions.frontends.implementations.cookie import CookieParameters, CookieParameters2
@@ -114,7 +116,10 @@ async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends
 
 
 @router.get("/sso/redirect/", summary="Only Redirect Request from Service Provider")
-async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends(get_db)):
+async def sso_redirect(request: Request, SAMLRequest: str,
+                       sessionStorage: SessionStorage = Depends(getSessionStorage),
+                       db: Session = Depends(get_db)
+                       ):
     # validate saml request parameter
     # if not validate_saml_request(SAMLRequest):
     # return Response(status_code=400, content="Invalid SAML Request")
@@ -129,8 +134,9 @@ async def sso_redirect(request: Request, SAMLRequest: str, db: Session = Depends
 
     verified_id = SessionController().verify_session(cookie, request)
     if verified_id[1] == 200:
-        verified_status = SessionController().check_session_db(db, verified_id[0])
+        verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
         if verified_status[1] == 200:
+
             email_ = req.get_userid(verified_id[0],db)
             resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]

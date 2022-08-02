@@ -108,3 +108,4 @@ class SessionCookie(SecurityBase, SessionFrontend[UUID]):
             key=self.model.name,
             value=str(self.signer.dumps(session_id.hex)),
             **dict(self.cookie_params))
+

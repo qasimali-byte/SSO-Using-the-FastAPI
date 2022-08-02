@@ -1,36 +1,55 @@
+"""prefork worker doesn't work in windows , so we have to use (-P solo) or (-P eventlet)\
+as following:
+celery -A celery_worker worker --loglevel=INFO -P eventlet
+"""
 import os
+import time
+from celery import Celery
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import  load_env
+from jinja2 import Environment, FileSystemLoader
 
 
-def send_email(url, recipient, attachment=None):
+def populate_html_file(url,user_name):
+    base_url = f"{os.environ.get('HOST_URL')}:{os.environ.get('HOST_PORT')}/static/media/"
+    if not "http" in base_url:
+        base_url = "http://"+base_url
+    environment = Environment(loader=FileSystemLoader("templates/"))
+    template = environment.get_template("email.html")
+    html_ = template.render(user_activation_url=url,base_url=base_url,user_name=user_name)
+    # print(base_url)
+    with open('email.html', 'wb') as f:
+        f.write(html_.encode())
+        # f.truncate()
+
+
+def wait_until_found_file(file_path):
+    while not os.path.exists(file_path):
+        print(f"\t{file_path} not found")
+        time.sleep(.5)
+
+    if os.path.isfile(file_path):
+        print(f"\tSuccess {file_path} found")
+        file_= open(file_path)
+        return file_
+    else:
+        raise ValueError("%s isn't a file!" % file_path)
+
+
+def send_email(url, recipient, user_name, attachment=None):
     try:
         print("===================================================")
         print("                Email Task Started                 ")
         print("===================================================")
 
-        html = f"""<html>
-          <body style="font-family: 'Muli',sans-serif;">
-            <p>Hi,</p>
-            <br style = "line-height:70px;"> 
-            <p>You have requested to signup using this email. Please verify it
-               by clicking the following button.<br>Please ignore it if that were not you.
-            </p>
-            <br>
-            <br>
-            <div style="margin: 0; position: absolute; top: 50%; left: 50%; -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);" >
-                 <a href="{url}"><button style="background-color: turquoise; cursor: pointer;;border:\
-                 none; border-radius: 5px; color: #333; /* Dark grey */ padding: 15px 32px">Click here to verify</button>
-                 </a>
-             </div>
-            <br style = "line-height:150px;"> 
-            <p>Thank you.</p>
-          </body>
-        </html>"""
-        mail_content = MIMEText(html, "html")
+        populate_html_file(url,user_name)
+        file_ = wait_until_found_file("email.html")
+
+        mail_content = MIMEText(file_.read(), "html")
         # The mail addresses and password
         # The mail addresses and password
         sender_address = os.environ.get("EMAIL_SENDER")
@@ -65,3 +84,13 @@ def send_email(url, recipient, attachment=None):
     except Exception as e:
         print(str(e))
         return False
+
+
+celery = Celery(__name__)
+celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+
+
+@celery.task(name="email_sender")
+def email_sender(user_verification_url, user_email,user_name):
+    return send_email(url=user_verification_url,recipient=user_email,user_name=user_name)
