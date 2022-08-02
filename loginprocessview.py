@@ -1,3 +1,7 @@
+import json
+from src.apis.v1.routes import practices_routes
+from src.apis.v1.services.roles_service import RolesService
+from src.apis.v1.services.user_service import UserService
 from storesession import StoreSession
 from utils import repr_saml, unpack_redirect, verify_request_signature
 from saml2 import server
@@ -6,8 +10,9 @@ from saml2 import (
     BINDING_HTTP_REDIRECT,
     entity,
 )
-from src.apis.v1.models import UserSession,User
+from src.apis.v1.models import UserSession,idp_users,User
 from sqlalchemy.orm import Session
+from src.apis.v1.controllers.auth_controller import AuthController
 
 class LoginProcessView():
     def verify(self):
@@ -39,27 +44,64 @@ class LoginProcessView():
         return "session not found"
 
     def get_user(self, email,password, db: Session):
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(idp_users).filter(idp_users.email == email).first()        
         if user :
-            if user.password == password:
+            var=AuthController(db).login_authentication(user.email, password)
+            if var[1]==200:
                 return user
-        
             return None
         return None
 
-    def get(self, request_parms, email):
+    def get(self, request_parms, email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
-        users_info = {
-            "name": email,
-            "email": email,
-        }
+        user_info_data = UserService(db).get_user_info_db(email)
+        practice_roles_data,practice_roles_status=UserService(db).get_all_sps_practice_roles_db(email)
+        users_info = dict({
+            "username": user_info_data.username,
+            "email": user_info_data.email,
+            "first_name": user_info_data.first_name,
+            "last_name": user_info_data.last_name
+
+
+        })
+
+        app_role=RolesService(db).get_user_selected_role_db_appid_userid(4,user_info_data.id)
+        apps = list()
+
+        for i in range(len(practice_roles_data)):
+            if practice_roles_data[i].get('name') == 'ez-analytics':
+                apps.append({'app_practices': practice_roles_data[i].get('practices')})
+        
+        app_practices_list = list()
+        for app in apps[0]['app_practices']:
+            try:
+                app_practices_list.append({'parent': app['name'], 'practices': app['practices']})
+            except:
+                pass
+        app_practices = list([])
+        for i in range(len(app_practices_list)):
+            temp_list = list([])
+            for index in range(len(app_practices_list[i]['practices'])):
+                temp_list.append(app_practices_list[i]['parent'])
+                temp_list.append(app_practices_list[i]['practices'][index]['name'])
+                try:
+                    temp_list.append(app_role[1].name)
+                except Exception as e:
+                    temp_list.append(None)
+                app_practices.append(str(temp_list))
+                temp_list = list([])
+        
+        users_info['app_practices']=app_practices
+        new_json_data = json.dumps(users_info)
+        json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
+        # print('json_updated_data---',json_updated_data)
         idp_server = server.Server(config_file="idp/idp_conf.py")
         # saml_msg = unpack_redirect(request_parms)
         saml_msg =request_parms
         data = idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
         verify_request_signature(data)
         users_info["email"] = email
-        identity = users_info
+        identity = json_updated_data
         resp_args = idp_server.response_args(data.message)
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=email)

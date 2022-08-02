@@ -49,8 +49,8 @@ async def email_verifier(email_validator: EmailValidator, request: Request, db: 
     # cookie_idp is used when the user comes from the another sp then the user is logged in from cookie_idp
     # token is used for the authentication of apis in idp
     # if admin email is not valid return notsuccessfull
-    req = await request.json()
-    email = req["email"]
+    email_dict = email_validator.dict()
+    email = email_dict["email"]
     resp = AuthController(db).email_verification(email)
     return resp
 
@@ -70,8 +70,8 @@ async def sso_login(login_validator: LoginValidator, request: Request,
     # if unique cookie is not valid, use only admin emails
     # if admin email is valid, return cookie_idp + token
     # if admin email is not valid return error
-    req = await request.json()
-    email, password = req["email"], req["password"]
+    login_dict = login_validator.dict()
+    email, password = login_dict["email"], login_dict["password"]
     verified_id = SessionController().verify_session(cookie_frontend, request)
     if verified_id[1] == 200:
         idp_controller = IDPController(db)
@@ -84,7 +84,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 response = custom_response(data=auth_result[0], status_code=auth_result[1])
                 return response
 
-            resp = req.get(verified_data[0].saml_req,email)
+            resp = req.get(verified_data[0].saml_req,email,db)
             application_entity_id = resp[1]['sp_entity_id']
             resp = resp[0]
             # delete frontend cookie from redis store.

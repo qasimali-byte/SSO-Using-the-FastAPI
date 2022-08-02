@@ -23,6 +23,7 @@ services:
       sh -c "python3 main.py -e prod"
     depends_on:
       - db_idp
+      - redis
 
   redis:
     image: "redis:alpine"

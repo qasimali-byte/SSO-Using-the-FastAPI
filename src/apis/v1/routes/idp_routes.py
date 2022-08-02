@@ -137,23 +137,20 @@ async def sso_redirect(request: Request, SAMLRequest: str,
         verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
         if verified_status[1] == 200:
 
-            # email_ = req.get_userid(verified_id[0],db)
-            # resp = req.get(SAMLRequest,email_)
-            # resp = resp[0]
-
-            email_ = sessionStorage[verified_id[0]]
-            resp = req.get(SAMLRequest, email_)
+            email_ = req.get_userid(verified_id[0],db)
+            resp = req.get(SAMLRequest,email_,db)
+            resp = resp[0]
             return HTMLResponse(content=resp["data"]["data"])
 
     session = uuid4()
     # store the cookie in db
-    # IDPController(db).store_frontend_saml(session, SAMLRequest)
-    # store session in the redis store.
-    sessionStorage[session] = SAMLRequest
+    IDPController(db).store_frontend_saml(session,SAMLRequest)
     # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host, port = Settings().HOST_URL, Settings().HOST_PORT
     host_port = str(host) + ":" + str(port)
     # logout the user from frontend as well
+    
+    # response = RedirectResponse(url="http://{}/sign-in".format("localhost:8088"))
 
     response = RedirectResponse(url="http://{}/sign-in".format("18.134.217.103"))
     cookie_frontend.attach_to_response(response, session)
@@ -201,14 +198,15 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     session = uuid4()
     print(session)
     ## store session in the database
-    resp.store_session(session, email, db)
-    resp = resp.get(saml_request, email)
+    resp.store_session(session,email,db)
+    resp = resp.get(saml_request, email,db)
     application_entity_id = resp[1]['sp_entity_id']
     resp = resp[0]
     print(application_entity_id,"application entity id")
     # print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     cookie.attach_to_response(response, session)
+    print(vars(response))
     return response
 
 

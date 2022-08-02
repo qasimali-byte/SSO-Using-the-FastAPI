@@ -11,8 +11,15 @@ class AdminUserValidator(BaseModel):
     email: str
     password: str
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 class ForgetPasswordValidator(BaseModel):
     email: str
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 
 class SetPasswordValidator(BaseModel):
     password: str
@@ -43,6 +50,10 @@ class CreateInternalExternalUserValidatorIn(BaseModel):
     apps: typing.List[UserAppsValidatorIn]
     is_active: typing.Optional[bool] = True
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
 class UserValidatorOut(BaseModel):
     statuscode: int = 201
     message: str = "successfully created user"
@@ -61,6 +72,9 @@ class ExternalUserValidator(BaseModel):
     email: typing.Optional[EmailStr]
     appspracticeroles: typing.List['AppsPracticeRoles']
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 class SPPracticeRoleValidator(BaseModel):
     """
         SP Practice Role Validator
@@ -90,6 +104,10 @@ class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
     type_of_user: typing.Literal['internal','external']
     is_active: typing.Optional[bool] 
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
 class PracticesRolesId(BaseModel):
     practice_id: int
     role_id: int
@@ -109,6 +127,9 @@ class UserValidatorIn(BaseModel):
     type_of_user: typing.Literal[ 'external','internal']
     practices_apps_roles: typing.List['PracticesAppsRolesValidator']
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 
 
 class GetUserInfoValidator(BaseModel):
@@ -118,6 +139,10 @@ class GetUserInfoValidator(BaseModel):
     phone_number: str = Field(alias="contact_no")
     address: str = Field(alias="address")
     image_url: typing.Optional[str] = Field(alias="profile_image")
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 
     class Config:
         orm_mode = True
@@ -136,28 +161,35 @@ class UpdateUserValidatorIn(BaseModel):
     address: str = Field(alias="address")
 
 class CreateUserValidator(BaseModel):
-        uuid : uuid.UUID
-        first_name: str = Field(alias="firstname")
-        last_name: str = Field(alias="lastname")
-        username : str
-        email : EmailStr
-        nhs_number = "123456789"
-        organization_id = "2"
-        contact_no = "+92123456789"
-        address = "enter address here"
-        password_hash = "admin"
-        reset_password_token = 'reset_password_token',
-        reset_password_token_expiry = 'reset_password_token_expiry',
-        profile_image = "image/profile_image.jpg"
-        created_date = datetime.now()
-        updated_date = datetime.now()
-        last_login_date = datetime.now()
-        user_type_id: int
-        dr_iq_gender_id: typing.Optional[int]
-        is_active: bool = True
 
-        class Config:
-            arbitrary_types_allowed = True
+
+    uuid : uuid.UUID
+    first_name: str = Field(alias="firstname")
+    last_name: str = Field(alias="lastname")
+    username : str
+    email : EmailStr
+    nhs_number = "123456789"
+    organization_id = "2"
+    contact_no = "+92123456789"
+    address = "enter address here"
+    password_hash = create_password_hash("admin")
+    reset_password_token = 'reset_password_token',
+    reset_password_token_expiry = 'reset_password_token_expiry',
+    profile_image = "image/profile_image.jpg"
+    created_date = datetime.now(),
+    updated_date = datetime.now(),
+    last_login_date = datetime.now()
+    user_type_id: int
+    dr_iq_gender_id: typing.Optional[int]
+    is_active: bool = True
+
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
+    class Config:
+        arbitrary_types_allowed = True
 
 class UserDeleteValidatorOut(BaseModel):
     message: str

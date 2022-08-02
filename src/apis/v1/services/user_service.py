@@ -306,17 +306,15 @@ class UserService():
             ## internal users should not have ez login option
             ## external users should have ez login option
             ## ez login sub-admin should have only practice-admin option
-
-            type_of_user = self.db.query(idp_users, idp_user_types) \
-                .join(idp_user_types, idp_users.user_type_id == idp_user_types.id) \
-                .with_entities(idp_user_types.user_type, idp_users.id) \
-                .filter(idp_users.email == email).first()
-
+            type_of_user = self.db.query(idp_users,idp_user_types) \
+                            .join(idp_user_types, idp_users.user_type_id == idp_user_types.id) \
+                            .with_entities(idp_user_types.user_type, idp_users.id)\
+                            .filter(idp_users.email == email).first()
             practice_roles_data = []
-            user_sp_apps = self.db.query(idp_users, SPAPPS) \
-                .filter(idp_users.email == email) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
-                .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(SPAPPS.is_active == True).all()
+            user_sp_apps = self.db.query(idp_users,SPAPPS) \
+            .filter(idp_users.email == email) \
+            .join(idp_sp,idp_users.id == idp_sp.idp_users_id) \
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(SPAPPS.is_active == True).all()
 
             if len(user_sp_apps) > 0:
                 practice_roles_data = self.get_practice_roles_data_for_sps(type_of_user, user_sp_apps,
@@ -350,7 +348,8 @@ class UserService():
                 # self.db.query(idp_user_apps_roles).filter(idp_user_apps_roles.idp_users_id==users_id).delete()
                 # self.db.query(idp_users_practices).filter(idp_users_practices.idp_users_id==users_id).delete()
                 # self.db.query(idp_users).filter(idp_users.id==users_id).delete()
-                # self.db.commit()
+                user.is_approved = False
+                self.db.commit()
                 return "User deleted successfully", status.HTTP_200_OK
             else:
                 return "User not found", status.HTTP_404_NOT_FOUND
