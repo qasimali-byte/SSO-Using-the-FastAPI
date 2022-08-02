@@ -68,13 +68,8 @@ class UserController():
                                             lastname=user_data['lastname'], email=user_data['email'],
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
                                             user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,
-<<<<<<< HEAD
                                             password_hash=create_password_hash(generate_password(size=12)),
-=======
-                                            password_hash=create_password_hash(generate_password(size=12))
->>>>>>> feature/session_redis
-                                            )
-
+        )
         # ## create user in db
         user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
         user_id = user_created_data.id
