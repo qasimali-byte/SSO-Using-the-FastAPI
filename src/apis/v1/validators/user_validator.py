@@ -176,9 +176,9 @@ class CreateUserValidator(BaseModel):
     reset_password_token = 'reset_password_token',
     reset_password_token_expiry = 'reset_password_token_expiry',
     profile_image = "image/profile_image.jpg"
-    created_date = datetime.now(),
-    updated_date = datetime.now(),
-    last_login_date = datetime.now()
+    created_date = Field(default_factory=datetime.now)
+    updated_date = Field(default_factory=datetime.now)
+    last_login_date = Field(default_factory=datetime.now)
     user_type_id: int
     dr_iq_gender_id: typing.Optional[int]
     is_active: bool = True
