@@ -88,13 +88,14 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             application_entity_id = resp[1]['sp_entity_id']
             resp = resp[0]
             # delete frontend cookie from redis store.
-            del sessionStorage[verified_id[0]]
-            # idp_controller.delete_frontend_session(verified_id[0])
+            # del sessionStorage[verified_id[0]]
+            idp_controller.delete_frontend_session(verified_id[0])
 
             # create idp cookie
             session = uuid4()
             # store session in the redis store.
-            sessionStorage[session] = email
+            req.store_session(session, email, db)
+            # sessionStorage[session] = email
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             access_token = authorize.create_access_token(subject=email, fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)

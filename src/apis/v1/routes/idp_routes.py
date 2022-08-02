@@ -134,7 +134,8 @@ async def sso_redirect(request: Request, SAMLRequest: str,
 
     verified_id = SessionController().verify_session(cookie, request)
     if verified_id[1] == 200:
-        verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
+        # verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
+        verified_status = SessionController().check_session_db(db, verified_id[0])
         if verified_status[1] == 200:
 
             email_ = req.get_userid(verified_id[0],db)
