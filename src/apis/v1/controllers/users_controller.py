@@ -38,6 +38,10 @@ class UsersController():
             # get all external users from db for practice admin role
             users_info, records_count = UsersService(self.db).get_external_users_info_db(user_type_id=user_type_id,page_limit=page_limit, page_offset=page_offset,order_by=order_by, latest=latest)
 
+        else:
+            users_info = []
+            records_count = 0
+
         ## structuring pagination data
         _metadata = {
             "page": page_offset+1,

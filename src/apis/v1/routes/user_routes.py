@@ -17,14 +17,14 @@ router = APIRouter(tags=["User-Management"])
 @router.post("/user/admin", summary="Create Admin User Api")
 async def create_user(user_validator:AdminUserValidator,request: Request,db: Session = Depends(get_db)):
     """
-        Create Admin User 
+        Create Admin User
     """
     pass
 
 @router.post("/user/external", summary="Create External User Api", responses={201:{"model":UserValidatorOut}})
 async def create_external_user(user_validator:ExternalUserValidator,request: Request,db: Session = Depends(get_db)):
     """
-        Create External User 
+        Create External User
     """
     req = await request.json()
     pass
@@ -69,12 +69,13 @@ async def get_practice_roles(authorize: AuthJWT = Depends(), token: str = Depend
             500:{"description":"Internal Server Error","model":ErrorResponseValidator}})
 async def create_internal_external_user(user_validator:CreateInternalExternalUserValidatorIn, authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
-        Create User 
+        Create User
     """
     authorize.jwt_required()
     current_user_email = authorize.get_jwt_subject()
     resp = UserController(db).create_user(user_validator.dict())
     return resp
+
 
 @router.get("/user/{user_id}/service-providers/practices/roles", summary="Get User Information with practices and roles",
             responses={200:{"model": GetUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
@@ -92,7 +93,7 @@ async def get_user_practices_roles_by_id(user_id:int, authorize: AuthJWT = Depen
             responses={ 201:{"model":UserValidatorOut},
                         404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"},
                         500:{"description":"Internal Server Error","model":ErrorResponseValidator}})
-async def update_user_practices_roles_by_id(user_id:int,user_validator:CreateInternalExternalUserValidatorIn, authorize: AuthJWT = Depends(), 
+async def update_user_practices_roles_by_id(user_id:int,user_validator:CreateInternalExternalUserValidatorIn, authorize: AuthJWT = Depends(),
                                             token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
         This api updates the user information according to relevant service providers and practices

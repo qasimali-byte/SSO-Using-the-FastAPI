@@ -23,11 +23,24 @@ services:
       sh -c "python3 main.py -e prod"
     depends_on:
       - db_idp
+      - redis
 
   redis:
     image: "redis:alpine"
     ports:
-     - 6379
+     - 6379:6379
+  celery_worker:
+    container_name: celery_worker
+    build: .
+    command: celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
+    volumes:
+      - .:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - app
+      - redis
 volumes:
     postgres_data:
                 

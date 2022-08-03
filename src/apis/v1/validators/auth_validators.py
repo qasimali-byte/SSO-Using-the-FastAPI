@@ -5,17 +5,20 @@ class EmailValidator(BaseModel):
     email: str
 
     @validator('email')
-    def validate(cls, email: str) -> bool:
-        return True
+    def validate_email(cls, v):
+        return v.lower()
 
 class LoginValidator(BaseModel):
-    email: Optional[EmailStr]
+    email: EmailStr
     password: str
-    
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 class LogoutValidator(BaseModel):
     access_token: str
     refresh_token: str
-    
+
 class EmailValidatorOut(BaseModel):
     message: str
     verification: bool = True
@@ -23,6 +26,9 @@ class EmailValidatorOut(BaseModel):
     email: str
     statuscode: int
 
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
 class EmailValidatorError(BaseModel):
     message: str
     verification: bool = False
