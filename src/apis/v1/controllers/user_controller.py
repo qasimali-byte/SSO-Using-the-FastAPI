@@ -228,7 +228,7 @@ class UserController():
 
         verification_save_response = UserService(self.db).save_user_verify_db(user_id=user_data.id,
                                                                               verification_id=unique_id)
-        host = Settings().SSO_FRONTEND_URL
+        host = Settings().SSO_BACKEND_URL
         url = host + "api/v1/verify-email/" + url_key
         return url
 
