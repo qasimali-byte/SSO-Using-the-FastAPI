@@ -108,8 +108,17 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             cookie.attach_to_response(response, session)
             delete_all_cookies(response, only_frontend=True)
             return response
+
     resp = AuthController(db).login(email, password, authorize)
-    delete_all_cookies(resp)
+
+    if resp.status_code == 200:
+        ### storing the valid cidp cookie in database
+        session = uuid4()
+        req = LoginProcessView()
+        req.store_session(session, email, db)
+        delete_all_cookies(resp, only_frontend=True)
+        cookie.attach_to_response(resp, session)
+
     return resp
 
 
