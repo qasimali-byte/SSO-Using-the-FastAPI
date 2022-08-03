@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     REDIS_DB = 0
     REDIS_HOST_PORT = int(os.environ.get("REDIS_HOST_PORT"))
     REDIS_HOST_PASSWORD = os.environ.get("REDIS_HOST_PASSWORD")
+    SSO_FRONTEND_URL = os.environ.get("SSO_FRONTEND_URL")
 
 def settings():
     return Settings()

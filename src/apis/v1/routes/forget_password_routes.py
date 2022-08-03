@@ -1,4 +1,5 @@
 import uuid
+from src.apis.v1.core.project_settings import Settings
 
 from src.apis.v1.db.session import get_db
 from sqlalchemy.orm import Session
@@ -28,7 +29,8 @@ async def verify_email(
     if resp.status_code==202 or resp.status_code==302:
         print("\nEmail user verified.")
         sessionData = get_encrypted_text(get_decrypted_text(user_key).split('?')[0])
-        response = RedirectResponse(url="http://18.134.217.103/reset-password")
+        host = Settings().SSO_FRONTEND_URL
+        response = RedirectResponse(url="{}reset-password".format(host))
         response.set_cookie(key="user_secret", value=sessionData)
         setSession(response, sessionData, sessionStorage)
         # cookie_frontend.attach_to_response(response, session)

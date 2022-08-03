@@ -14,8 +14,9 @@ import  load_env
 from jinja2 import Environment, FileSystemLoader
 
 
+
 def populate_html_file(url,user_name):
-    base_url = f"18.134.217.103:{os.environ.get('HOST_PORT')}/api/v1/image/"
+    base_url = f"{os.environ.get('SSO_FRONTEND_URL')}api/v1/image/"
     if not "http" in base_url:
         base_url = "http://"+base_url
     environment = Environment(loader=FileSystemLoader("templates/"))
