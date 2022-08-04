@@ -228,7 +228,8 @@ class UserController():
 
         verification_save_response = UserService(self.db).save_user_verify_db(user_id=user_data.id,
                                                                               verification_id=unique_id)
-        url = "http://18.134.217.103" + "/api/v1/verify-email/" + url_key
+        host = Settings().SSO_BACKEND_URL
+        url = host + "api/v1/verify-email/" + url_key
         return url
 
     def send_email_to_user(self, user_data):
