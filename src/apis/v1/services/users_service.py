@@ -40,9 +40,10 @@ class UsersService():
     def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool) -> tuple:
 
         try:
+            get_order_by= get_order_by_query(order_by,latest)
             count_records = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True)).count()
             subquery = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True)).order_by(idp_users.id.asc()).limit(page_limit).offset(page_offset*page_limit).subquery()
-            users_info_object = self.db.query(idp_users,SPAPPS).order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))) \
+            users_info_object = self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery))) \
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id,isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id,isouter=True).all()
 
             user_data = {}
