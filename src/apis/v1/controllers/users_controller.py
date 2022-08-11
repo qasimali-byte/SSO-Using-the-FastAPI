@@ -14,7 +14,7 @@ class UsersController():
         self._metadata = {}
         
 
-    def get_users(self, user_email:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:bool) -> dict:
+    def get_users(self, user_email:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:bool,select_practices:str) -> dict:
         """
             Get Users according to the roles of user email
         """
@@ -26,12 +26,12 @@ class UsersController():
         if user_selected_role == "super-admin":
             # get subadmins and practice admins and external users
             users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='super-admin',page_limit=page_limit,\
-                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status)
+                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status,select_practices=select_practices)
 
         elif user_selected_role == "sub-admin":
             # get practice admins and external users
             users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='sub-admin',page_limit=page_limit,\
-                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status)
+                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status,select_practices=select_practices)
 
         elif user_selected_role == "practice-administrator":
             # get user type id of external user
@@ -39,7 +39,7 @@ class UsersController():
 
             # get all external users from db for practice admin role
             users_info, records_count = UsersService(self.db).get_external_users_info_db(user_type_id=user_type_id,page_limit=page_limit,\
-                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status)
+                 page_offset=page_offset,order_by=order_by, latest=latest,search=search,user_status=user_status,select_practices=select_practices)
 
         else:
             users_info = []

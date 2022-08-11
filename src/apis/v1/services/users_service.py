@@ -36,19 +36,26 @@ class UsersService():
         count_records = self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery))).count()
         return count_records
 
-    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool) -> tuple:
+    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+        
+        select_practices:str) -> tuple:
 
         try:
             get_order_by= get_order_by_query(order_by,latest)
             count_records = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True)).count()
             subquery = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True))\
                 .order_by(idp_users.id.asc()).limit(page_limit).offset(page_offset*page_limit).subquery()
-            if search is None:
+
+            if search is None and select_practices =='All':
                 users_info_object = self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id,isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id,isouter=True).all()
-            else:
-                users_info_object = self.db.query(idp_users,SPAPPS).filter(idp_users.username.ilike(f"%{search}%")).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id,isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id,isouter=True).all()
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+            elif search is None and select_practices !='All' :
+                users_info_object=self.db.query(idp_users,SPAPPS).filter(SPAPPS.name.ilike(f"%{select_practices}%")).filter(idp_users.id.in_(select(subquery))) \
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+            elif search is not None and select_practices !='All' :
+                users_info_object=self.db.query(idp_users,SPAPPS).filter(and_( SPAPPS.name.ilike(f"%{select_practices}%"),idp_users.username.ilike(f"%{search}%"))).filter(idp_users.id.in_(select(subquery))) \
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+
 
             user_data = {}
             for user, apps in users_info_object:
@@ -73,7 +80,8 @@ class UsersService():
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")
 
-    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool) -> tuple:
+    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+        select_practices:str) -> tuple:
         try:
             get_order_by= get_order_by_query(order_by,latest)
             if user_role == "super-admin":
@@ -130,11 +138,14 @@ class UsersService():
                 .order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))).subquery()
             
 
-            if search is None:
+            if search is None and select_practices =='All':
                 users_info_object = self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-            else:
-                users_info_object=self.db.query(idp_users,SPAPPS).filter(idp_users.username.ilike(f"%{search}%")).filter(idp_users.id.in_(select(subquery))) \
+            elif search is None and select_practices !='All' :
+                users_info_object=self.db.query(idp_users,SPAPPS).filter(SPAPPS.name.ilike(f"%{select_practices}%")).filter(idp_users.id.in_(select(subquery))) \
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+            elif search is not None and select_practices !='All' :
+                users_info_object=self.db.query(idp_users,SPAPPS).filter(and_( SPAPPS.name.ilike(f"%{select_practices}%"),idp_users.username.ilike(f"%{search}%"))).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
 
             user_data = {}
