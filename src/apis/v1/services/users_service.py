@@ -142,13 +142,16 @@ class UsersService():
                 users_info_object = self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
             elif search is None and select_practices !='All' :
-                users_info_object=self.db.query(idp_users,SPAPPS).filter(SPAPPS.name.ilike(f"%{select_practices}%")).filter(idp_users.id.in_(select(subquery))) \
+                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(SPAPPS.name.ilike(f"%{select_practices}%")).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
             elif search is not None and select_practices !='All' :
-                users_info_object=self.db.query(idp_users,SPAPPS).filter(and_( SPAPPS.name.ilike(f"%{select_practices}%"),idp_users.username.ilike(f"%{search}%"))).filter(idp_users.id.in_(select(subquery))) \
+                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(and_( SPAPPS.name.ilike(f"%{select_practices}%"),idp_users.username.ilike(f"%{search}%"))).filter(idp_users.id.in_(select(subquery))) \
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+            elif search is not None and select_practices =='All' :
+                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.username.ilike(f"%{search}%")).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
 
-            user_data = {}
+            user_data = {} 
             for user, apps in users_info_object:
                 if user_data.get(user.id) is None:
                     user_data[user.id] = dict({
