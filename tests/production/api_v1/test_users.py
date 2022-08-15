@@ -129,3 +129,49 @@ def test_get_asc_des_first_last_id_name_list_superusers():
     data = response['users_data'][-1]
     assert len(response['users_data']) == 10
     assert response['users_data'][0]['id'] == 1819
+
+    ''' Get only those users who are not Active users'''
+
+    response = client.get("/api/v1/users?limit=10&offset=1&order_by=first_name&latest=true&status=false&practices=All",headers=headers)
+    assert response.status_code == 200
+    assert UsersValidatorOut(**response.json())
+    response = response.json()
+    data = response['users_data'][-1]
+    assert len(response['users_data']) == 1
+    assert response['users_data'][0]['id'] == 1809
+
+
+    ''' Get only those users who are  Active users'''
+
+    response = client.get("/api/v1/users?limit=10&offset=1&order_by=first_name&latest=true&status=true&practices=All",headers=headers)
+    assert response.status_code == 200
+    assert UsersValidatorOut(**response.json())
+    response = response.json()
+    data = response['users_data'][-1]
+    assert len(response['users_data']) == 1
+    assert response['users_data'][0]['id'] == 1786
+
+
+
+    ''' Get only those users who are  assigned practice are ez-login '''
+
+    response = client.get("/api/v1/users?limit=10&offset=1&order_by=first_name&latest=true&status=true&practices=ez-login",headers=headers)
+    assert response.status_code == 200
+    assert UsersValidatorOut(**response.json())
+    response = response.json()
+    data = response['users_data'][-1]
+    assert len(response['users_data']) == 1
+    assert response['users_data'][0]['id'] == 1786
+
+    
+
+
+    ''' Get only those users whose username is demo '''
+
+    response = client.get("/api/v1/users?limit=10&offset=1&order_by=first_name&latest=true&status=true&search=demo&practices=All",headers=headers)
+    assert response.status_code == 200
+    assert UsersValidatorOut(**response.json())
+    response = response.json()
+    data = response['users_data'][-1]
+    assert len(response['users_data']) == 1
+    assert response['users_data'][0]['id'] == 1786
