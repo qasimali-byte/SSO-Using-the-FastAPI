@@ -235,13 +235,14 @@ class UserController():
         host = Settings().SSO_BACKEND_URL
         url = host + "api/v1/verify-email/" + url_key
         return url
-
+    @staticmethod
     def send_email_to_user(self, user_data):
         user_verification_url = self.generate_encrypted_url(user_data)
         user_email = user_data.email
         task = email_sender.delay(user_verification_url=user_verification_url, user_email=user_email,user_name=user_data.first_name)
         self.log.info(f"Task created: task={task.id}, user_verification_url={user_verification_url},\
         user_email={user_email}")
+        return user_verification_url
 
     def verify_user_through_email(self, user_key):
         decrypted_values_list = get_decrypted_text(user_key).split('?')
