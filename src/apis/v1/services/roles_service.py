@@ -135,3 +135,12 @@ class RolesService():
 
         all_app_roles = format_roles_with_selected_roles(all_app_roles, selected_roles)
         return all_app_roles
+
+    def get_ezlogin_role_only(self, user_id):
+        role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)
+        ezlogin_role = []
+        if role_name is not None:
+            ezlogin_role.append(role_name)
+            return ezlogin_role
+        else:
+            return ['external user']

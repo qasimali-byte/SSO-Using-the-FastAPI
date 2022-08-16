@@ -4,9 +4,11 @@ from sqlalchemy.orm import Session
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.services.auth_service import AuthService
+from src.apis.v1.services.roles_service import RolesService
+from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.auth_validators import EmailValidatorError, EmailValidatorOut, LoginValidator, LoginValidatorOut, RefreshTokenValidatorOut
 from fastapi import status
-
+from src.apis.v1.services.user_service import UserService
 class AuthController:
 
     def __init__(self, db: Session):
@@ -55,12 +57,14 @@ class AuthController:
         # access and refresh tokens
         access_token = authorize.create_access_token(subject=email,fresh=True)
         refresh_token = authorize.create_refresh_token(subject=email)
+        user_info_data = UserService(self.db).get_user_info_db(email)
+        get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
         data = LoginValidatorOut(
             product_name="ez-login",
             message="successfully authenticated",
             access_token= access_token, 
             refresh_token=refresh_token,
-            roles= ["super_admin"], 
+            roles= get_ezlogin_roles_only, 
             token_type= "bearer",
             statuscode=200)
         response = custom_response(data=data,status_code=200)

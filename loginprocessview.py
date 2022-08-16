@@ -71,7 +71,6 @@ class LoginProcessView():
         for i in range(len(practice_roles_data)):
             if practice_roles_data[i].get('name') == 'ez-analytics':
                 apps.append({'app_practices': practice_roles_data[i].get('practices')})
-        
         app_practices_list = list()
         for app in apps[0]['app_practices']:
             try:

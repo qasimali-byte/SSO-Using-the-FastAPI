@@ -8,7 +8,7 @@ from fastapi import status
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from sqlalchemy.sql import select
-from src.apis.v1.utils.users_utils import get_order_by_query,create_user_action_filter_query
+from src.apis.v1.utils.users_utils import get_order_by_query
 
 
 class UsersService():
