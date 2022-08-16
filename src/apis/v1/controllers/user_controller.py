@@ -1,6 +1,9 @@
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from starlette.background import BackgroundTasks
+
 from src.apis.v1.services.type_of_user_service import TypeOfUserService
 from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text, get_decrypted_text
 from src.apis.v1.controllers.roles_controller import RolesController
@@ -19,6 +22,7 @@ from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersV
     UserDeleteValidatorOut
 from ..core.project_settings import Settings
 from ..utils.auth_utils import create_password_hash, generate_password
+from utils import get_redis_client
 from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, \
     format_data_for_update_user_image
 
@@ -270,11 +274,21 @@ class UserController():
 
         return response
 
-    def set_password(self, session, password):
+    def set_password(self, session_id, password):
+        redis_client = get_redis_client()
+        encrypted_user_id = redis_client.get(session_id)
+        if encrypted_user_id:
+            redis_client.delete(session_id) # remove from redis
+            user_id = get_decrypted_text(encrypted_user_id)
+            return UserService(self.db).set_user_password_db(user_id=user_id, password=password)
 
-        user_id = get_decrypted_text(session)
-        response = UserService(self.db).set_user_password_db(user_id=user_id, password=password)
-        return response
+        else:
+            data = {
+                "message": "You have already reset your password.",
+                "statuscode": status.HTTP_208_ALREADY_REPORTED
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
 
     def change_password(self, password):
 
