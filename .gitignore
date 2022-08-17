@@ -22,3 +22,7 @@ local_test.py
 /public
 /alembic/
 # /build/
+/venv/
+/alembic/
+/envs/
+.gitignore
