@@ -19,6 +19,6 @@ __pycache__/
 
 .idea
 local_test.py
-# /public/assets/
+/public
 /alembic/
 # /build/
