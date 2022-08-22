@@ -42,6 +42,13 @@ class SPSService():
         except:
             return []
 
+    def get_sps_app_by_filter(self, **kwargs):
+        try:
+            sps = self.db.query(SPAPPS).filter_by(**kwargs).all()
+            return sps
+        except Exception as e:
+            raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     def get_sps_app(self,user_email):
         try:
             

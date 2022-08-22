@@ -1,6 +1,10 @@
 from pydantic import BaseModel, validator
 from typing import List,Dict, Optional
 
+from src.apis.v1.models.sp_apps_model import SPAPPS
+from pydantic_sqlalchemy import sqlalchemy_to_pydantic
+
+SpAppsGeneralValidator = sqlalchemy_to_pydantic(SPAPPS)
 class ServiceProviderValidator(BaseModel):
     name : str
     info : str
