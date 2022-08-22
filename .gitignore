@@ -19,7 +19,7 @@ __pycache__/
 
 .idea
 local_test.py
-/public
+# /public
 /alembic/
 # /build/
 /venv/
