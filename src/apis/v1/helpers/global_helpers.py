@@ -12,9 +12,16 @@ def delete_all_cookies(response, only_frontend=False):
             value="",
             max_age=0
             )
-        # cookie.delete_from_response(response)
     except:
         print("error deleting cookies")
+    try:
+        response.set_cookie(
+            domain="attech-ltd.com",
+            value="",
+            max_age=0
+            )
+    except:
+        pass
     try:
         response.delete_cookie("cookie_frontend")
     except:
