@@ -1,7 +1,7 @@
 from enum import Enum
 
 class SpAppsEnum(str,Enum):
-    ezanalytics = 'ez_analytics/saml','ezanalytics/local/saml'
+    ezanalytics = 'ezanalytics/saml','ezanalytics/local/saml'
     ezweb = "ezweb/saml","ezweb/local/saml"
 
     def __new__(cls, *values):
