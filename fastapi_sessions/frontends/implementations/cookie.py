@@ -20,7 +20,7 @@ class SameSiteEnum(str, Enum):
 class CookieParameters(BaseModel):
     max_age: int = 4 * 24 * 60 * 60  # 4 days in seconds
     path: str = "/"
-    domain: Optional[str] = None
+    domain: Optional[str] = "http://dev-sso-frontend.attech-ltd.com/"
     secure: bool = False
     httponly: bool = False
     samesite: SameSiteEnum = SameSiteEnum.lax
@@ -28,7 +28,7 @@ class CookieParameters(BaseModel):
 class CookieParameters2(BaseModel):
     max_age: int = 3 * 60 # 3 minutes in seconds
     path: str = "/"
-    domain: Optional[str] = None
+    domain: Optional[str] = "http://dev-sso-frontend.attech-ltd.com/"
     secure: bool = False
     httponly: bool = False
     samesite: SameSiteEnum = SameSiteEnum.lax
