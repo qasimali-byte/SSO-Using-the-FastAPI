@@ -11,6 +11,7 @@ def delete_all_cookies(response, only_frontend=False):
         pass
     try:
         response.set_cookie(
+            key="cookie_idp",
             domain="attech-ltd.com",
             value="",
             max_age=0
@@ -19,6 +20,7 @@ def delete_all_cookies(response, only_frontend=False):
         print("error deleting cookies")
     try:
         response.set_cookie(
+            key="cookie_idp",
             domain=".attech-ltd.com",
             value="",
             max_age=0
