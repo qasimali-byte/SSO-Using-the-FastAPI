@@ -8,7 +8,7 @@ def delete_all_cookies(response, only_frontend=False):
     
     try:
         response.set_cookie(
-            domain=".attech-ltd.com"
+            domain=".attech-ltd.com",
             value="",
             max_age=0
             )
