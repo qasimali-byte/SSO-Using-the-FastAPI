@@ -171,7 +171,7 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
         "message": "successfully logged out"
     }
         , status_code=status.HTTP_200_OK)
-    delete_all_cookies(response)
+    response = delete_all_cookies(response)
     return response
 
 

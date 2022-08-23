@@ -5,36 +5,32 @@ def delete_all_cookies(response, only_frontend=False):
     if only_frontend:
         cookie_frontend.delete_from_response(response)
         return response
-    try:
-         cookie.delete_from_response(response)
-    except:
-        pass
+    # try:
+    #      cookie.delete_from_response(response)
+    # except:
+    #     pass
     try:
         response.set_cookie(
             key="cookie_idp",
             domain="attech-ltd.com",
             value="",
-            max_age=0
+            max_age=0,
+            path= "/",
+            secure= False,
+            httponly= False,
+            samesite="lax"
             )
     except:
         print("error deleting cookies")
-    try:
-        response.set_cookie(
-            key="cookie_idp",
-            domain=".attech-ltd.com",
-            value="",
-            max_age=0
-            )
-    except:
-        pass
-    try:
-        response.delete_cookie("cookie_frontend")
-    except:
-        print("error deleting cookies")
-    try:
-        response.delete_cookie("cookie")
-    except:
-        print("error deleting cookies")
+
+    # try:
+    #     response.delete_cookie("cookie_frontend")
+    # except:
+    #     print("error deleting cookies")
+    # try:
+    #     response.delete_cookie("cookie")
+    # except:
+    #     print("error deleting cookies")
 
     return response
 
