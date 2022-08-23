@@ -5,10 +5,13 @@ def delete_all_cookies(response, only_frontend=False):
     if only_frontend:
         cookie_frontend.delete_from_response(response)
         return response
-    
+    try:
+         cookie.delete_from_response(response)
+    except:
+        pass
     try:
         response.set_cookie(
-            domain=".attech-ltd.com",
+            domain="attech-ltd.com",
             value="",
             max_age=0
             )
@@ -16,7 +19,7 @@ def delete_all_cookies(response, only_frontend=False):
         print("error deleting cookies")
     try:
         response.set_cookie(
-            domain="attech-ltd.com",
+            domain=".attech-ltd.com",
             value="",
             max_age=0
             )
@@ -31,7 +34,7 @@ def delete_all_cookies(response, only_frontend=False):
     except:
         print("error deleting cookies")
 
-    return
+    return response
 
 def create_unique_id():
     import uuid
