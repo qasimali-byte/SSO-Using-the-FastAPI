@@ -5,12 +5,13 @@ def delete_all_cookies(response, only_frontend=False):
     if only_frontend:
         cookie_frontend.delete_from_response(response)
         return
+    
     try:
-        response.delete_cookie("cookie_frontend")
+        response.delete_cookie(domain="dev-sso-app.attech-ltd.com")
     except:
         print("error deleting cookies")
     try:
-        response.delete_cookie("cookie_idp")
+        response.delete_cookie("cookie_frontend")
     except:
         print("error deleting cookies")
     try:
