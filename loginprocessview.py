@@ -139,12 +139,11 @@ class LoginProcessView():
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=email)
         value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,**resp_args)
-        
+
         http_args = self.idp_server.apply_binding(
-            binding=resp_args['binding'],
+            binding=BINDING_HTTP_POST,
             msg_str=value,
             destination=resp_args['destination'],
-            relay_state="/whoami",
             response=True)
 
         html_response = {
