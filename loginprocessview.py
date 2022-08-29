@@ -130,7 +130,6 @@ class LoginProcessView():
         users_info['app_practices']=app_practices
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
- 
         users_info["email"] = email
         identity = json_updated_data
 

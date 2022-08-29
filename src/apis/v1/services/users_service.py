@@ -85,6 +85,7 @@ class UsersService():
         try:
             get_order_by= get_order_by_query(order_by,latest)
             if user_role == "super-admin":
+                
                 if (user_status == True):
                     subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
                     .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
@@ -150,7 +151,6 @@ class UsersService():
             elif search is not None and select_practices =='All' :
                 users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.username.ilike(f"%{search}%")).filter(idp_users.id.in_(select(subquery))) \
                 .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-
             user_data = {} 
             for user, apps in users_info_object:
                 if user_data.get(user.id) is None:
