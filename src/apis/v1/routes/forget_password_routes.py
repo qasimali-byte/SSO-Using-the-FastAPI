@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Request, Response, Cookie
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
 from src.apis.v1.controllers.user_controller import UserController
 from utils import get_redis_client
+from ..helpers.customize_response import custom_response
 from ..utils.user_utils import get_decrypted_text, get_encrypted_text
 from starlette.responses import RedirectResponse
 from src.apis.v1.validators.user_validator import ForgetPasswordValidator, SetPasswordValidator
@@ -49,7 +50,7 @@ async def verify_email(user_key: str, background_tasks: BackgroundTasks, db: Ses
         # response.set_cookie(key="user_secret", value=user_secret,httponly=True)
         response.set_cookie(key="ssid", value=session_id,httponly=True)
         return response
-    elif resp.status_code==302:
+    elif resp.status_code == 302:
         return resp
 
 
@@ -62,6 +63,7 @@ async def set_password(set_password_validator: SetPasswordValidator, request: Re
         This api takes password from front-end evaluating the session cookie data and saves in db.
     """
     session_id = request.cookies.get("ssid","")
+    print("session_id",session_id)
     resp = UserController(db).set_password(session_id=session_id, password=set_password_validator.password)
 
     return resp
