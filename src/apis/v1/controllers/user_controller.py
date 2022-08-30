@@ -235,7 +235,7 @@ class UserController():
         host = Settings().SSO_BACKEND_URL
         url = host + "api/v1/verify-email/" + url_key
         return url
-    @staticmethod
+    
     def send_email_to_user(self, user_data):
         user_verification_url = self.generate_encrypted_url(user_data)
         user_email = user_data.email
