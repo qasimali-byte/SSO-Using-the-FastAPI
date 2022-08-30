@@ -1,4 +1,6 @@
 from urllib.parse import parse_qs
+from src.apis.v1.core.project_settings import Settings
+from redis import Redis
 import base64
 import datetime
 import xml.dom.minidom
@@ -79,3 +81,7 @@ def extract_validuntil_from_metadata(metadata: str) -> datetime.datetime:
     if is_naive(metadata_expiration_dt):
         return make_aware(metadata_expiration_dt)
     return metadata_expiration_dt
+
+def get_redis_client():
+    return Redis(host=Settings().REDIS_HOST_URL, port=Settings().REDIS_HOST_PORT, db=0, decode_responses=True,
+          password=Settings().REDIS_HOST_PASSWORD)

@@ -1,6 +1,6 @@
 <md:EntityDescriptor 
     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
-    entityID="ezanalytics/saml">
+    entityID="ezanalytics/local/saml">
     <md:SPSSODescriptor
         AuthnRequestsSigned="true"
         WantAssertionsSigned="true"
@@ -72,15 +72,15 @@ x5Ql0ejivIJAYcMGUyA+/YwJg2FGoA==
         <md:AssertionConsumerService
             index="0"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            Location="https://dev-eza-server.attech-ltd.com/ez/analytics/acs"/>
+            Location="http://bi-rest-server.local/ez/analytics/acs"/>
         <md:AssertionConsumerService
             isDefault="true"
             index="1"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-            Location="https://dev-eza-server.attech-ltd.com/ez/analytics/acs"/>
+            Location="http://bi-rest-server.local/ez/analytics/acs"/>
         <md:AssertionConsumerService
             index="2"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="https://dev-eza-server.attech-ltd.com/ez/analytics/acs"/>
+            Location="http://bi-rest-server.local/ez/analytics/acs"/>
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
