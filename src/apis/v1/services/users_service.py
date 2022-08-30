@@ -1,3 +1,4 @@
+from itertools import count
 from sqlalchemy import and_
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
@@ -17,23 +18,40 @@ class UsersService():
         self.db = db
     
     def get_total_records_super_admin(self) -> int:
-        subquery = self.db.query(idp_users.id) \
-        .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-        .join(roles, sp_apps_role.roles_id == roles.id, isouter=True) \
-        .filter(and_(roles.name != "super-admin",idp_users.is_approved == True)) \
-        .subquery()
-        count_records = self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery))).count()
+
+        subquery_1=self.db.query(idp_users.id)\
+        .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+        .join(roles, sp_apps_role.roles_id == roles.id) \
+        .filter(roles.name == "super-admin").subquery()
+        
+        subquery_2=self.db.query(idp_users.id)\
+        .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+        .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+        .filter(idp_users.id.not_in(select(subquery_1))).group_by(idp_users.id).subquery()
+        
+        count_records=self.db.query(idp_users,SPAPPS).distinct(idp_users.id).filter(idp_users.id.in_(select(subquery_2))) \
+            .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).count()
+        
         return count_records
 
     def get_total_records_sub_admin(self) -> int:
-        subquery = self.db.query(idp_users.id) \
-        .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
+        subquery_1=self.db.query(idp_users.id)\
+        .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
         .join(roles, sp_apps_role.roles_id == roles.id) \
-        .filter(and_(roles.name != "super-admin",roles.name != "sub-admin",idp_users.is_approved == True)) \
-        .subquery()
-        count_records = self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery))).count()
+        .filter(roles.name == "sub-admin").subquery()
+        
+        subquery_2=self.db.query(idp_users.id)\
+        .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+        .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+        .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+        .filter(idp_users.id.not_in(select(subquery_1))).group_by(idp_users.id).subquery()
+        
+        count_records=self.db.query(idp_users,SPAPPS).filter(idp_users.id.in_(select(subquery_2))) \
+            .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).count()
+        
         return count_records
 
     def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
@@ -85,73 +103,98 @@ class UsersService():
         try:
             get_order_by= get_order_by_query(order_by,latest)
             if user_role == "super-admin":
-                
-                if (user_status == True):
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id, isouter=True) \
-                    .filter(and_(roles.name != "super-admin",idp_users.is_approved == True,idp_users.is_active == True)).limit(page_limit).offset(page_offset*page_limit).subquery()
-                elif (user_status==False):
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id, isouter=True) \
-                    .filter(and_(roles.name != "super-admin",idp_users.is_approved == True,idp_users.is_active == False)).limit(page_limit).offset(page_offset*page_limit).subquery()
-                else:
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id, isouter=True) \
-                    .filter(and_(roles.name != "super-admin",idp_users.is_approved == True)).limit(page_limit).offset(page_offset*page_limit).subquery()
- 
-                count_records = self.get_total_records_super_admin()
-                
-                subquery = self.db.query(idp_users.id) \
-                .order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))).subquery()
-                
+                subquery_1=self.db.query(idp_users.id)\
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .join(roles, sp_apps_role.roles_id == roles.id) \
+                .filter(roles.name == "super-admin").subquery()
+
+                count_records=self.get_total_records_super_admin()
+
             elif user_role == "sub-admin":
-                if (user_status == True):
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id) \
-                    .filter(and_(roles.name != "super-admin",roles.name != "sub-admin",idp_users.is_approved == True,idp_users.is_active == True)).limit(page_limit).offset(page_offset*page_limit) \
-                    .subquery()
-                elif (user_status==False):
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id) \
-                    .filter(and_(roles.name != "super-admin",roles.name != "sub-admin",idp_users.is_approved == True,idp_users.is_active == False)).limit(page_limit).offset(page_offset*page_limit) \
-                    .subquery()
-                else:
-                    subquery = self.db.query(idp_users.id).distinct().order_by(get_order_by) \
-                    .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                    .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                    .join(roles, sp_apps_role.roles_id == roles.id) \
-                    .filter(and_(roles.name != "super-admin",roles.name != "sub-admin",idp_users.is_approved == True)).limit(page_limit).offset(page_offset*page_limit) \
-                    .subquery()
+                subquery_1=self.db.query(idp_users.id)\
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .join(roles, sp_apps_role.roles_id == roles.id) \
+                .filter(roles.name == "sub-admin").subquery()
+                
+                count_records=self.get_total_records_sub_admin()
 
-                count_records = self.get_total_records_sub_admin()
+            if search is None and select_practices =='All' and user_status == True:
+                # Case 1
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True)).group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
 
-                subquery = self.db.query(idp_users.id) \
-                .order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))).subquery()
-            
+            elif search is None and select_practices =='All' and user_status == False:
+                # Case 2
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == False)).group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
 
-            if search is None and select_practices =='All':
-                users_info_object = self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-            elif search is None and select_practices !='All' :
-                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(SPAPPS.name.ilike(f"%{select_practices}%")).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-            elif search is not None and select_practices !='All' :
-                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(and_( SPAPPS.name.ilike(f"%{select_practices}%"),idp_users.username.ilike(f"%{search}%"))).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-            elif search is not None and select_practices =='All' :
-                users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.username.ilike(f"%{search}%")).filter(idp_users.id.in_(select(subquery))) \
-                .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
-            user_data = {} 
+            elif search is None and select_practices !='All' and user_status == True:
+                # Case 3
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True,SPAPPS.name.ilike(f"%{select_practices}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            elif search is None and select_practices !='All' and user_status == False:
+                # Case 4
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == False,SPAPPS.name.ilike(f"%{select_practices}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            elif search is not None and select_practices =='All' and user_status == True:
+                # Case 5
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True,idp_users.username.ilike(f"%{search}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            elif search is not None and select_practices =='All' and user_status == False:
+                # Case 6
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == False,idp_users.username.ilike(f"%{search}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            elif search is not None and select_practices !='All' and user_status == True:
+                # Case 7
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.ilike(f"%{'ez-login'}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            elif search is not None and select_practices !='All' and user_status == False:
+                # Case 8
+                print(select_practices)
+                subquery_2=self.db.query(idp_users.id).order_by(get_order_by)\
+                .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
+                .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
+                .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == False,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.ilike(f"%{select_practices}%")))\
+                    .group_by(idp_users.id).limit(page_limit).offset(page_offset*page_limit).subquery()
+
+            users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))) \
+            .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).all()
+            print(count_records)
+            user_data = {}
             for user, apps in users_info_object:
                 if user_data.get(user.id) is None:
                     user_data[user.id] = dict({
@@ -169,6 +212,10 @@ class UsersService():
 
             
             user_data = [values for values in user_data.values()]
+            print(len(user_data))
+            for user in user_data:
+                print(user)
+
             return user_data, count_records
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")
