@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_,or_
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.idp_users_model import idp_users
@@ -49,10 +49,13 @@ class UsersService():
             if user_role == "super-admin":
 
                 subquery = self.db.query(idp_users.id) \
-                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                .join(roles, sp_apps_role.roles_id == roles.id, isouter=True) \
-                .filter(and_(roles.name != "super-admin",idp_users.is_approved == True)) \
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .filter(idp_users.id.not_in(self.db.query(idp_users.id) \
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .join(roles, sp_apps_role.roles_id == roles.id).filter(roles.name == "super-admin").subquery())) \
+                .filter(idp_users.is_approved == True) \
                 .subquery()
 
                 count_records = self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery))).count()
@@ -63,10 +66,13 @@ class UsersService():
             elif user_role == "sub-admin":
 
                 subquery = self.db.query(idp_users.id) \
-                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id, isouter=True) \
-                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id, isouter=True) \
-                .join(roles, sp_apps_role.roles_id == roles.id) \
-                .filter(and_(roles.name != "super-admin",roles.name != "sub-admin",idp_users.is_approved == True)) \
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .filter(idp_users.id.not_in(self.db.query(idp_users.id) \
+                .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
+                .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
+                .join(roles, sp_apps_role.roles_id == roles.id).filter(or_(roles.name == "super-admin",roles.name == "sub-admin")).subquery())) \
+                .filter(idp_users.is_approved == True) \
                 .subquery()
 
                 count_records = self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery))).count()
@@ -75,7 +81,7 @@ class UsersService():
                 .order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))).limit(page_limit).offset(page_offset*page_limit).subquery()
 
             users_info_object = self.db.query(idp_users,SPAPPS).order_by(idp_users.id.asc()).filter(idp_users.id.in_(select(subquery))) \
-            .join(idp_sp, idp_users.id == idp_sp.idp_users_id, isouter=True).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id, isouter=True).all()
+            .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).all()
 
             user_data = {}
             for user, apps in users_info_object:
