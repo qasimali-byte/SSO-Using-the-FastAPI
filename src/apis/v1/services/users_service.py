@@ -48,9 +48,9 @@ class UsersService():
         .join(idp_user_apps_roles,idp_users.id == idp_user_apps_roles.idp_users_id )\
         .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id)\
         .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
-        .filter(idp_users.id.not_in(select(subquery_1))).group_by(idp_users.id).subquery()
+        .filter((and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True))).group_by(idp_users.id).subquery()
         
-        count_records=self.db.query(idp_users,SPAPPS).filter(idp_users.id.in_(select(subquery_2))) \
+        count_records=self.db.query(idp_users,SPAPPS).distinct(idp_users.id).filter(idp_users.id.in_(select(subquery_2))) \
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).count()
         
         return count_records
@@ -131,7 +131,6 @@ class UsersService():
 
             users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))) \
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id).join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).all()
-            print(count_records)
             user_data = {}
             for user, apps in users_info_object:
                 if user_data.get(user.id) is None:
@@ -150,10 +149,6 @@ class UsersService():
 
             
             user_data = [values for values in user_data.values()]
-            print(len(user_data))
-            for user in user_data:
-                print(user)
-
             return user_data, count_records
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")

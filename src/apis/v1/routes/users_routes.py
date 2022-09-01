@@ -13,7 +13,7 @@ router = APIRouter(tags=["Display Users"])
 
 @router.get("/users", summary="List Users",responses={200:{"model":UsersValidatorOut,"description":"Get All the users and their APP permissions"}})
 async def get_users(authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),limit:int = Query(default=10), offset:int = Query(default=1,gt=0),order_by:str = Query(default='first_name'),\
-    latest:bool =Query(default=True),status:bool =Query(default=None),db: Session = Depends(get_db),search:str = Query(default=None),practices:list =Query(default=['All'])):
+    latest:bool =Query(default=True),status:bool =Query(default=True),db: Session = Depends(get_db),search:str = Query(default=None),practices:list =Query(default=['All'])):
     """
         List all the users with their products accroding to the user defined role
     """

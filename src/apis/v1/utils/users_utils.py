@@ -25,10 +25,6 @@ def get_order_by_query(order_by,latest):
 
 
 def get_subquery(search,select_practices,user_status):
-    print(select_practices)
-    if select_practices != ['All']:
-        select_practices=[value.split(',') for value in select_practices]
-        select_practices=select_practices[0]
 
     if  search is None and select_practices ==['All'] and user_status == True:
         # Case 1
