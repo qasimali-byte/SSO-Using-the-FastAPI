@@ -19,7 +19,7 @@ load_env.py
 
 .idea
 local_test.py
-/public
+# /public
 /alembic/
 # /build/
 /venv/

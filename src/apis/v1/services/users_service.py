@@ -1,6 +1,5 @@
 from itertools import count
 from sqlalchemy import and_
-
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.idp_users_model import idp_users

@@ -4,22 +4,35 @@ from src.apis.v1.routes.idp_routes import cookie,cookie_frontend
 def delete_all_cookies(response, only_frontend=False):
     if only_frontend:
         cookie_frontend.delete_from_response(response)
-        return
+        return response
+    # try:
+    #      cookie.delete_from_response(response)
+    # except:
+    #     pass
     try:
-        response.delete_cookie("cookie_frontend")
-    except:
-        print("error deleting cookies")
-    try:
-        response.delete_cookie("cookie_idp")
-    except:
-        print("error deleting cookies")
-    try:
-        response.delete_cookie("cookie")
+        response.set_cookie(
+            key="cookie_idp",
+            domain="attech-ltd.com",
+            value="",
+            max_age=0,
+            path= "/",
+            secure= False,
+            httponly= False,
+            samesite="lax"
+            )
     except:
         print("error deleting cookies")
 
-    # cookie.delete_from_response(response)
-    # cookie_frontend.delete_from_response(response)
+    # try:
+    #     response.delete_cookie("cookie_frontend")
+    # except:
+    #     print("error deleting cookies")
+    # try:
+    #     response.delete_cookie("cookie")
+    # except:
+    #     print("error deleting cookies")
+
+    return response
 
 def create_unique_id():
     import uuid

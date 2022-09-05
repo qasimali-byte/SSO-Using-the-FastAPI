@@ -181,7 +181,7 @@ class CreateUserValidator(BaseModel):
     last_login_date: datetime = Field(default_factory=datetime.now)
     user_type_id: int
     dr_iq_gender_id: typing.Optional[int]
-    is_active: bool = True
+    is_active: bool = False
 
 
     @validator('email')

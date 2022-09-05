@@ -158,9 +158,20 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
 
         access_token, refresh_token = req["access_token"], req["refresh_token"]
         if not access_token or not refresh_token:
-            return {"message": "access token or refresh token is missing"}
+            response = custom_response(data={
+            "message": "access token or refresh token is missing"
+            }
+            , status_code=status.HTTP_200_OK)
+            response = delete_all_cookies(response)
+            return response
+            
         if (redis_conn.get(authorize.get_jti(access_token)) or redis_conn.get(authorize.get_jti(refresh_token))):
-            return {"message": "already logged out"}
+            response = custom_response(data={
+            "message": "already logged out"
+            }
+            , status_code=status.HTTP_200_OK)
+            response = delete_all_cookies(response)
+            return response
 
         jti = authorize.get_jti(access_token)
         redis_conn.setex(jti, Settings().authjwt_access_token_expires, 'true')
@@ -168,13 +179,18 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
         redis_conn.setex(jti, Settings().authjwt_refresh_token_expires, 'true')
 
     except Exception as e:
-        return {"message": "token has expired"}
+        response = custom_response(data={
+        "message": "token has expired"
+        }
+        , status_code=status.HTTP_200_OK)
+        response = delete_all_cookies(response)
+        return response
 
     response = custom_response(data={
         "message": "successfully logged out"
     }
         , status_code=status.HTTP_200_OK)
-    delete_all_cookies(response)
+    response = delete_all_cookies(response)
     return response
 
 
