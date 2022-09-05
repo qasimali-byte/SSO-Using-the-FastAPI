@@ -7,7 +7,7 @@ class AuthService:
         self.db = db
 
     def get_idp_user(self, email: str):
-        user=self.db.query(idp_users).filter(and_(idp_users.email==email,idp_users.is_approved==True)).first()
+        user=self.db.query(idp_users).filter(and_(idp_users.email==email,idp_users.is_approved==True,idp_users.is_active==True)).first()
         return user
 
     def check_email(self, email: str):
