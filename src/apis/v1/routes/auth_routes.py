@@ -16,6 +16,8 @@ from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.auth_controller import AuthController
 from src.apis.v1.db.session import engine, get_db
 from sqlalchemy.orm import Session
+from src.apis.v1.services.roles_service import RolesService
+from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidatorError, EmailValidatorOut, \
     LoginValidator, LoginValidatorOut, LoginValidatorOutRedirect, LogoutValidator
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -90,7 +92,6 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             # delete frontend cookie from redis store.
             # del sessionStorage[verified_id[0]]
             idp_controller.delete_frontend_session(verified_id[0])
-
             # create idp cookie
             session = uuid4()
             # store session in the redis store.
@@ -99,8 +100,10 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             access_token = authorize.create_access_token(subject=email, fresh=True)
             refresh_token = authorize.create_refresh_token(subject=email)
+            user_info_data = UserService(db).get_user_info_db(email)
+            get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
             data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="successfully authenticated",
-            roles=["super_admin"],token_type="Bearer",redirect_url=data[0],saml_response=data[1], product_name=application_entity_id,
+            roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url=data[0],saml_response=data[1], product_name=application_entity_id,
             statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
             response = custom_response(data=data_out
                                        , status_code=status.HTTP_307_TEMPORARY_REDIRECT)

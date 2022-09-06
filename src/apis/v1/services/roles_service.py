@@ -1,3 +1,4 @@
+from typing import Union
 from sqlalchemy import and_
 from src.apis.v1.models.driq_practices_role_model import driq_practices_role
 
@@ -80,25 +81,20 @@ class RolesService():
             roles = RolesValidator(roles = roles_object.roles).dict()
             return roles["roles"]
 
-    def get_user_selected_role(self, sp_app_name, user_id):
+    def get_user_selected_role(self, sp_app_name, user_id) -> Union[str,None]:
         try:
-            user_selected_roles = []
-            user_selected_role_object = self.db.query(idp_users,roles)\
+            ## This function is mainly used to get the role in ez-login application
+            user_selected_role_object = self.db.query(idp_users.id,roles.name)\
             .filter(idp_users.id == user_id) \
             .join(idp_user_apps_roles, idp_user_apps_roles.idp_users_id == idp_users.id) \
             .join(sp_apps_role, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id) \
             .join(roles, roles.id == sp_apps_role.roles_id) \
-            .all()
+            .join(SPAPPS, SPAPPS.id == sp_apps_role.sp_apps_id).filter(SPAPPS.name == sp_app_name) \
+            .first()
 
-            for users_values,roles_values in user_selected_role_object:
-                user_selected_roles.append(roles_values.name)
-
-            if sp_app_name == "ez-login":
-                if len(user_selected_roles) == 0:
-                    return None
-                return user_selected_roles[0]
-            
-            return user_selected_roles
+            if user_selected_role_object:
+                return user_selected_role_object[1]
+            return None
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+" - error occured in roles service")
 
@@ -135,3 +131,12 @@ class RolesService():
 
         all_app_roles = format_roles_with_selected_roles(all_app_roles, selected_roles)
         return all_app_roles
+
+    def get_ezlogin_role_only(self, user_id):
+        role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)
+        ezlogin_role = []
+        if role_name is not None:
+            ezlogin_role.append(role_name)
+            return ezlogin_role
+        else:
+            return ['external user']

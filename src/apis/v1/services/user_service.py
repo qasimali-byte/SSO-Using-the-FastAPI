@@ -93,6 +93,7 @@ class UserService():
             if user_info_object.verification_id == verification_id:
                 user_info_object.is_on_hold = False
                 user_info_object.is_active = True
+                user_info_object.is_approved = True
                 user_info_object.verification_id = "verified"
                 self.db.commit()
                 data = {
