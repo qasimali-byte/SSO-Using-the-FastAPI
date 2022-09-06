@@ -152,7 +152,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,
     
     # response = RedirectResponse(url="http://{}/sign-in".format("localhost:8088"))
 
-    response = RedirectResponse(url="{}sign-in".format(host))
+    response = RedirectResponse(url="{}sign-in".format(host)) 
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend, vars(cookie_frontend), "---cookie--", vars(response))
     return response

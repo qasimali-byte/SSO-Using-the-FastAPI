@@ -137,3 +137,12 @@ class RolesService():
     def get_allowed_api_by_role(self, role_name, method, url):
         return self.db.query(roles).join(role_api, roles.id == role_api.role_id).join(api, role_api.api_id == api.id) \
             .filter(and_(roles.name == role_name,api.method == method, api.name == url,role_api.is_allowed == True)).first()
+
+    def get_ezlogin_role_only(self, user_id):
+        role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)
+        ezlogin_role = []
+        if role_name is not None:
+            ezlogin_role.append(role_name)
+            return ezlogin_role
+        else:
+            return ['external user']

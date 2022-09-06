@@ -107,7 +107,6 @@ class LoginProcessView():
         for i in range(len(practice_roles_data)):
             if practice_roles_data[i].get('name') == str(sp_apps_data.name):
                 apps.append({'app_practices': practice_roles_data[i].get('practices')})
-        
         app_practices_list = list()
         for app in apps[0]['app_practices']:
             try:
@@ -131,7 +130,6 @@ class LoginProcessView():
         users_info['app_practices']=app_practices
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
- 
         users_info["email"] = email
         identity = json_updated_data
 
