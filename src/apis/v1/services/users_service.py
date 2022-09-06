@@ -1,5 +1,4 @@
-from itertools import count
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.idp_users_model import idp_users
@@ -78,7 +77,7 @@ class UsersService():
                 .join(idp_user_apps_roles, idp_users.id == idp_user_apps_roles.idp_users_id) \
                 .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
                 .join(roles, sp_apps_role.roles_id == roles.id) \
-                .filter(roles.name == "sub-admin").subquery()
+                .filter(or_(roles.name == "super-admin",roles.name == "sub-admin")).subquery()
                 
 
             sub_query=get_subquery(search,select_practices,user_status)
