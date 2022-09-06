@@ -1,7 +1,6 @@
 import uuid
 from datetime import timedelta
 
-from fastapi_redis import redis_client
 from starlette.background import BackgroundTasks
 
 from src.apis.v1.core.project_settings import Settings
