@@ -23,7 +23,7 @@ if config.config_file_name is not None:
 
 # from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.models import Base
-from src.apis.v1.models import Sps, User, UserSession, idp_users, SAMLUserSession, SPAPPS, idp_sp
+from src.apis.v1.models import *
 from src.apis.v1.core.project_settings import Settings
 target_metadata = [Base.metadata]
 
