@@ -44,13 +44,15 @@ x5Ql0ejivIJAYcMGUyA+/YwJg2FGoA==
                 </ds:X509Data>
             </ds:KeyInfo>
         </md:KeyDescriptor>
+
+
         <md:SingleLogoutService
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            Location="http://ezanalytics/sso/slo"
-            ResponseLocation="http://ezanalytics/sso/slo"/>
+            Location="http://localhost:8000/sso/slo"
+            ResponseLocation="http://localhost:8000/sso/slo"/>
         <md:SingleLogoutService
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
-            Location="http://ezanalytics/sso/slo"/>
+            Location="http://localhost:8000/slo"/>
         <md:ManageNameIDService
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
             Location="https://LoadBalancer-9.siroe.com:3443/federation/SPMniRedirect/metaAlias/sp"

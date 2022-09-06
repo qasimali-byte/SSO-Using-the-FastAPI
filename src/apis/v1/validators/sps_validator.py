@@ -13,6 +13,7 @@ class ServiceProviderValidator(BaseModel):
 
 class ListServiceProviders(BaseModel):
     id: int
+    display_name: str
     name : str
     image : str
     host_url : str
