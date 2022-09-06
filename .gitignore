@@ -23,6 +23,6 @@ local_test.py
 /alembic/
 # /build/
 /venv/
-/alembic/
+/alembic/versions/
 /envs/
 .gitignore

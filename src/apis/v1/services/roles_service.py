@@ -1,6 +1,8 @@
 from typing import Union
 from sqlalchemy import and_
+from src.apis.v1.models.api_model import api
 from src.apis.v1.models.driq_practices_role_model import driq_practices_role
+from src.apis.v1.models.role_api_model import role_api
 
 from src.apis.v1.models.sp_apps_role_driq_practice_role_model import sp_apps_role_driq_practice_role
 from src.apis.v1.utils.roles_utils import format_roles_with_selected_roles
@@ -81,7 +83,7 @@ class RolesService():
             roles = RolesValidator(roles = roles_object.roles).dict()
             return roles["roles"]
 
-    def get_user_selected_role(self, sp_app_name, user_id) -> Union[str,None]:
+    def get_user_selected_role(self, sp_app_name, user_id) -> str:
         try:
             ## This function is mainly used to get the role in ez-login application
             user_selected_role_object = self.db.query(idp_users.id,roles.name)\
@@ -94,7 +96,7 @@ class RolesService():
 
             if user_selected_role_object:
                 return user_selected_role_object[1]
-            return None
+            return 'external-user'
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+" - error occured in roles service")
 
@@ -131,6 +133,10 @@ class RolesService():
 
         all_app_roles = format_roles_with_selected_roles(all_app_roles, selected_roles)
         return all_app_roles
+
+    def get_allowed_api_by_role(self, role_name, method, url):
+        return self.db.query(roles).join(role_api, roles.id == role_api.role_id).join(api, role_api.api_id == api.id) \
+            .filter(and_(roles.name == role_name,api.method == method, api.name == url,role_api.is_allowed == True)).first()
 
     def get_ezlogin_role_only(self, user_id):
         role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)

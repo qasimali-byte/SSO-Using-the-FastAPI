@@ -27,3 +27,4 @@ from .action_model import action
 from .user_action_model import user_action
 from .action_api_model import action_api
 from .api_model import api
+from .role_api_model import role_api
