@@ -104,7 +104,7 @@ class UserService():
                 response = custom_response(status_code=status.HTTP_202_ACCEPTED, data=validated_data)
             elif user_info_object.verification_id == "verified":
                 data = {
-                    "message": "User is already verified",
+                    "message": "User is already verified, url expired",
                     "statuscode": status.HTTP_302_FOUND
                 }
                 validated_data = SuccessfulJsonResponseValidator(**data)

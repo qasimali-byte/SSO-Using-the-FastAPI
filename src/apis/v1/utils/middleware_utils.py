@@ -1,9 +1,11 @@
 from contextlib import contextmanager
 import json
+
+from redis import Redis
+
 from src.apis.v1.controllers.action_controller import ActionController
 
 from src.apis.v1.db.session import get_db
-
 
 class async_iterator_wrapper:
     def __init__(self, obj):
