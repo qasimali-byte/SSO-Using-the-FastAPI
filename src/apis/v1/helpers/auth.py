@@ -57,3 +57,6 @@ class AuthJWT(AuthJWT):
         """
         super().jwt_required()
         return super().get_jwt_subject()
+
+    def get_jwt_current_user(self):
+        return super().get_jwt_subject()

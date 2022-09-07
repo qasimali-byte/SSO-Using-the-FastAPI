@@ -115,8 +115,17 @@ class AuthController:
         the refresh token, but will mark that access token as non-fresh,
         as we do not actually verify a password in this endpoint.
         """
-        authorize.jwt_required()
-        current_user = authorize.get_jwt_subject()
+        try:
+            authorize.jwt_refresh_token_required()
+        except Exception as e:
+            data = {
+                "message":str(e),
+                "statuscode":status.HTTP_422_UNPROCESSABLE_ENTITY
+            }
+            response = custom_response(data=data,status_code=422)
+            return response
+
+        current_user = authorize.get_jwt_current_user()
         new_access_token = authorize.create_access_token(subject=current_user,fresh=False)
         data = RefreshTokenValidatorOut(
             message = "successfully generated new access token",
