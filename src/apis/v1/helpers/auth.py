@@ -9,6 +9,7 @@ import jwt
 
 class AuthJWT(AuthJWT):
     def __init__(self, req: Request = None, res: Response = None):
+        self._request = req
         super().__init__(req, res)
 
     def _verified_token(self,encoded_token: str, issuer: Optional[str] = None) -> Dict[str,Union[str,int,bool]]:
@@ -47,3 +48,15 @@ class AuthJWT(AuthJWT):
             raise HTTPException(status_code=401, detail='Invalid token')
         except Exception as err:
             raise JWTDecodeError(status_code=422,message=str(err))
+
+    def get_jwt_subject(self) -> Optional[Union[str,int]]:
+        """
+        this will return the subject of the JWT that is accessing this endpoint.
+        If no JWT is present, `None` is returned instead.
+
+        :return: sub of JWT
+        """
+        self.jwt_required(self._request)
+        if self._token:
+            return self._verified_token(self._token)['sub']
+        return None

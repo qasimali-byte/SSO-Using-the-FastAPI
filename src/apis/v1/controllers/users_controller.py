@@ -14,14 +14,12 @@ class UsersController():
         self._metadata = {}
         
 
-    def get_users(self, user_email:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:bool,select_practices:str) -> dict:
+    def get_users(self, user_role:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:bool,select_practices:str) -> dict:
         """
             Get Users according to the roles of user email
         """
         page_offset -= 1
-        user_id = UserService(self.db).get_user_info_db(user_email)
-        user_id = user_id.id
-        user_selected_role = RolesService(self.db).get_user_selected_role("ez-login", user_id)
+        user_selected_role = user_role
 
         if user_selected_role == "super-admin":
             # get subadmins and practice admins and external users

@@ -71,3 +71,10 @@ class RolesController():
 
     def get_ezlogin_user_role(self, user_id):
         return RolesService(self.db).get_user_selected_role("ez-login", user_id)
+
+    def get_allowed_api_by_role(self, role_name, method, url) -> bool:
+        allowed_role = RolesService(self.db).get_allowed_api_by_role(role_name, method, url)
+        if allowed_role:
+            return True
+        else:
+            return False
