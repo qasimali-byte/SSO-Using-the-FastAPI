@@ -9,7 +9,6 @@ import jwt
 
 class AuthJWT(AuthJWT):
     def __init__(self, req: Request = None, res: Response = None):
-        self._request = req
         super().__init__(req, res)
 
     def _verified_token(self,encoded_token: str, issuer: Optional[str] = None) -> Dict[str,Union[str,int,bool]]:
@@ -56,7 +55,5 @@ class AuthJWT(AuthJWT):
 
         :return: sub of JWT
         """
-        self.jwt_required(self._request)
-        if self._token:
-            return self._verified_token(self._token)['sub']
-        return None
+        super().jwt_required()
+        return super().get_jwt_subject()
