@@ -19,3 +19,5 @@ async def serve_spa(request: Request, filename):
 
     content_type, _ = guess_type(local_path)
     return FileResponse(local_path, media_type=content_type)
+
+
