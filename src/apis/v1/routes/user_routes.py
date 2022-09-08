@@ -78,7 +78,7 @@ async def update_user_practices_roles_by_id(user_id:int,user_validator:CreateInt
     return resp
 
 @router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=201)
-async def update_user_image(image:UploadFile = Form(...),user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+async def update_user_image(image:UploadFile = Form(...), user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image, uses request.body.file
     """
@@ -87,6 +87,16 @@ async def update_user_image(image:UploadFile = Form(...),user_email_role:RoleVer
     resp = UserController(db).update_user_image(user_email=current_user_email,data_image=image)
     return resp
 
+
+@router.put("/user/get_profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=201)
+async def get_user_image(user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+    """
+        This api updates the user information for profile image, uses request.body.file
+    """
+
+    current_user_email = user_email_role.get_user_email()
+    resp = UserController(db).update_user_image(user_email=current_user_email)
+    return resp
 
 @router.delete("/user/{user_id}", summary="Delete a user",responses={200:{"description":"Delete a user and all associated applications and it's rights"}})
 async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):

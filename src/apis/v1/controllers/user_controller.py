@@ -226,6 +226,19 @@ class UserController():
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
 
+
+    def get_user_image(self, user_email):
+        """
+            Access User Image Controller
+        """
+        image_url = UserService(self.db).get_user_image_db(user_email=user_email)
+        data = {
+            "url": image_url,
+            "statuscode": status.HTTP_302_FOUND
+        }
+        validated_data = SuccessfulJsonResponseValidator(**data)
+        response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
+        return response
     def generate_encrypted_url(self, user_data):
         unique_id = uuid.uuid4().hex
         url_key = get_encrypted_text(str(user_data.id) + "?" + str(unique_id) + "?" + str(datetime.now()))
