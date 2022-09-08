@@ -101,7 +101,6 @@ class RolesService():
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+" - error occured in roles service")
 
     def get_user_selected_role_db_appid_userid(self, app_id, selected_userid):
-
         selected_roles = self.db.query(idp_user_apps_roles, roles, driq_practices_role) \
         .join(sp_apps_role, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id) \
         .join(roles, roles.id == sp_apps_role.roles_id) \
@@ -135,6 +134,7 @@ class RolesService():
         return all_app_roles
 
     def get_allowed_api_by_role(self, role_name, method, url):
+
         return self.db.query(roles).join(role_api, roles.id == role_api.role_id).join(api, role_api.api_id == api.id) \
             .filter(and_(roles.name == role_name,api.method == method, api.name == url,role_api.is_allowed == True)).first()
 

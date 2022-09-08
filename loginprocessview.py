@@ -94,16 +94,13 @@ class LoginProcessView():
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
         sp_metadata_name = self.get_sp_name(resp_args)
-
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)
         practice_roles_data,practice_roles_status = UserService(db).get_all_sps_practice_roles_db(email)
 
         users_info, user_info_data_id = self.get_user_info(email,db)
-
         app_role=RolesService(db).get_user_selected_role_db_appid_userid(sp_apps_data.id,user_info_data_id )
         apps = list()
-
         for i in range(len(practice_roles_data)):
             if practice_roles_data[i].get('name') == str(sp_apps_data.name):
                 apps.append({'app_practices': practice_roles_data[i].get('practices')})
@@ -113,7 +110,6 @@ class LoginProcessView():
                 app_practices_list.append({'parent': app['name'], 'practices': app['practices']})
             except:
                 pass
-
         app_practices = list([])
         for i in range(len(app_practices_list)):
             temp_list = list([])

@@ -91,9 +91,34 @@ class SPPracticeRoleValidator(BaseModel):
     class Config:
         allow_population_by_field_name = True
         validate_assignment = True
+        
+class LogedInUserSPPracticeRoleValidator(BaseModel):
+    """
+        For Loged IN User SP Practice Role Validator
+    """
+    id: int
+    name: str
+    gender: typing.Optional[typing.List[ListGenderValidator]] = []
+    sp_app_name: str
+    sp_app_image: str
+    practices: SPRegionsValidator = []
+    # roles: typing.Optional[SPRolesValidator]
+    # roles: typing.Optional[str]
+    # is_selected: typing.Optional[bool] = Field(alias='selected')
+    
+    class Config:
+        allow_population_by_field_name = True
+        validate_assignment = True
 
 class UserSPPracticeRoleValidatorOut(BaseModel):
     sp_practice_roles: typing.List['SPPracticeRoleValidator']
+    message: str = "successfully fetched sp practice roles"
+    statuscode: int = 200
+    
+    
+class LogedInUserSPPracticeRoleValidatorOut(BaseModel):
+    'for loged in user'
+    sp_practice_roles: typing.List['LogedInUserSPPracticeRoleValidator']
     message: str = "successfully fetched sp practice roles"
     statuscode: int = 200
 
