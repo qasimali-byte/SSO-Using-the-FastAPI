@@ -32,7 +32,7 @@ class UsersService():
 
             count_records=self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery_2))).count()
 
-            subquery_3=self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery_2))).limit(page_limit).offset(page_offset*page_limit).subquery()
+            subquery_3=self.db.query(idp_users.id).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))).limit(page_limit).offset(page_offset*page_limit).subquery()
 
             users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_3))).\
                 join(idp_sp, idp_users.id == idp_sp.idp_users_id).\
@@ -88,7 +88,7 @@ class UsersService():
             .join(SPAPPS,SPAPPS.id == sp_apps_role.sp_apps_id)\
             .filter(and_(idp_users.id.not_in(select(subquery_1)),idp_users.is_approved == True,*sub_query)).group_by(idp_users.id).subquery()
 
-            subquery_3=self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery_2))).limit(page_limit).offset(page_offset*page_limit).subquery()
+            subquery_3=self.db.query(idp_users.id).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))).limit(page_limit).offset(page_offset*page_limit).subquery()
 
             count_records=self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery_2))).count()
 
