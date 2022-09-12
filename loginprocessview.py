@@ -74,7 +74,6 @@ class LoginProcessView():
 
     def get_sp_name(self, resp_args):
         try:
-            # print(resp_args["sp_entity_id"],"resp_args",SpAppsEnum(resp_args["sp_entity_id"]).name)
             return SpAppsEnum(resp_args["sp_entity_id"]).name
         except Exception as e:
             print(e,"error")
