@@ -96,14 +96,3 @@ async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Dep
     user_to_delete = UserController(db).delete_user(user_id)
     return user_to_delete
 
-
-@router.get("/user/service-providers/practices/roles", summary="Get All Service Providers With Practices And RolesApi for a logged in user",
-            responses={200:{"model":LogedInUserSPPracticeRoleValidatorOut,"description":"Succesfully returned service providers with their practices and roles"},})
-async def get_user_loged_in_practice_roles(user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
-# async def get_practice_roles(db: Session = Depends(get_db)):
-    """
-        Get All Service Providers Practice Roles
-    """
-    current_user_email = user_email_role.get_user_email()
-    resp = UserController(db).get_sps_practice_roles_loged_in_user(current_user_email)
-    return resp

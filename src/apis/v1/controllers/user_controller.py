@@ -19,7 +19,7 @@ from celery_worker import email_sender
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersValidatorUpdateApps, \
     UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut, \
-    UserDeleteValidatorOut,LogedInUserSPPracticeRoleValidatorOut
+    UserDeleteValidatorOut
 from ..core.project_settings import Settings
 from ..utils.auth_utils import create_password_hash, generate_password
 from utils import get_redis_client
@@ -105,24 +105,6 @@ class UserController():
         return response
     
     
-    def get_sps_practice_roles_loged_in_user(self, user_email):
-
-        practice_roles_data, practice_roles_status = UserService(self.db).get_all_sps_practice_roles_db_for_loged_in_user(user_email)
-        if practice_roles_status != 200:
-            data = ErrorResponseValidator(message=practice_roles_data)
-            response = custom_response(status_code=practice_roles_status, data=data)
-            return response
-
-        print(practice_roles_data)
-        try:
-            data = LogedInUserSPPracticeRoleValidatorOut(sp_practice_roles=practice_roles_data)
-            data = data.dict(exclude_none=True)
-        except Exception as e:
-            data = ErrorResponseValidator(message=str(e))
-            response = custom_response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, data=data)
-            return response
-        response = custom_response(status_code=practice_roles_status, data=data)
-        return response
 
     def get_user_practices_roles_by_id(self, user_email: str, user_id: int):
         """
