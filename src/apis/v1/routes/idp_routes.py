@@ -139,6 +139,9 @@ async def sso_redirect(request: Request, SAMLRequest: str,
         if verified_status[1] == 200:
 
             email_ = req.get_userid(verified_id[0],db)
+            status_code = req.verify_app_allowed(SAMLRequest,db,email_)
+            if status_code == 307:
+                return templates.TemplateResponse("notification.html",{"request": request})
             resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]
             return HTMLResponse(content=resp["data"]["data"])
@@ -192,7 +195,10 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     if user == None:
         return templates.TemplateResponse("loginform.html", {"request": request, "saml_request": saml_request,
                                                              "error": "Invalid username or password"})
-    print(vars(request))
+    # print(vars(request))
+    status_code = resp.verify_app_allowed(saml_request,db,email)
+    if status_code == 307:
+        return templates.TemplateResponse("notification.html",{"request": request,})
     # print(request.headers['referer'])
     print(saml_request, "---saml_request")
     session = uuid4()
