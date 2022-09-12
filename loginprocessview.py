@@ -22,6 +22,7 @@ from src.apis.v1.controllers.auth_controller import AuthController
 class LoginProcessView():
     def __init__(self) -> None:
         self.idp_server = server.Server(config_file="idp/idp_conf.py")
+        self.sp_metadata_name:str = ""
 
     def verify(self):
         verify_request_signature(data)
@@ -93,6 +94,7 @@ class LoginProcessView():
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
         sp_metadata_name = self.get_sp_name(resp_args)
+        self.sp_metadata_name = sp_metadata_name
         sps_allowed = SPSService(db).get_sps_app(user_email)
         if sps_allowed:
             if get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name):
@@ -100,6 +102,9 @@ class LoginProcessView():
             else:
                 return status.HTTP_307_TEMPORARY_REDIRECT
         return status.HTTP_404_NOT_FOUND 
+
+    def return_sp_app_name(self):
+        return self.sp_metadata_name
 
     def get(self, request_parms, email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
@@ -109,6 +114,7 @@ class LoginProcessView():
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
         sp_metadata_name = self.get_sp_name(resp_args)
+        self.sp_metadata_name = sp_metadata_name
 
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)

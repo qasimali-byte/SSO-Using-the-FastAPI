@@ -89,6 +89,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 return response
             
             status_code = req.verify_app_allowed(verified_data[0].saml_req,db,email)
+            application_entity_id = req.return_sp_app_name()
             if status_code == 307:
                 session = uuid4()
                 req.store_session(session, email, db)
@@ -97,7 +98,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 user_info_data = UserService(db).get_user_info_db(email)
                 get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
                 data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="You don't have access to this sp application",
-                roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url="http://dev-sso-frontend.attech-ltd.com/backend/notification",saml_response="", product_name="",
+                roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url="http://dev-sso-frontend.attech-ltd.com/backend/notification",saml_response="", product_name=application_entity_id,
                 statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
                 response = custom_response(data=data_out
                                         ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)
@@ -107,7 +108,6 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 return response
 
             resp = req.get(verified_data[0].saml_req,email,db)
-            application_entity_id = resp[1]['sp_entity_id']
             resp = resp[0]
             # delete frontend cookie from redis store.
             # del sessionStorage[verified_id[0]]
