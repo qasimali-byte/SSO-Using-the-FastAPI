@@ -91,6 +91,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             status_code = req.verify_app_allowed(verified_data[0].saml_req,db,email)
             if status_code == 307:
                 session = uuid4()
+                req.store_session(session, email, db)
                 access_token = authorize.create_access_token(subject=email, fresh=True)
                 refresh_token = authorize.create_refresh_token(subject=email)
                 user_info_data = UserService(db).get_user_info_db(email)
