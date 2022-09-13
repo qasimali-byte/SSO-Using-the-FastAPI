@@ -132,6 +132,51 @@ class UserController():
         response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
+
+    def get_loged_in_user_practices_roles_by_id(self, user_email: str,user_id: int):
+        """
+            Get User Practices And Selected Roles By ID
+         """
+        selected_user_id = user_id
+        user_service_object = UserService(self.db)
+        user_info = user_service_object.get_user_info_db(user_email)
+        selected_user_info = user_service_object.get_user_info_db_by_id(user_id)
+        if selected_user_info is None:
+            data = ErrorResponseValidator(message="User Not Found")
+            response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=data)
+            return response
+
+        selected_email = selected_user_info.email
+        allowed_apps = SPSController(self.db).get_allowed_apps_by_userid_for_loged_in_user(user_email, selected_email, user_info.id,
+                                                                         selected_user_id)
+        firstname = selected_user_info.first_name
+        lastname = selected_user_info.last_name
+        type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
+        type_of_user = type_of_user['name']
+        data = GetUsersValidatorUpdateApps(firstname=firstname, lastname=lastname,
+                                           email=selected_email, type_of_user=type_of_user,
+                                           sp_practice_roles=allowed_apps, is_active=selected_user_info.is_active)
+        response = custom_response(status_code=status.HTTP_200_OK, data=data)
+        return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def update_user_practices_roles_by_id(self, user_id: int, user_data):
         """
             Update User Practices, SP Applications And Roles By User ID

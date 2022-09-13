@@ -1,6 +1,6 @@
 from sqlalchemy import func, union_all
 from src.apis.v1.models.practices_model import practices
-from src.apis.v1.utils.practices_utils import format_practices_edit_user_data_selected_unselected
+from src.apis.v1.utils.practices_utils import  format_practices_edit_user_data_selected_unselected, format_practices_user_data_selected
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from fastapi import status
@@ -71,4 +71,14 @@ class PracticesService():
         selected_unselected_practices_data = self.get_selected_unselected_practices_dbquery_by_appid_userid(app_id, user_id, selected_user_id)
         edit_practices_list = format_practices_edit_user_data_selected_unselected(selected_unselected_practices_data)
         return edit_practices_list
+
+    def get_selected_practices_db_by_id_loged_in_user(self, app_id, user_id, selected_user_id):
+        print(app_id, user_id, selected_user_id)
+        practices_als = aliased(practices, name='practices_aliased')
+        practices_of_selecteduserid = self.db.query(practices,practices_als).with_entities(practices.id.label('practices_id'),practices.name.label('practices_name'),practices_als.id.label('practices_als_id'),practices_als.name.label('practices_als_name')).options(Load(practices).load_only("id","name"))\
+        .options(Load(practices_als).load_only("id","name"))\
+        .join(practices_als, practices.practice_region_id == practices_als.id, isouter=True).filter(practices.sp_apps_id == app_id) \
+        .join(idp_users_practices,practices.id == idp_users_practices.practices_id).filter(idp_users_practices.idp_users_id == selected_user_id).all()
+        formated_practices=format_practices_user_data_selected(practices_of_selecteduserid)
+        return formated_practices
 

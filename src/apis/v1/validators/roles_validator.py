@@ -29,10 +29,14 @@ class ListSubRolesValidator(BaseModel):
         orm_mode = True
     
 
+
+
 class SubRolesValidator(BaseModel):
     id: int
     name: str 
     sub_roles: Optional[List[ListSubRolesValidator]]
+    
+
 
 class ListRolesValidator(BaseModel):
     id: int
@@ -41,6 +45,8 @@ class ListRolesValidator(BaseModel):
 
     class Config:
         orm_mode = True
+        
+
 class RolesValidator(BaseModel):
     roles: Optional[List[ListRolesValidator]] = []
     
@@ -52,6 +58,14 @@ class SubRolesValidatorWithOutOrm(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+        
+class LogedInUserSubRolesValidatorWithOutOrm(BaseModel):
+    id: int
+    name: str 
+    # is_selected: Optional[bool] = Field(alias='isSelected')
+
+    class Config:
+        allow_population_by_field_name = True
 class ListRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str
@@ -60,7 +74,18 @@ class ListRolesValidatorWithOutOrm(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-        
+
+
+class LogedInUserListRolesValidatorWithOutOrm(BaseModel):
+    id: int
+    name: str
+    # is_selected: Optional[bool] = Field(alias='isSelected')
+    sub_roles : Optional[List[LogedInUserSubRolesValidatorWithOutOrm]] = []
+
+    class Config:
+        allow_population_by_field_name = True
+
+
 class RolesValidatorWithOutOrm(BaseModel):
     roles: Optional[List[ListRolesValidatorWithOutOrm]] = []
 
@@ -69,3 +94,9 @@ class SPRolesValidator(BaseModel):
         List SP Roles Validator
     """
     __root__: List[ListRolesValidatorWithOutOrm]
+    
+class LogedInUserSPRolesValidator(BaseModel):
+    """
+        List SP Roles Validator
+    """
+    __root__: List[LogedInUserListRolesValidatorWithOutOrm]
