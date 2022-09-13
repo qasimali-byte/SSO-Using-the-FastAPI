@@ -94,7 +94,7 @@ async def get_user_image( db: Session = Depends(get_db)):
         This api returns the user information for profile image, uses request.body.file
     """
 
-    current_user_email = "umair@gmail.com" # user_email_role.get_user_email()
+    current_user_email = user_email_role.get_user_email()
     resp = UserController(db).get_user_image(user_email=current_user_email)
     return resp
 
