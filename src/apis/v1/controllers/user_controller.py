@@ -244,14 +244,6 @@ class UserController():
         content_type, _ = guess_type(local_path)
         return FileResponse(local_path, media_type=content_type)
 
-        #
-        # data = {
-        #     "message": image_url,
-        #     "statuscode": status.HTTP_302_FOUND
-        # }
-        # validated_data = SuccessfulJsonResponseValidator(**data)
-        # response = custom_response(status_code=status.HTTP_302_FOUND, data=validated_data)
-        # return response
     def generate_encrypted_url(self, user_data):
         unique_id = uuid.uuid4().hex
         url_key = get_encrypted_text(str(user_data.id) + "?" + str(unique_id) + "?" + str(datetime.now()))

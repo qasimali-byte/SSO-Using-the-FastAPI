@@ -63,7 +63,7 @@ class UserService():
             user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
             existing_image_file_name = user_info_object.profile_image.split('/')[-1]
             if existing_image_file_name != 'profile_image.jpg':
-                file_remover(f"./public/assets/{existing_image_file_name}")
+                file_remover(f"./public/profile_image/{existing_image_file_name}")
 
             self.db.query(idp_users).filter(idp_users.email == user_email).update(
                 {"profile_image": user_image_url})
