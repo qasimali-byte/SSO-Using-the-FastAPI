@@ -12,3 +12,9 @@ def test_get_user_image(superuser_token_headers):
 
     response = client.get("api/v1/user/get-profile-image",headers=superuser_token_headers)
     assert response.status_code == 201
+
+
+def test_serve_image():
+
+    response = client.get("http://localhost:8088/api/v1/user/profile-image/NqQQrAi9_dp.jpeg")
+    assert response.status_code == 200
