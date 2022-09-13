@@ -19,3 +19,16 @@ async def serve_spa(request: Request, filename):
 
     content_type, _ = guess_type(local_path)
     return FileResponse(local_path, media_type=content_type)
+
+
+@router.get("/user/profile-image/{filename}")
+async def serve_spa(request: Request, filename):
+    if len(filename) == 0:
+        return Response(status_code=404)
+    local_path = './public/profile_image/'+filename
+
+    if not isfile(local_path):
+        return Response(status_code=404)
+
+    content_type, _ = guess_type(local_path)
+    return FileResponse(local_path, media_type=content_type)
