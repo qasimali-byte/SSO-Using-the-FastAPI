@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, validator, typing, Field
-from src.apis.v1.validators.practices_validator import SPRegionsValidator
-from src.apis.v1.validators.roles_validator import LogedInUserSPRolesValidator, RolesValidator, SPRolesValidator
+from src.apis.v1.validators.practices_validator import LogedInUserSPRegionsValidator, SPRegionsValidator
+from src.apis.v1.validators.roles_validator import LogedInUserListRolesValidatorWithOutOrm,  RolesValidator, SPRolesValidator
 from src.apis.v1.validators.gender_validator import ListGenderValidator, LogedInUserListGenderValidator
 import uuid
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
@@ -99,11 +99,11 @@ class LogedInUserSPPracticeRoleValidator(BaseModel):
     """
     id: int
     name: str
-    gender: typing.Optional[typing.List[LogedInUserListGenderValidator]] = []
+    gender: typing.Optional[LogedInUserListGenderValidator]
     sp_app_name: str
     sp_app_image: str
-    practices: SPRegionsValidator = []
-    roles: typing.Optional[LogedInUserSPRolesValidator]
+    practices: LogedInUserSPRegionsValidator = []
+    role: typing.Optional[LogedInUserListRolesValidatorWithOutOrm]
     # is_selected: typing.Optional[bool] = Field(alias='selected')
     
     class Config:

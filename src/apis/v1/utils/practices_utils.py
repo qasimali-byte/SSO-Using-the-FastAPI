@@ -124,7 +124,6 @@ def format_practices_user_data_selected(practices_selected):
 
     
     for practices_child_id,practices_child_name, practices_parent_id, practices_parent_name in practices_selected: 
-        print(practices_child_id,practices_child_name,practices_parent_id,practices_parent_name)
         ## create parent regions for practices
         if practices_parent_id == None:
 

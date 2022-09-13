@@ -139,11 +139,11 @@ class RolesService():
     def get_user_loged_in_ezlogin_roles(self, user_id):
         role_name = self.get_user_selected_role(sp_app_name="ez-login", user_id=user_id)
         if role_name == "super-admin":
-            user_roles = [{"id":15,"name":"Super Admin","sub_roles":[]}]
+            user_roles = {"id":15,"name":"Super Admin","sub_roles":None}
         elif role_name == "sub-admin":
-            user_roles = [{"id":16, "name":"Practice Admin","sub_roles":[]}]
+            user_roles = {"id":16, "name":"Practice Admin","sub_roles":None}
         else:
-            user_roles = ['external user']
+            user_roles = {"id":17, "name":"External User","sub_roles":None}
 
         return user_roles
 

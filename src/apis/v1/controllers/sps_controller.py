@@ -114,30 +114,25 @@ class SPSController():
             
 
     def get_practices_roles_by_apps_loged_in_user(self,apps_list,app, selected_apps, user_id, selected_id):
-            data=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id)
-            practices=PracticesController(self.db).get_allowed_practices_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id)
-            print(practices)
-            print('------Roles-----',data,type(data))
-            # apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
-            # sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
-            # roles=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id),
-            # practices=PracticesController(self.db).get_allowed_practices_by_userid(app["id"],user_id,selected_id)) 
+            apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
+            sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
+            role=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id),
+            practices=PracticesController(self.db).get_allowed_practices_by_userid_loged_in_user(app["id"],user_id,selected_id)) 
 
-            # for iteration2 in selected_apps:
-            #     if app["id"] == iteration2["id"]:
-            #         # apps.is_selected = True
-            #         print('90')
+            for iteration2 in selected_apps:
+                if app["id"] == iteration2["id"]:
+                    pass
 
-            # if apps.id == 7: ## ez login id
-            #     apps_list.insert(0,apps.dict())
+            if apps.id == 7: ## ez login id
+                apps_list.insert(0,apps.dict())
 
-            # elif apps.id == 3: ## dr iq app id
-            #     gender_data = GenderService(self.db).get_driq_selected_gender(selected_id)
-            #     apps.gender = gender_data
-            #     apps_list.append(apps.dict())
+            elif apps.id == 3: ## dr iq app id
+                gender_data = GenderService(self.db).get_driq_selected_gender_loged_in_user(selected_id)
+                apps.gender = gender_data
+                apps_list.append(apps.dict())
 
-            # else:
-            #     apps_list.append(apps.dict())
+            else:
+                apps_list.append(apps.dict())
 
 
 

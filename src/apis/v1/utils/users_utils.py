@@ -44,7 +44,6 @@ def get_subquery(search,select_practices,user_status):
         return  query
     elif search is None and select_practices !=['All'] and user_status == True:
         # Case 3
-        print(select_practices,type(select_practices))
         query= {idp_users.is_active==True,SPAPPS.name.in_(select_practices)}
         return query
     elif search is None and select_practices !=['All'] and user_status == False:

@@ -73,7 +73,6 @@ class PracticesService():
         return edit_practices_list
 
     def get_selected_practices_db_by_id_loged_in_user(self, app_id, user_id, selected_user_id):
-        print(app_id, user_id, selected_user_id)
         practices_als = aliased(practices, name='practices_aliased')
         practices_of_selecteduserid = self.db.query(practices,practices_als).with_entities(practices.id.label('practices_id'),practices.name.label('practices_name'),practices_als.id.label('practices_als_id'),practices_als.name.label('practices_als_name')).options(Load(practices).load_only("id","name"))\
         .options(Load(practices_als).load_only("id","name"))\
