@@ -1,4 +1,3 @@
-import threading
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.helpers.customize_response import custom_response
@@ -151,11 +150,11 @@ class SPSController():
         return apps_list
     
     
-    def get_allowed_apps_by_userid_for_loged_in_user(self, user_email, selected_email, user_id, selected_id):
+    def get_allowed_apps_by_userid_for_loged_in_user(self,selected_email, user_id, selected_id):
 
         apps_list = [] # contains all the apps 
         sps_app_object = SPSService(self.db)
-        total_allowed_apps = sps_app_object.get_sps_app(user_email)
+        total_allowed_apps = sps_app_object.get_sps_app(selected_email)
         selected_apps = sps_app_object.get_sps_app(selected_email)
 
         if len(total_allowed_apps) == 0:

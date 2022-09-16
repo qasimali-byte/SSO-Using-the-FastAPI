@@ -23,5 +23,5 @@ class GenderService():
     def get_driq_selected_gender_loged_in_user(self, selected_user_id):
         selected_gender = self.db.query(idp_users) \
         .options(Load(idp_users).load_only("id","dr_iq_gender_id")).join(gender).filter(idp_users.id == selected_user_id).scalar()
-        all_genders = format_gender_selected_data_loged_in_area(selected_gender)
+        all_genders = format_gender_selected_data_loged_in_area(selected_gender.dr_iq_gender_id)
         return all_genders

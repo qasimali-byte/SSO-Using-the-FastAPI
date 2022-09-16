@@ -11,7 +11,14 @@ def format_gender_selected_data(all_genders,selected_gender):
     return all_genders
 
 def format_gender_selected_data_loged_in_area(selected_gender):
+    
     gender_dict=dict({})
-    gender_dict['id'] = selected_gender.id
-    gender_dict['name'] = selected_gender.gender
+    if selected_gender==1:
+        gender_dict['id'] = selected_gender
+        gender_dict['name'] = 'male'
+    
+    if selected_gender==2 :
+        gender_dict['id'] = selected_gender
+        gender_dict['name'] = 'female'
+        
     return gender_dict
