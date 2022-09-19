@@ -99,12 +99,12 @@ async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Dep
 
 
 
-# @router.get("/user/service-providers/practices/roles", summary="Get User Information with practices and roles",
-#             responses={200:{"model": GetLogedInUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
-# async def get_user_practices_roles_by_id( user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-#     """
-#         This api get the user information according to relevant service providers and practices
-#     """
-#     current_user_email = user_email_role.get_user_email()
-#     resp = UserController(db).get_loged_in_user_practices_roles_by_id(user_email=current_user_email)
-#     return resp
+@router.get("/user/selected/apps/practices/roles", summary="Get User Information with practices and roles",
+            responses={200:{"model": GetLogedInUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
+async def get_user_practices_roles_by_id( user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """
+        This api get the user information according to relevant service providers and practices
+    """
+    current_user_email = user_email_role.get_user_email()
+    resp = UserController(db).get_loged_in_user_practices_roles_by_id(user_email=current_user_email)
+    return resp
