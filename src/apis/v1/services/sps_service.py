@@ -64,6 +64,21 @@ class SPSService():
         except Exception as e:
             return []
 
+    def get_selected_sps_app_for_idp_user(self,user_email):
+        try:
+            
+            sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
+            serviceproviders = []
+            for i in sp_query:
+                x,y = (i[1],i[2])
+                serviceproviders.append(str({"name": y.name, "logo":y.logo_url,"url":y.host}))
+
+            return serviceproviders
+
+        except Exception as e:
+            return []
+
     def assign_sps_to_user_db(self, user_id, sps_object_list):
         try:
             objects = []
