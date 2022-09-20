@@ -30,7 +30,7 @@ class GraphQLRoleAuthorizer(RoleVerifier):
         self.url = url
 
     def verify(self):
-        if self.action_level == "application":
+        if self.action_level == "application" or self.action_level == None:
             with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
                 db = session
                 try:

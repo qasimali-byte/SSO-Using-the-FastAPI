@@ -27,8 +27,10 @@ from ..helpers.auth import AuthJWT
 from redis import Redis
 from src.apis.v1.routes.idp_routes import cookie, cookie_frontend
 from . import oauth2_scheme
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter(tags=["Authentication"])
+templates = Jinja2Templates(directory="templates/")
 
 # Setup our redis connection for storing the denylist tokens
 redis_conn = Redis(host=Settings().REDIS_HOST_URL, port=Settings().REDIS_HOST_PORT, db=0, decode_responses=True,password=Settings().REDIS_HOST_PASSWORD)
@@ -85,9 +87,27 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             if auth_result[1] != 200:
                 response = custom_response(data=auth_result[0], status_code=auth_result[1])
                 return response
+            
+            status_code = req.verify_app_allowed(verified_data[0].saml_req,db,email)
+            application_entity_id = req.return_sp_app_name()
+            if status_code == 307:
+                session = uuid4()
+                req.store_session(session, email, db)
+                access_token = authorize.create_access_token(subject=email, fresh=True)
+                refresh_token = authorize.create_refresh_token(subject=email)
+                user_info_data = UserService(db).get_user_info_db(email)
+                get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
+                data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="You don't have access to this sp application",
+                roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url="http://dev-sso-frontend.attech-ltd.com/backend/notification",saml_response="", product_name="ez-login",
+                statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
+                response = custom_response(data=data_out
+                                        ,status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+                cookie.attach_to_response(response, session)
+                delete_all_cookies(response, only_frontend=True)
+                return response
 
             resp = req.get(verified_data[0].saml_req,email,db)
-            application_entity_id = resp[1]['sp_entity_id']
             resp = resp[0]
             # delete frontend cookie from redis store.
             # del sessionStorage[verified_id[0]]
