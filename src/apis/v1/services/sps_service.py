@@ -57,12 +57,29 @@ class SPSService():
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
-                serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,"sp_app_name": y.name})
+                serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,\
+                    "sp_app_name": y.name,"logo_url": y.logo_url})
+            return serviceproviders
+
+        except Exception as e:
+            return []
+        
+        
+    def get_selected_unselected_sps_app(self):
+        try:
+            
+            total_sp_apps = self.db.query(SPAPPS).filter(SPAPPS.is_active==True).all()
+            serviceproviders = []
+            for data in total_sp_apps:
+                serviceproviders.append({"id": data.id, "display_name": data.display_name,"name": data.name, "image":data.logo_url,"host_url":data.host,\
+                    "sp_app_name": data.name,"logo_url": data.inactive_logo_url})
 
             return serviceproviders
 
         except Exception as e:
             return []
+
+
 
     def get_selected_sps_app_for_idp_user(self,user_email):
         try:

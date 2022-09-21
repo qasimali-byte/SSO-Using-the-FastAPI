@@ -93,6 +93,25 @@ class SPPracticeRoleValidator(BaseModel):
         validate_assignment = True
 
 
+
+class UserSelectedUnselectedSPApps(BaseModel):
+    """
+        SP Apps Validator
+    """
+    id: int
+    name: str
+    sp_app_name: str
+    sp_app_image: str
+    logo_url: str
+    is_selected: typing.Optional[bool]
+    
+    class Config:
+        allow_population_by_field_name = True
+        validate_assignment = True
+
+
+
+
 class LogedInUserSPPracticeRoleValidator(BaseModel):
     """
         SP Practice Role Validator
@@ -131,6 +150,29 @@ class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
     @validator('email')
     def validate_email(cls, v):
         return v.lower()
+
+
+
+
+class UserSelectedSPAppsValidatorOut(BaseModel):
+    selected_unselected_sp_apps: typing.List['UserSelectedUnselectedSPApps']
+    message: str = "successfully fetched sp apps"
+    statuscode: int = 200
+
+
+class GetUsersValidatorSelectedUnSelectedApps(UserSelectedSPAppsValidatorOut):
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
+    is_active: typing.Optional[bool] 
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
+
+
     
 class GetLogedInUsersValidatorUpdateApps(LogedInUserSPPracticeRoleValidatorOut):
     firstname: str 
