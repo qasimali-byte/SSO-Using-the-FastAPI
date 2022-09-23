@@ -1,6 +1,7 @@
-from fastapi import HTTPException
+from fastapi import HTTPException,status
 import json
 from src.apis.v1.constants.sp_application_enums import SpAppsEnum
+from src.apis.v1.helpers.filter_List_dictionaries import get_item
 from src.apis.v1.routes import practices_routes
 from src.apis.v1.services.roles_service import RolesService
 from src.apis.v1.services.sps_service import SPSService
@@ -21,6 +22,7 @@ from src.apis.v1.controllers.auth_controller import AuthController
 class LoginProcessView():
     def __init__(self) -> None:
         self.idp_server = server.Server(config_file="idp/idp_conf.py")
+        self.sp_metadata_name:str = ""
 
     def verify(self):
         verify_request_signature(data)
@@ -73,7 +75,6 @@ class LoginProcessView():
 
     def get_sp_name(self, resp_args):
         try:
-            print(resp_args["sp_entity_id"],"resp_args",SpAppsEnum(resp_args["sp_entity_id"]).name)
             return SpAppsEnum(resp_args["sp_entity_id"]).name
         except Exception as e:
             print(e,"error")
@@ -86,6 +87,25 @@ class LoginProcessView():
         else:
             raise HTTPException(status_code=500, detail="NO SP APP FOUND")
 
+    def verify_app_allowed(self, request_parms, db: Session, user_email: str) -> bool:
+        ## verifies whether is app allowed to the user or not
+        saml_msg = request_parms
+        data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
+        verify_request_signature(data)
+        resp_args = self.idp_server.response_args(data.message)
+        sp_metadata_name = self.get_sp_name(resp_args)
+        self.sp_metadata_name = sp_metadata_name
+        sps_allowed = SPSService(db).get_sps_app(user_email)
+        if sps_allowed:
+            if get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name):
+                return status.HTTP_200_OK
+            else:
+                return status.HTTP_307_TEMPORARY_REDIRECT
+        return status.HTTP_404_NOT_FOUND 
+
+    def return_sp_app_name(self):
+        return self.sp_metadata_name
+
     def get(self, request_parms, email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
 
@@ -94,6 +114,8 @@ class LoginProcessView():
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
         sp_metadata_name = self.get_sp_name(resp_args)
+        self.sp_metadata_name = sp_metadata_name
+
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)
         practice_roles_data,practice_roles_status = UserService(db).get_all_sps_practice_roles_db(email)
