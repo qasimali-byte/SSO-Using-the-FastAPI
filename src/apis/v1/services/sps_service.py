@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
@@ -67,7 +68,7 @@ class SPSService():
         
     def get_selected_unselected_sps_app(self):
         try:
-            
+
             total_sp_apps = self.db.query(SPAPPS).filter(SPAPPS.is_active==True).all()
             serviceproviders = []
             for data in total_sp_apps:
@@ -83,13 +84,13 @@ class SPSService():
 
     def get_selected_sps_app_for_idp_user(self,user_email):
         try:
-            
+            base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/image/"
             sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
             .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
-                serviceproviders.append(str({"name": y.name, "logo":y.logo_url,"url":y.host}))
+                serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
 
             return serviceproviders
 
