@@ -132,6 +132,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             # response.set_cookie(key="cookie_idp", value=session, httponly=True)this and lower line are same. can be removed
             cookie.attach_to_response(response, session)
             delete_all_cookies(response, only_frontend=True)
+            response.set_cookie(key='refresh_token',value=refresh_token,max_age=60*60,httponly=True)
             return response
 
     resp = AuthController(db).login(email, password, authorize)
