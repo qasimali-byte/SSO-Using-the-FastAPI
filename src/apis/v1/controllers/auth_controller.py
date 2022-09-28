@@ -94,6 +94,7 @@ class AuthController:
                 verification= True, 
                 roles=["super_admin"], 
                 email= email,
+                data=None,
                 statuscode=status.HTTP_200_OK
                 )
             response = custom_response(data=data,status_code=200)

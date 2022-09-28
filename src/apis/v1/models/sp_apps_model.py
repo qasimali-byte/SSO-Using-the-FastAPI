@@ -18,5 +18,6 @@ class SPAPPS(Base):
     is_active = Column(Boolean, nullable=False, unique=False, default=True)
     created_date = Column(DateTime, nullable=False, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
+    email_verification_url = Column(String(255),nullable=True, unique=False)
     roles = relationship("roles", secondary="sp_apps_role", back_populates='sp_apps')
     # idp_users=relationship("idp_users", secondary="idp_sp", back_populates='SPAPPS')

@@ -1,10 +1,8 @@
-from os import access
 from uuid import uuid4
 from fastapi import Depends, HTTPException, Request, APIRouter, Response
-from fastapi.responses import HTMLResponse
 from fastapi import status
 from fastapi_redis_session import SessionStorage, getSessionStorage
-
+from src.apis.v1.controllers.async_auth_controller import AsyncAuthController
 from src.apis.v1.helpers.global_helpers import delete_all_cookies
 from src.apis.v1.helpers.html_parser import HTMLPARSER
 from src.apis.v1.controllers.idp_controller import IDPController
@@ -14,20 +12,20 @@ from src.apis.v1.helpers.customize_response import custom_response
 from loginprocessview import LoginProcessView
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.controllers.auth_controller import AuthController
-from src.apis.v1.db.session import engine, get_db
+from src.apis.v1.db.session import  get_db
 from sqlalchemy.orm import Session
 from src.apis.v1.services.roles_service import RolesService
 from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.auth_validators import EmailValidator, EmailValidatorError, EmailValidatorOut, \
     LoginValidator, LoginValidatorOut, LoginValidatorOutRedirect, LogoutValidator
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from src.graphql.db.session import get_session_without_context_manager
 from ..helpers.auth import AuthJWT
 from redis import Redis
 from src.apis.v1.routes.idp_routes import cookie, cookie_frontend
 from . import oauth2_scheme
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["Authentication"])
 templates = Jinja2Templates(directory="templates/")
@@ -42,8 +40,8 @@ def get_config():
 
 
 @router.post("/email-verifier", summary="Email Verifier API", response_model=EmailValidatorOut,
-             responses={422: {"model": EmailValidatorError}})
-async def email_verifier(email_validator: EmailValidator, request: Request, db: Session = Depends(get_db)):
+             responses={422: {"model": EmailValidatorError},308:{"model":EmailValidatorOut}})
+async def email_verifier(email_validator: EmailValidator, request: Request, db: Session = Depends(get_db), async_db: AsyncSession = Depends(get_session_without_context_manager)):
     # validate cookie
     # if unique cookie is valid, use all emails
     # if email is not valid, return error + logger("")
@@ -56,6 +54,10 @@ async def email_verifier(email_validator: EmailValidator, request: Request, db: 
     email_dict = email_validator.dict()
     email = email_dict["email"]
     resp = AuthController(db).email_verification(email)
+    if resp.status_code == 422: # user is not found in sso idp db
+        resp = await AsyncAuthController(async_db).find_user_in_other_products(email)
+        return resp
+
     return resp
 
 
