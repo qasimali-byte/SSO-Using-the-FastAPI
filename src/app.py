@@ -15,6 +15,7 @@ basicConfig(
 def create_app():
     app = FastAPI()
     app.mount("/static", StaticFiles(directory="build/static"), name="static")
+    app.mount("/static", StaticFiles(directory="profile_image"), name="profile_image")
     registering_middleware(app)
     registering_routes(app)
     registering_exceptions(app)
