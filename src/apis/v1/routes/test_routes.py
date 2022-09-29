@@ -12,3 +12,5 @@ def user_email_product1(email_validator: EmailValidator):
 @router.post("/test2", summary="Find User Email in Product 2")
 def user_email_product2(email_validator: EmailValidator):
     return {'email':'user email found in product 2'}
+
+# @router.post
