@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>One Time Password Verify</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Cards</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital@1&display=swap" rel="stylesheet">
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+        }
+
+
+
+.responsive {
+  width: 40%;
+  height: auto;
+}
+body {
+    background: #F6F9FF;
+    height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #434343;
+
+    font-size: 16px;
+}
+
+main.cards {
+    display: flex;
+    padding: 32px;
+}
+
+main.cards section.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    max-height: auto;
+    margin-left: 32px;
+}
+
+main.cards section.card:first-child {
+    margin-left: 0;
+}
+
+main.cards section.card .icon {
+    width: 64px;
+    height: 64px;
+}
+
+main.cards section.card img {
+    width: 100%;
+}
+
+main.cards section.card h3 {
+    font-size: 100%;
+    margin: 16px 0;
+}
+
+main.cards section.card span {
+    font-weight: 300;
+    max-width: 240px;
+    font-size: 80%;
+    margin-bottom: 16px;
+}
+
+main.cards section.card button {
+    padding: 0.5rem 1rem;
+    text-transform: uppercase;
+    border-radius: 32px;
+    border: 0;
+    cursor: pointer;
+    font-size: 80%;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+main.cards section.card.contact button {
+    background: linear-gradient(to right, #5219ad, #DFCBFF);
+}
+
+
+main.cards section.card.contact {
+    box-shadow: 20px 20px 50px -30px #DBC4FF;
+}
+main.cards section.card.contact_up {
+    box-shadow: -10px -10px 60px -30px #b2e6fc;
+}
+
+@media screen and (max-width: 720px) {
+    main.cards {
+        flex-direction: column;
+    }
+
+    main.cards section.card {
+        margin-left: 0;
+        margin-bottom: 32px;
+    }
+
+    main.cards section.card:last-child {
+        margin-bottom: 0;
+    }
+
+    main.cards section.card button {
+        font-size: 40%;
+    }
+
+}
+
+        .flex-container {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+}
+
+.flex-item-left {
+    margin: 20px;
+  padding: 20px;
+  flex: 50%;
+}
+
+.flex-item-right {
+      margin: 20px;
+  padding: 20px;
+  flex: 50%;
+}
+
+/* Responsive layout - makes a one column-layout instead of two-column layout */
+@media (max-width: 1200px) {
+  .flex-container {
+    flex-direction: column;
+  }
+}
+/* Popup container - can be anything you want */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+/* Popup arrow */
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+    </style>
+</head>
+<body>
+    <main class="cards">
+        <section class="card contact">
+            <video autoplay loop muted inline class="responsive" width="400" height="300" style="margin: 40px;">
+              <source src="https://cdnl.iconscout.com/lottie/premium/thumb/login-protection-6232036-5116092.mp4" type="video/webm">
+              <!--source src="http://localhost:8088/api/v1/image/login-protection.mp4" type="video/webm"-->
+            </video>
+          <div class="flex-container">
+  <div class="flex-item-left">
+      <section class="card contact_up">
+
+            <h3>Hi {{user_data.name}}!</h3>
+          <h1 id="otp" style="color: #722ed1; font-family: 'Lato', sans-serif;">{{user_data.otp}}</h1>
+          <br>
+          <p>Here is your one time password, this is only valid untill </p>
+          <br>
+              <h1 style="font-family: 'JetBrains Mono', monospace; font-size: 25px;">{{ user_data.expires }}</h1>
+          <br>
+        </section>
+  </div>
+  <div class="flex-item-right">
+      <!--section class="card contact">
+            <div class="icon">
+               <div class="icon">
+                    <img src= >
+                </div>
+            </div>
+            <h3></h3>
+            <p>Access is granted for , please don't share this OTP with anybody. </p>
+
+            <button onclick="myFunction()">Copy OTP</button>
+               <span class="popuptext" id="myPopup">A Simple Popup!</span>
+
+        </section-->
+
+  </div>
+</div>
+        </section>
+<script>
+
+function myFunction() {
+  // Get the text field
+  var otp = document.getElementById("otp");
+
+  // Select the text field
+  otp.select();
+  otp.setSelectionRange(0, 99999); // For mobile devices
+
+  // Copy the text inside the text field
+  navigator.clipboard.writeText(otp.value);
+
+  var popup = document.getElementById("myPopup");
+  alert("OTP copied")
+  popup.classList.toggle("show");
+}
+</script>
+    </main>
+
+
+
+
+
+</body>
+</html>
