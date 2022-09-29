@@ -9,7 +9,6 @@ async def startup_event():
     except:
         pass
     
-
 if __name__ == "__main__":
     from src import settings_by_env
     import uvicorn

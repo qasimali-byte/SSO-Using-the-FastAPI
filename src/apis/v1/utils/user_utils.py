@@ -70,7 +70,7 @@ def get_decrypted_text(text):
 def image_writer(data_image):
     message = ""
     image_data = data_image["file"]
-    image_name = data_image["name"]
+    image_name = str(data_image["name"]).split('.')[0]
     content_type = data_image["type"]
 
     if content_type in ["image/png", "image/jpg", "image/jpeg", "image/webp"]:
@@ -78,19 +78,19 @@ def image_writer(data_image):
     else:
         message += " Invalid image typ"
         raise CustomException(
-            message="There was an error,Invalid image type only png, jpg, jpeg,webp allowed - error occured in user utils",
+            message= "There was an error,Invalid image type only png, jpg, jpeg,webp allowed - error occured in user utils",
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     resource_name = shortuuid.ShortUUID().random(length=8) + "_" + image_name + f".{content_type.split('/')[-1]}"
     resource_name = resource_name.replace(" ", "_")
-    with open(f"./public/assets/{resource_name}", 'wb') as f:
+    with open(f"./public/profile_image/{resource_name}", 'wb') as f:
         try:
             f.write(image_data)
+            return resource_name
         except Exception as e:
             raise CustomException(message="There was an error,Error in writing image - error occured in user utils",
                                   status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    return "image/" + resource_name
 
 
 def format_data_for_update_user_image(image) -> dict:
