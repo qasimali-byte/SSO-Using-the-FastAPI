@@ -1,5 +1,5 @@
-from src.apis.v1.routes import forget_password_routes, sps_routes, idp_routes,auth_routes,user_routes,\
-     frontend_routes,staticfiles_routes, roles_routes, practices_routes, users_routes
+from src.apis.v1.routes import forget_password_routes, sps_routes, idp_routes, auth_routes, user_routes, \
+    frontend_routes, staticfiles_routes, roles_routes, practices_routes, users_routes, access_routs
 import strawberry
 from strawberry.fastapi import GraphQLRouter
 from strawberry.schema.config import StrawberryConfig
@@ -11,6 +11,7 @@ api_url : str = "/api/v1"
 
 def registering_routes(app):
     app.include_router(staticfiles_routes.router, prefix=api_url)
+    app.include_router(access_routs.router, prefix=api_url)
     app.include_router(sps_routes.router, prefix=api_url)
     app.include_router(idp_routes.router)
     app.include_router(auth_routes.router, prefix=api_url)

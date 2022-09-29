@@ -24,6 +24,7 @@ class ForgetPasswordValidator(BaseModel):
 class SetPasswordValidator(BaseModel):
     password: str
 
+
 class ChangePasswordValidator(BaseModel):
     old_password: str
 
