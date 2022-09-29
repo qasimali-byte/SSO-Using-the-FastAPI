@@ -84,14 +84,18 @@ class SPSService():
 
     def get_selected_sps_app_for_idp_user(self,user_email):
         try:
-            base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/image/"
+            base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
             sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
             .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
             serviceproviders = []
             for i in sp_query:
-                x,y = (i[1],i[2])
-                serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
-
+                y = (i[2])
+                if(y.host=='dev-sso-frontend.attech-ltd.com/'):
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'http://'+y.host}))
+                else:
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
+                
+            print(serviceproviders)
             return serviceproviders
 
         except Exception as e:
