@@ -1,8 +1,11 @@
+import typing
 from pydantic import BaseModel, validator, EmailStr
 from typing import Optional
 
+from src.apis.v1.validators.sps_validator import ListSpAppsGeneralValidator
+
 class EmailValidator(BaseModel):
-    email: str
+    email: EmailStr
 
     @validator('email')
     def validate_email(cls, v):
@@ -22,8 +25,9 @@ class LogoutValidator(BaseModel):
 class EmailValidatorOut(BaseModel):
     message: str
     verification: bool = True
-    roles: list
+    roles: typing.Optional[list] = []
     email: str
+    data: typing.Optional[ListSpAppsGeneralValidator] = None
     statuscode: int
 
     @validator('email')

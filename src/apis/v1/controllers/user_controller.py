@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from starlette.background import BackgroundTasks
+from starlette.responses import FileResponse
 
 from src.apis.v1.services.type_of_user_service import TypeOfUserService
 from src.apis.v1.utils.user_utils import image_writer, get_encrypted_text, get_decrypted_text
@@ -15,6 +16,8 @@ from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.services.user_service import UserService
 from fastapi import status
+from fastapi import Response
+from mimetypes import guess_type
 from celery_worker import email_sender
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersValidatorUpdateApps, \
@@ -23,6 +26,7 @@ from src.apis.v1.validators.user_validator import CreateUserValidator, GetUsersV
 from ..core.project_settings import Settings
 from ..utils.auth_utils import create_password_hash, generate_password
 from utils import get_redis_client
+from os.path import isfile
 from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, \
     format_data_for_update_user_image
 
@@ -225,6 +229,20 @@ class UserController():
         validated_data = SuccessfulJsonResponseValidator(**data)
         response = custom_response(status_code=status.HTTP_201_CREATED, data=validated_data)
         return response
+
+
+    def get_user_image(self, user_email):
+        """
+            Access User Image Controller
+        """
+        local_path = UserService(self.db).get_user_image_db(user_email=user_email)
+
+
+        if not isfile(local_path):
+            return Response(status_code=404)
+
+        content_type, _ = guess_type(local_path)
+        return FileResponse(local_path, media_type=content_type)
 
     def generate_encrypted_url(self, user_data):
         unique_id = uuid.uuid4().hex
