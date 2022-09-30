@@ -19,14 +19,14 @@ router = APIRouter(tags=["Account Access"])
 
 @router.post("/request-account", summary=" Load all the registered apps and emails in SSO.",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
         This api returns the emails and apps list to grant access using emails.
 
     """
 
-    current_user_email = "umair@gmail.com"  # user_email_role.get_user_email()
+    current_user_email = user_email_role.get_user_email()
     user_data = AccessService(db).get_user_apps_info_db(user_email=current_user_email)
     user_data["user"] = dict({"name": user_data.get("user").first_name,
                               "id": user_data.get("user").id,
