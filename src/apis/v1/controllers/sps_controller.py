@@ -122,19 +122,19 @@ class SPSController():
             for s_data in selected_apps:
                 if t_data['id']==s_data['id']:            
                     apps['id']=s_data["id"]
-                    apps['name']=s_data["sp_app_name"]
+                    apps['name']=s_data["display_name"]
                     apps['sp_app_name']=s_data["name"]
-                    apps['sp_app_image']=s_data["image"]
                     apps['logo_url']=s_data["logo_url"]
+                    apps['host_url']=s_data["host_url"]
                     apps['is_selected'] = True
                 else:
                     not_matched=not_matched+1
                 if(not_matched==len(selected_apps)):
                     apps['id']=t_data["id"]
-                    apps['name']=t_data["sp_app_name"]
+                    apps['name']=t_data["display_name"]
                     apps['sp_app_name']=t_data["name"]
-                    apps['sp_app_image']=t_data["image"]
                     apps['logo_url']=t_data["logo_url"]
+                    apps['host_url']=t_data["host_url"]
                     apps['is_selected'] = False
             apps_list.append(apps)
         

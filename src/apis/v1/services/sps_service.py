@@ -72,8 +72,8 @@ class SPSService():
             total_sp_apps = self.db.query(SPAPPS).filter(SPAPPS.is_active==True).all()
             serviceproviders = []
             for data in total_sp_apps:
-                serviceproviders.append({"id": data.id, "display_name": data.display_name,"name": data.name, "image":data.logo_url,"host_url":data.host,\
-                    "sp_app_name": data.name,"logo_url": data.inactive_logo_url})
+                serviceproviders.append({"id": data.id, "display_name": data.display_name,"name": data.name,"host_url":data.host,\
+                    "sp_app_name": data.name,"logo_url": data.logo_url})
 
             return serviceproviders
 

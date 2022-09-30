@@ -101,8 +101,8 @@ class UserSelectedUnselectedSPApps(BaseModel):
     id: int
     name: str
     sp_app_name: str
-    sp_app_image: str
     logo_url: str
+    host_url: str
     is_selected: typing.Optional[bool]
     
     class Config:
