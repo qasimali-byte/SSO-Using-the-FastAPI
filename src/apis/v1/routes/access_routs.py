@@ -13,7 +13,8 @@ from ..services.access_service import AccessService
 from ..validators.access_validator import OtpEmailValidator, OtpProductsValidator, \
     VerifyProductsValidator, OtpAccountValidator
 from celery_worker import otp_sender
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.graphql.db.session import get_session_without_context_manager
 router = APIRouter(tags=["Account Access"])
 
 
@@ -51,6 +52,7 @@ async def request_account(otp_validator: OtpAccountValidator, db: Session = Depe
     """
         This api verifies emails using OTPs sent previously.
     """
+
     response = AccessController(db).verify_otp_email(otp_validator=otp_validator)
     return response
 
@@ -58,24 +60,28 @@ async def request_account(otp_validator: OtpAccountValidator, db: Session = Depe
 @router.post("/send-otp-products", summary="Send OTP via email",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
 async def send_otp_products(products_validator: OtpProductsValidator,
-                            db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+                            db: Session = Depends(get_db),
+                            async_db: AsyncSession = Depends(get_session_without_context_manager)
+                            # authorize: AuthJWT = Depends(),
+                            # token: str = Depends(oauth2_scheme),
+                            # user_email_role:RoleVerifierImplemented = Depends()
+                            ):
     """
         This api returns the apps list to create user for those apps.
 
     """
-    response = AccessController(db).send_otp_products_email(email=products_validator.email,
-                                                            products=products_validator.selected_products)
+    response = await AccessController(db).send_otp_products_email(products_validator,async_db=async_db)
     return response
 
 
 @router.post("/verify-otp-products", summary="Verify OTP")
 async def verify_otp_products(otp_products_validator: VerifyProductsValidator,
+                              # authorize: AuthJWT = Depends(),
+                              # token: str = Depends(oauth2_scheme),
+                              # user_email_role:RoleVerifierImplemented = Depends(),
                               db: Session = Depends(get_db)):
     """
         This api verifies emails using OTPs sent previously.
     """
-    response = AccessController(db).verify_otp_products_email(email=otp_products_validator.email, \
-                                                              received_otp=otp_products_validator.otp, \
-                                                              products=otp_products_validator.selected_products
-                                                              )
+    response = AccessController(db).verify_otp_products_email(otp_products_validator)
     return response
