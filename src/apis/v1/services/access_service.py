@@ -16,7 +16,7 @@ class AccessService():
 
     def is_valid_email(self, user_email):
         return True if self.db.query(idp_users, SPAPPS).filter(
-            idp_users.email == user_email) is not None else False
+            idp_users.email == user_email).first() is not None else False
 
     def get_user_apps_info_db(self, user_email) -> dict:
         users_info_object = self.db.query(idp_users, SPAPPS).filter(
@@ -44,13 +44,8 @@ class AccessService():
 
 
 
-    def get_user_info_db(self, user_email) -> dict:
+    def if_user_exists_db(self, user_email) -> bool:
 
-        try:
-            users_info_object = self.db.query(idp_users).filter(
-            idp_users.email==user_email)
-            return users_info_object
-
-        except Exception as e:
-            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                  message=str(e) + "- error occured in users_service.py")
+        # self.db.query(idp_users).filter(idp_users.email == user_email).first()
+        return True if self.db.query(idp_users).filter(
+            idp_users.email == user_email).first() is not None else False
