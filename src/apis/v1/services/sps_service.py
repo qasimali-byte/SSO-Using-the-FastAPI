@@ -59,7 +59,7 @@ class SPSService():
             for i in sp_query:
                 x,y = (i[1],i[2])
                 serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,\
-                    "sp_app_name": y.sp_metadata,"logo_url": y.logo_url})
+                    "sp_app_name": y.display_name,"logo_url": y.logo_url})
             return serviceproviders
 
         except Exception as e:

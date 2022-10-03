@@ -92,8 +92,8 @@ class SPSController():
 
 
     def get_practices_roles_by_apps(self,apps_list,app, selected_apps, user_id, selected_id):
-        apps = SPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
-        sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
+        apps = SPPracticeRoleValidator(id=app["id"],name=app["name"],
+        sp_app_name=app["sp_app_name"],sp_app_image=app["image"],is_selected=False,
         roles=RolesController(self.db).get_allowed_roles_by_userid(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid(app["id"],user_id,selected_id)) 
 
@@ -122,8 +122,8 @@ class SPSController():
             for s_data in selected_apps:
                 if t_data['id']==s_data['id']:            
                     apps['id']=s_data["id"]
-                    apps['name']=s_data["display_name"]
-                    apps['sp_app_name']=s_data["name"]
+                    apps['name']=s_data["name"]
+                    apps['sp_app_name']=s_data["display_name"]
                     apps['logo_url']=s_data["logo_url"]
                     apps['host_url']=s_data["host_url"]
                     apps['is_selected'] = True
@@ -131,8 +131,8 @@ class SPSController():
                     not_matched=not_matched+1
                 if(not_matched==len(selected_apps)):
                     apps['id']=t_data["id"]
-                    apps['name']=t_data["display_name"]
-                    apps['sp_app_name']=t_data["name"]
+                    apps['name']=t_data["name"]
+                    apps['sp_app_name']=t_data["display_name"]
                     apps['logo_url']=t_data["logo_url"]
                     apps['host_url']=t_data["host_url"]
                     apps['is_selected'] = False
@@ -144,8 +144,8 @@ class SPSController():
             
 
     def get_practices_roles_by_apps_loged_in_user(self,apps_list,app, selected_apps, user_id, selected_id):
-        apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
-        sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
+        apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["name"],
+        sp_app_name=app["sp_app_name"],sp_app_image=app["image"],is_selected=False,
         role=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid_loged_in_user(app["id"],user_id,selected_id)) 
 
