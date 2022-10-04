@@ -1,6 +1,6 @@
 from src.apis.v1.routes import forget_password_routes, sps_routes, idp_routes, auth_routes, user_routes, \
-    frontend_routes, staticfiles_routes, roles_routes, practices_routes, users_routes, access_routs,test_routes
-tes,staticfiles_routes, roles_routes, practices_routes, users_routes, 
+    frontend_routes, staticfiles_routes, roles_routes, practices_routes, users_routes, access_routs,test_routes \
+    ,staticfiles_routes, roles_routes, practices_routes, users_routes
 
 import strawberry
 from strawberry.fastapi import GraphQLRouter
