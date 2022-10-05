@@ -77,6 +77,8 @@ def populate_html_file_otp_products(user_data):
     # print(base_url)
     with open('user_otp_email_products.html', 'wb') as f:
         f.write(html_.encode())
+        f.close()
+        
 def remove_file(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
