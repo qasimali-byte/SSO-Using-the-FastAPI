@@ -76,10 +76,13 @@ class AccessController():
             raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='user already exists with this email')
         products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products(products_validator.email)
+
+        products_allowed_ids= [p.get("id")for p in products_allowed]
+        email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
         for p in products_validator.selected_products:
             keep_products+=p+","
-            if not int(p) in products_allowed:
+            if not int(p) in products_allowed_ids:
                 raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                       message='Requested product is not allowed')
 
@@ -89,9 +92,9 @@ class AccessController():
         date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
         natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
         data = {
-            "name": "Test",#products.get("user").first_name,
+            "name": "There",
             "recipient": products_validator.email,
-            "products": keep_products,
+            "products": email_products,
             "otp": OTP,
             "expires": natural_datetime,
         }

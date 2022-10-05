@@ -6,4 +6,4 @@ def reduce_list_dictionaries(collection, key, target):
 
 
 def reduce_list_products(collection, key, target):
-    return [item.get("id") for item in collection if item.get(key, None) == target]
+    return [dict({"id":item.get("id"),"name":item.get("display_name"),"logo":item.get("logo_url")}) for item in collection if item.get(key, None) == target]
