@@ -62,9 +62,6 @@ async def request_account(otp_validator: OtpAccountValidator, db: Session = Depe
 async def send_otp_products(products_validator: OtpProductsValidator,
                             db: Session = Depends(get_db),
                             async_db: AsyncSession = Depends(get_session_without_context_manager)
-                            # authorize: AuthJWT = Depends(),
-                            # token: str = Depends(oauth2_scheme),
-                            # user_email_role:RoleVerifierImplemented = Depends()
                             ):
     """
         This api returns the apps list to create user for those apps.
