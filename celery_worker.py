@@ -71,9 +71,9 @@ def populate_html_file_otp_products(user_data,base_url):
     environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("otp_mail_products.html")
     html_ =  template.render(user_data=user_data,base_url=base_url)
-    # with open('otp_mail_products.html', 'wb') as f:
-    #         f.write(html_.encode())
-    #         # f.truncate()
+    with open('otp_mail_products.html', 'wb') as f:
+            f.write(html_.encode())
+            # f.truncate()
     return html_
 
 def remove_file(file_path):
@@ -125,6 +125,9 @@ def send_otp_products(user_data, attachment=None):
         print("===================================================")
         recipient = user_data["recipient"]
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
+        # email only renders png not svg
+        [p.update((k, p["logo"].replace("svg", "png")) for k, v in p.items() if k == "logo") for p in
+         user_data["products"]]
         html_ = populate_html_file_otp_products(user_data,base_url)
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
@@ -181,11 +184,15 @@ def otp_sender_products(user_data):
 
 if __name__ == "__main__":
     # data = {'name': 'Asad', 'recipient': 'asadbukharee@gmail.com', 'app': 'DR IQ', 'otp': '945369', 'expires': '08:33:14 PM 29 Sep, 2022', 'logo': 'http://dev-sso-app.attech-ltd.com/api/v1/image/EZLOGO.svg'}
-    data = {'name': 'There', 'recipient': 'user1@example.com',
+    user_data = {'name': 'There', 'recipient': 'user1@example.com',
      'products': [{'id': 1, 'name': 'EZ DOC', 'logo': 'image/EZDOC.svg'},
                   {'id': 2, 'name': 'EZ NAV', 'logo': 'image/EZNAV.svg'},
                   {'id': 3, 'name': 'DR.iQ', 'logo': 'image/DRIQ.svg'},
                   {'id': 6, 'name': 'EZ WEB', 'logo': 'image/EZWEBT.svg'},
                   {'id': 4, 'name': 'EZ ANALYTICS', 'logo': 'image/EZANALYTICS.svg'}], 'otp': '5609',
      'expires': '02:47:51 PM 04 Oct, 2022'}
-    otp_sender_products(user_data=data)
+
+    # otp_sender_products(user_data=user_data)
+    # print(user_data)
+    # [p.update((k, p["logo"].replace("svg","png")) for k, v in p.items() if k=="logo") for p in user_data["products"]]
+    # print(user_data)
