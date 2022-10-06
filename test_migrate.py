@@ -70,7 +70,6 @@ class UserMigrate:
 
         response = response.json()
         practice_ids = self.validate_practices_data_by_response(response['data']['selected_practice'],practices_app['__root__'])
-        print(practice_ids)
         roles_data = self.roles_data_by_app_id(app_id)
         role_id = self.validate_roles_by_response_role(response['data']['role'],roles_data)
         return {
@@ -93,7 +92,7 @@ class UserMigrate:
         for values in response_data:
             for practice in practice_data:
                 if values.lower() == practice['name'].lower():
-                    practices_ids.append(practice['id'])
+                    practices_ids.append({'id':practice['id']})
         return practices_ids
 
     def validate_roles_by_response_role(self, response_roles_data, roles_data):

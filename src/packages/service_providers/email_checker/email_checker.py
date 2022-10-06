@@ -5,7 +5,6 @@ class EmailChecker:
 
     async def call_product(self, product: dict, email:str):
         resp_data, resp_status = await http_post(product["email_verification_url"],email)
-        print(resp_data,resp_status)
         product['is_found'] = True if resp_data['code'] == 200 else False
         return product
 
