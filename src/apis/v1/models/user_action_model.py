@@ -13,6 +13,7 @@ class user_action(Base):
     status = Column(String(255),nullable=False, unique=False)
     action = relationship("action", uselist=False, lazy="joined")
     idp_user = relationship("idp_users", uselist=False ,lazy="joined")
+    # sp_app = relationship("sp_apps", uselist=False ,lazy="joined")
 
 
     def user_actions_as_dict(self):
@@ -29,4 +30,6 @@ class user_action(Base):
             "role_name": self.role_name,
             "action_date": self.action_date,
             "status": self.status,
+            # "display_name": self.sp_app.display_name,
+            # "logo": self.sp_app.logo_url,
         }
