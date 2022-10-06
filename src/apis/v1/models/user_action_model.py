@@ -7,13 +7,14 @@ class user_action(Base):
     id = Column(Integer, primary_key=True)
     idp_user_id = Column(Integer, ForeignKey('idp_users.id'))
     action_id = Column(Integer, ForeignKey("action.id"))
+    app_id = Column(Integer, ForeignKey("sp_apps.id"))
     app_name = Column(String(155),nullable=True, unique=False)
     role_name = Column(String(155),nullable=True, unique=False)
     action_date = Column(DateTime, nullable=False, unique=False)
     status = Column(String(255),nullable=False, unique=False)
     action = relationship("action", uselist=False, lazy="joined")
     idp_user = relationship("idp_users", uselist=False ,lazy="joined")
-    # sp_app = relationship("sp_apps", uselist=False ,lazy="joined")
+    sp_app = relationship("SPAPPS", uselist=False ,lazy="joined")
 
 
     def user_actions_as_dict(self):
@@ -30,6 +31,6 @@ class user_action(Base):
             "role_name": self.role_name,
             "action_date": self.action_date,
             "status": self.status,
-            # "display_name": self.sp_app.display_name,
-            # "logo": self.sp_app.logo_url,
+            "display_name": self.sp_app.display_name,
+            "logo": self.sp_app.logo_url,
         }
