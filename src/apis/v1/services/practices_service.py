@@ -1,5 +1,6 @@
 from sqlalchemy import func, union_all
 from src.apis.v1.models.practices_model import practices
+from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.utils.practices_utils import format_practices_edit_user_data_selected_unselected
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
@@ -28,6 +29,12 @@ class PracticesService():
         except Exception as e:
             raise CustomException(message=str(e) + "error occured in practices service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+    def get_practices_db_by_app_name(self, app_name):
+
+        practices_of_app = self.db.query(practices).join(SPAPPS, SPAPPS.id == practices.sp_apps_id) \
+        .filter(SPAPPS.sp_metadata == app_name).all()
+        return practices_of_app
 
     def get_practices_db_by_appid_userid(self, app_id, user_id):
 

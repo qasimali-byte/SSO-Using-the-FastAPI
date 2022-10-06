@@ -8,6 +8,7 @@ from starlette import status
 from celery_worker import otp_sender, otp_sender_products
 from src.apis.v1.controllers.async_auth_controller import AsyncAuthController
 from src.apis.v1.controllers.sps_controller import SPSController
+from src.apis.v1.controllers.user_controller import UserController
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.helpers.global_helpers import create_unique_id
@@ -17,7 +18,8 @@ from src.apis.v1.services.user_service import UserService
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
-from src.apis.v1.validators.user_validator import CreateUserValidator
+from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
+from test_migrate import UserMigrate
 from utils import get_redis_client
 
 redis_client = get_redis_client()
@@ -73,7 +75,8 @@ class AccessController():
         if self.db.query(idp_users).filter(idp_users.email == products_validator.email).first() is not None:
             raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='user already exists with this email')
-        products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products()
+        products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products(products_validator.email)
+
         products_allowed_ids= [p.get("id")for p in products_allowed]
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
@@ -140,19 +143,29 @@ class AccessController():
                     raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                           message='email already used.')
                 # user = user_data.get("user")
-                idp_user_data = CreateUserValidator(uuid=create_unique_id(),
-                                                    firstname="first name",
-                                                    lastname="last name",
-                                                    email=validator_data.email,
-                                                    username=str("username"),
-                                                    password_hash=create_password_hash(generate_password(size=12)),
-                                                    user_type_id = 2,
-                                                    is_active=False,
-                                                    )
+                # idp_user_data = CreateUserValidator(uuid=create_unique_id(),
+                #                                     firstname="first name",
+                #                                     lastname="last name",
+                #                                     email=validator_data.email,
+                #                                     username=str("username"),
+                #                                     password_hash=create_password_hash(generate_password(size=12)),
+                #                                     user_type_id = 2,
+                #                                     is_active=False,
+                #                                     )
                 #  create user in db
-                user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
-                SPSController(self.db).assign_sps_to_user(user_id=user_created_data.id, sps_object_list=products_ids)
+                # user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
+                # SPSController(self.db).assign_sps_to_user(user_id=user_created_data.id, sps_object_list=products_ids)
+                apps_object = UserMigrate().user_migration_request(email=validator_data.email, app_id=products_ids[0])
+                user_validator = CreateInternalExternalUserValidatorIn(firstname="first name",
+                                                                        lastname="last name",
+                                                                        email=validator_data.email,
+                                                                        type_of_user="external",
+                                                                        dr_iq_gender_id=None,
+                                                                        apps=[apps_object],
+                                                                        is_active=True)
+
+                UserController(self.db).create_user(user_validator.dict())
                 raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps')
             else:
-                raise CustomException(status_code=status.HTTP_200_OK, message='failed, wrong otp')
+                raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='failed, wrong otp')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='failed, otp expired')
