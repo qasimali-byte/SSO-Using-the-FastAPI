@@ -80,6 +80,10 @@ class AccessController():
         products_allowed_ids= [p.get("id")for p in products_allowed]
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
+        if len(products_validator.selected_products)==0:
+            raise CustomException(status_code=status.HTTP_204_NO_CONTENT,
+                                  message='no product is selected.')
+
         for p in products_validator.selected_products:
             keep_products+=p+","
             if not int(p) in products_allowed_ids:
