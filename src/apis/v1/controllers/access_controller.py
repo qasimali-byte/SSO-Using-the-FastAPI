@@ -81,7 +81,7 @@ class AccessController():
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
         if len(products_validator.selected_products)==0:
-            raise CustomException(status_code=status.HTTP_204_NO_CONTENT,
+            raise CustomException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                                   message='no product is selected.')
 
         for p in products_validator.selected_products:
