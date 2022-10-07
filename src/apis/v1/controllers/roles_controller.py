@@ -78,3 +78,6 @@ class RolesController():
             return True
         else:
             return False
+
+    def get_roles_by_app_id(self, app_id):
+        return RolesService(self.db).get_apps_practice_roles(app_id)
