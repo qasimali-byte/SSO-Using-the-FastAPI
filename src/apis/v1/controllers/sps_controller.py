@@ -1,7 +1,9 @@
 import threading
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.roles_controller import RolesController
+from src.apis.v1.daos.sps_dao import SyncSpsDAO
 from src.apis.v1.helpers.customize_response import custom_response
+from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.services.gender_service import GenderService
 from src.apis.v1.services.practices_service import PracticesService
 from src.apis.v1.services.roles_service import RolesService
@@ -9,7 +11,7 @@ from src.apis.v1.services.sps_service import SPSService
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulResponseValidator
 from fastapi import status
 
-from src.apis.v1.validators.sps_validator import FilterServiceProviderValidator, ListFilterServiceProviderValidator, ListServiceProviderValidatorOut, ListServiceProviders
+from src.apis.v1.validators.sps_validator import FilterServiceProviderValidator, ListFilterServiceProviderValidator, ListServiceProviderValidatorOut, ListServiceProviders, ListSpAppsGeneralValidator
 from src.apis.v1.validators.user_validator import SPPracticeRoleValidator
 class SPSController():
     def __init__(self, db):
@@ -125,3 +127,7 @@ class SPSController():
         for apps_object in total_allowed_apps:
             self.get_practices_roles_by_apps(apps_list,apps_object, selected_apps, user_id, selected_id)
         return apps_list
+
+    def get_specific_product_byappid(self, app_id:int):
+        dto = SyncSpsDAO(self.db).get(filter_data={SPAPPS.is_active: True,SPAPPS.id:app_id})
+        return ListSpAppsGeneralValidator.from_orm(dto).dict()

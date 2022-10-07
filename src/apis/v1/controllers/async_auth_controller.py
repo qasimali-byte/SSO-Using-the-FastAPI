@@ -12,7 +12,7 @@ class AsyncAuthController:
 
     async def find_user_in_other_products(self, email):
         get_all_products = await AsyncSpsController(self.db).get_all_sps_product()
-        all_products_with_status = await EmailChecker().call_products(get_all_products)
+        all_products_with_status = await EmailChecker().call_products(get_all_products, email)
         filtered_products = reduce_list_dictionaries(all_products_with_status,'is_found', True)
         if filtered_products:
             data = EmailValidatorOut(
@@ -34,8 +34,8 @@ class AsyncAuthController:
         response = custom_response(data=data,status_code=422)
         return response
 
-    async def find_user_ids_in_other_products(self):
+    async def find_user_ids_in_other_products(self, email):
         get_all_products = await AsyncSpsController(self.db).get_all_sps_product()
-        all_products_with_status = await EmailChecker().call_products(get_all_products)
+        all_products_with_status = await EmailChecker().call_products(get_all_products, email)
         filtered_products_ids = reduce_list_products(all_products_with_status, 'is_found', True)
         return filtered_products_ids

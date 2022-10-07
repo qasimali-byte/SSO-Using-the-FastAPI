@@ -89,7 +89,7 @@ class AuthController:
         return response
 
     def email_verification(self, email: str):
-        if AuthService(self.db).check_email(email):
+        if AuthService(self.db).check_email_initial(email):
             data = EmailValidatorOut(
                 message= "success",
                 verification= True, 
