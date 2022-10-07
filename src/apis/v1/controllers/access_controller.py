@@ -167,5 +167,5 @@ class AccessController():
                 UserController(self.db).create_user(user_validator.dict())
                 raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps')
             else:
-                raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='failed, wrong otp')
-        raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='failed, otp expired')
+                raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
+        raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
