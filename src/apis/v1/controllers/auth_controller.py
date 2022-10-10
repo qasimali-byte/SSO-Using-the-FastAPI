@@ -55,10 +55,10 @@ class AuthController:
 
         # Use create_access_token() and create_refresh_token() to create our
         # access and refresh tokens
+        access_token = authorize.create_access_token(subject=email,fresh=True)
+        refresh_token = authorize.create_refresh_token(subject=email)
         user_info_data = UserService(self.db).get_user_info_db(email)
         get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
-        access_token = authorize.create_access_token(subject=str({'email':email,'role':get_ezlogin_roles_only}),fresh=True)
-        refresh_token = authorize.create_refresh_token(subject=str({'email':email,'role':get_ezlogin_roles_only}))
         data = LoginValidatorOut(
             product_name="ez-login",
             message="successfully authenticated",

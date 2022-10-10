@@ -6,7 +6,6 @@ from fastapi_jwt_auth.exceptions import (
     JWTDecodeError,
 )
 import jwt
-from ast import literal_eval
 
 class AuthJWT(AuthJWT):
     def __init__(self, req: Request = None, res: Response = None):
@@ -57,7 +56,7 @@ class AuthJWT(AuthJWT):
         :return: sub of JWT
         """
         super().jwt_required()
-        return literal_eval(super().get_jwt_subject())['email']
+        return super().get_jwt_subject()
 
     def get_jwt_current_user(self):
-        return literal_eval(super().get_jwt_subject())['email']
+        return super().get_jwt_subject()
