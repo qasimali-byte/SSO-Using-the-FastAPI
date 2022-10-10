@@ -31,6 +31,6 @@ class user_action(Base):
             "role_name": self.role_name,
             "action_date": self.action_date,
             "status": self.status,
-            "display_name": self.sp_app.display_name,
-            "logo": self.sp_app.logo_url,
+            "display_name": self.sp_app.display_name if self.sp_app else "",
+            "logo": self.sp_app.logo if self.sp_app else "",
         }
