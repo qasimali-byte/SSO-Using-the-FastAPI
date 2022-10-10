@@ -173,7 +173,7 @@ class AccessController():
                                                                         email=validator_data.email,
                                                                         type_of_user="external",
                                                                         dr_iq_gender_id=None,
-                                                                        apps=[apps_list],
+                                                                        apps=apps_list,
                                                                         is_active=True)
 
                 UserController(self.db).create_user(user_validator.dict())
