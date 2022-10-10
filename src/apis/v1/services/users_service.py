@@ -20,7 +20,6 @@ class UsersService():
     def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
         
         select_practices:str) -> tuple:
-
         try:
             get_order_by= get_order_by_query(order_by,latest)
 

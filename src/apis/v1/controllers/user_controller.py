@@ -30,7 +30,7 @@ from os.path import isfile
 from ..utils.user_utils import check_driq_gender_id_exsist, format_data_for_create_user, \
     format_data_for_update_user_image
 
-
+import operator
 class UserController():
     def __init__(self, db) -> None:
         self.db = db
@@ -179,7 +179,7 @@ class UserController():
 
         selected_email = user_info.email
         allowed_apps = SPSController(self.db).get_selected_unselected_apps(selected_email)
-        allowed_apps = sorted(allowed_apps, key=itemgetter('is_selected'), reverse=True)
+        allowed_apps = sorted(allowed_apps, key=operator.itemgetter('is_selected'), reverse=True)
         firstname = user_info.first_name
         lastname = user_info.last_name
         type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)

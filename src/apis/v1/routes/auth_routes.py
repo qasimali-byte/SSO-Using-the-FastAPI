@@ -95,10 +95,10 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             if status_code == 307:
                 session = uuid4()
                 req.store_session(session, email, db)
-                access_token = authorize.create_access_token(subject=email, fresh=True)
-                refresh_token = authorize.create_refresh_token(subject=email)
                 user_info_data = UserService(db).get_user_info_db(email)
                 get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
+                access_token = authorize.create_access_token(subject=str({'email':email,'role':get_ezlogin_roles_only}), fresh=True)
+                refresh_token = authorize.create_refresh_token(subject=str({'email':email,'role':get_ezlogin_roles_only}))
                 data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="You don't have access to this sp application",
                 roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url="http://dev-sso-frontend.attech-ltd.com/backend/notification",saml_response="", product_name="ez-login",
                 statuscode=status.HTTP_307_TEMPORARY_REDIRECT)

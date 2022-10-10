@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.auth import AuthJWT
-
+from ast import literal_eval
 settings = Settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -69,18 +69,18 @@ def generate_password(size=9, custom=True):
 def get_current_logged_in_user(authorize, response_body):
     current_user = None
     try:
-        current_user = authorize.get_jwt_subject()
+         current_user = literal_eval(authorize.get_jwt_subject())['email']
     except:
         current_user = None
 
     if current_user == None:
         access_token = response_body.get("access_token",None)
         if access_token:
-            current_user = authorize._verified_token(access_token)['sub']
+            current_user = literal_eval(authorize._verified_token(access_token)['sub'])['email']
 
     return current_user
 
 def auth_jwt_verifier_and_get_subject(request):
     authorize=AuthJWT(request)
-    current_user_email = authorize.get_jwt_subject()
+    current_user_email = literal_eval(authorize.get_jwt_subject())['email']
     return current_user_email
