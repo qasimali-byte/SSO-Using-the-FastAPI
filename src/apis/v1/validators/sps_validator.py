@@ -5,6 +5,11 @@ from src.apis.v1.models.sp_apps_model import SPAPPS
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 
 SpAppsGeneralValidator = sqlalchemy_to_pydantic(SPAPPS)
+
+class ListSpAppsGeneralValidator(BaseModel):
+    __root__: List[SpAppsGeneralValidator]
+    class Config:
+        orm_mode = True   
 class ServiceProviderValidator(BaseModel):
     name : str
     info : str

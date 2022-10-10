@@ -68,6 +68,7 @@ class AuthController:
             token_type= "bearer",
             statuscode=200)
         response = custom_response(data=data,status_code=200)
+        response.set_cookie(key='refresh_token',value=refresh_token,max_age=60*60,httponly=True)
         return response
         
     def fresh_login(self, email: str, password: str, authorize):
@@ -88,12 +89,13 @@ class AuthController:
         return response
 
     def email_verification(self, email: str):
-        if AuthService(self.db).check_email(email):
+        if AuthService(self.db).check_email_initial(email):
             data = EmailValidatorOut(
                 message= "success",
                 verification= True, 
                 roles=["super_admin"], 
                 email= email,
+                data=None,
                 statuscode=status.HTTP_200_OK
                 )
             response = custom_response(data=data,status_code=200)

@@ -11,7 +11,7 @@ class ActionController():
         action_service_obj = ActionService(self.db)
         data = action_service_obj.get_action_api(method=method,url=url)
 
-        if data:
+        if data and type(resp_body) == dict:
             app_name = resp_body.get("product_name",None)
             actions = data['action']
             current_user = get_current_logged_in_user(authorize=authorize, response_body=resp_body)

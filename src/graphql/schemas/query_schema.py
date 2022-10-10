@@ -17,9 +17,8 @@ class Query:
     async def user_actions(self, info:Info, first: int = 10, cursor: Optional[Cursor] = None, direction: DirectionEnum = "forward",
         search: Optional[str] = None,user_email: Optional[str] = None, role_name: Optional[RoleEnum] = None,action_level: Optional[ActionLevelEnum]='user',
         start_date_time:Optional[str]=None,end_date_time:Optional[str]=None) -> Connection[UserAction]:
-        
 
-        IsAuthenticated().has_permission(action_level,info)
+        # IsAuthenticated().has_permission(action_level,info)
         async with get_session() as s:
 
                 return await get_user_actions(db=s,first=first,cursor=cursor,direction=direction,search=search,user_email=user_email,
