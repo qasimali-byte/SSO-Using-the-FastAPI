@@ -20,7 +20,6 @@ class UsersController():
         """
         page_offset -= 1
         user_selected_role = user_role
-
         if user_selected_role == "super-admin":
             # get subadmins and practice admins and external users
             users_info, records_count = UsersService(self.db).get_internal_external_users_info_db(user_role='super-admin',page_limit=page_limit,\

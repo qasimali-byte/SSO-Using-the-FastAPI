@@ -68,6 +68,13 @@ class RolesController():
         roles_object = RolesService(self.db)
         selected_roles_list = roles_object.get_selected_roles_db_by_id(app_id, user_id, selected_id)
         return selected_roles_list
+    
+
+    def get_allowed_roles_by_userid_loged_in_user(self, app_id, user_id, selected_id):
+
+        roles_object = RolesService(self.db)
+        selected_roles_list = roles_object.get_loged_in_user_selected_roles_db_by_id(app_id, user_id, selected_id)
+        return selected_roles_list
 
     def get_ezlogin_user_role(self, user_id):
         return RolesService(self.db).get_user_selected_role("ez-login", user_id)
