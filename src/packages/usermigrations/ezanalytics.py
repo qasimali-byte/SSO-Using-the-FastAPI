@@ -8,7 +8,7 @@ from src.apis.v1.db.session import get_db
 from src.apis.v1.helpers.custom_exceptions import CustomException
 
 
-class EZWEBMigrate:
+class EZAnalyticsMigrate:
     
     def __init__(self) -> None:
         self.db = None
@@ -25,13 +25,17 @@ class EZWEBMigrate:
         practices_app = self.practices_data_by_app_name(app_data[0])
         try:
             response = requests.post(app_data[1], json={'email':email,'type':'migration'})
-        except Exception:
-            raise CustomException(message="ez web not working", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(e)
+            raise CustomException(message="ez analytics not working", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         response = response.json()
-        practice_ids = self.validate_practices_data_by_response(response['data']['selected_practice'],practices_app['__root__'])
+        if len(response['Data']['selected_practice']) < 1:
+            raise CustomException(message="ez analytics user contains no practice", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        practice_ids = self.validate_practices_data_by_response(response['Data']['selected_practice'],practices_app['__root__'])
         roles_data = self.roles_data_by_app_id(app_id)
-        role_id = self.validate_roles_by_response_role(response['data']['role'],roles_data)
+        role_id = self.validate_roles_by_response_role(response['Data']['selected_practice'][0]['role'],roles_data)
         return {
             'id':app_id,
             'practices':practice_ids,
@@ -49,10 +53,19 @@ class EZWEBMigrate:
 
     def validate_practices_data_by_response(self, response_data, practice_data):
         practices_ids = []
+        empty_practice_set = set()
         for values in response_data:
             for practice in practice_data:
-                if values.lower() == practice['name'].lower():
-                    practices_ids.append({'id':practice['id']})
+                if values['practice'].lower() == practice['name'].lower():
+                    if practice['id'] not in empty_practice_set:
+                        practices_ids.append({'id':practice['id']})
+                        empty_practice_set.add(practice['id'])
+                
+                if values['parent_organization'].lower() if values['parent_organization'] else None == practice['name'].lower():
+                    if practice['id'] not in empty_practice_set:
+                        practices_ids.append({'id':practice['id']})
+                        empty_practice_set.add(practice['id'])
+
         return practices_ids
 
     def validate_roles_by_response_role(self, response_roles_data, roles_data):
@@ -65,5 +78,3 @@ class EZWEBMigrate:
 
         else:
             return None
-
-

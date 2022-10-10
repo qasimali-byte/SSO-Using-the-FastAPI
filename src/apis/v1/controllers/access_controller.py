@@ -19,6 +19,8 @@ from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
 from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
+from src.packages.usermigrations.ezanalytics import EZAnalyticsMigrate
+from src.packages.usermigrations.ezweb import EZWEBMigrate
 from test_migrate import UserMigrate
 from utils import get_redis_client
 
@@ -159,17 +161,23 @@ class AccessController():
                 #  create user in db
                 # user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())
                 # SPSController(self.db).assign_sps_to_user(user_id=user_created_data.id, sps_object_list=products_ids)
-                apps_object = UserMigrate().user_migration_request(email=validator_data.email, app_id=products_ids[0])
+                apps_list = []
+                for ids in products_ids:
+                    if ids == 4:
+                        apps_list.append(EZAnalyticsMigrate().user_migration_request(email=validator_data.email,app_id=ids))
+                    elif ids == 6:
+                        apps_list.append(EZWEBMigrate().user_migration_request(email=validator_data.email,app_id=ids))
+                    
                 user_validator = CreateInternalExternalUserValidatorIn(firstname="first name",
                                                                         lastname="last name",
                                                                         email=validator_data.email,
                                                                         type_of_user="external",
                                                                         dr_iq_gender_id=None,
-                                                                        apps=[apps_object],
+                                                                        apps=[apps_list],
                                                                         is_active=True)
 
                 UserController(self.db).create_user(user_validator.dict())
-                raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps')
+                raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps and reset password mail has been generated')
             else:
                 raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
