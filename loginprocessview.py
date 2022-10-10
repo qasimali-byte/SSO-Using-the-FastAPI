@@ -119,7 +119,8 @@ class LoginProcessView():
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)
         practice_roles_data,practice_roles_status = UserService(db).get_all_sps_practice_roles_db(email)
-
+        sps_app_object = SPSService(db)
+        selected_apps = sps_app_object.get_selected_sps_app_for_idp_user(email)
         users_info, user_info_data_id = self.get_user_info(email,db)
         app_role=RolesService(db).get_user_selected_role_db_appid_userid(sp_apps_data.id,user_info_data_id )
         apps = list()
@@ -146,6 +147,7 @@ class LoginProcessView():
                 temp_list = list([])
         
         users_info['app_practices']=app_practices
+        users_info['products']= selected_apps
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
         users_info["email"] = email

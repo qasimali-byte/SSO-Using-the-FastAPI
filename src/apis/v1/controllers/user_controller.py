@@ -20,7 +20,7 @@ from fastapi import Response
 from mimetypes import guess_type
 from celery_worker import email_sender
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
-from src.apis.v1.validators.user_validator import CreateUserValidator, GetLogedInUsersValidatorUpdateApps, GetUsersValidatorUpdateApps, \
+from src.apis.v1.validators.user_validator import CreateUserValidator, GetLogedInUsersValidatorUpdateApps, GetUsersValidatorSelectedUnSelectedApps, GetUsersValidatorUpdateApps, \
     UpdateUserValidatorDataClass, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorOut, \
     UserDeleteValidatorOut
 from ..core.project_settings import Settings
@@ -164,6 +164,31 @@ class UserController():
         return response
 
 
+
+    def get_user_selected_unselected_apps(self, user_email: str):
+        """
+            Get User selected And UnSelected Apps 
+         """
+        user_service_object = UserService(self.db)
+        user_info = user_service_object.get_user_info_db(user_email)
+        selected_user_id = user_info.id
+        if user_info is None:
+            data = ErrorResponseValidator(message="User Not Found")
+            response = custom_response(status_code=status.HTTP_404_NOT_FOUND, data=data)
+            return response
+
+        selected_email = user_info.email
+        allowed_apps = SPSController(self.db).get_selected_unselected_apps(selected_email)
+        allowed_apps = sorted(allowed_apps, key=itemgetter('is_selected'), reverse=True)
+        firstname = user_info.first_name
+        lastname = user_info.last_name
+        type_of_user = TypeOfUserService(self.db).get_type_of_user_db_by_userid(selected_user_id)
+        type_of_user = type_of_user['name']
+        data = GetUsersValidatorSelectedUnSelectedApps(firstname=firstname, lastname=lastname,
+                                           email=selected_email, type_of_user=type_of_user,
+                                           selected_unselected_sp_apps=allowed_apps, is_active=user_info.is_active)
+        response = custom_response(status_code=status.HTTP_200_OK, data=data)
+        return response
 
 
 

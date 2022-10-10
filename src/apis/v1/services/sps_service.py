@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
@@ -57,8 +58,44 @@ class SPSService():
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
-                serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,"sp_app_name": y.sp_metadata})
+                serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,\
+                    "sp_app_name": y.display_name,"logo_url": y.logo_url})
+            return serviceproviders
 
+        except Exception as e:
+            return []
+        
+        
+    def get_selected_unselected_sps_app(self):
+        try:
+
+            total_sp_apps = self.db.query(SPAPPS).filter(SPAPPS.is_active==True).all()
+            serviceproviders = []
+            for data in total_sp_apps:
+                serviceproviders.append({"id": data.id, "display_name": data.display_name,"name": data.name,"host_url":data.host,\
+                    "sp_app_name": data.name,"logo_url": data.logo_url})
+
+            return serviceproviders
+
+        except Exception as e:
+            return []
+
+
+
+    def get_selected_sps_app_for_idp_user(self,user_email):
+        try:
+            base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
+            sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
+            serviceproviders = []
+            for i in sp_query:
+                y = (i[2])
+                if(y.host=='dev-sso-frontend.attech-ltd.com/'):
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'http://'+y.host}))
+                else:
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
+                
+            print(serviceproviders)
             return serviceproviders
 
         except Exception as e:

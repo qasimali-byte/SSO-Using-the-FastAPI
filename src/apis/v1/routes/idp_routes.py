@@ -197,6 +197,7 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
                                                              "error": "Invalid username or password"})
     # print(vars(request))
     status_code = resp.verify_app_allowed(saml_request,db,email)
+
     if status_code == 307:
         return templates.TemplateResponse("notification.html",{"request": request,})
     # print(request.headers['referer'])
@@ -212,7 +213,6 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     # print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     cookie.attach_to_response(response, session)
-    print(vars(response))
     return response
 
 
