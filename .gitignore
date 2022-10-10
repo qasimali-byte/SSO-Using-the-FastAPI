@@ -26,3 +26,4 @@ local_test.py
 /alembic/versions/
 /envs/
 .gitignore
+/public/profile_image

@@ -78,7 +78,7 @@ async def update_user_practices_roles_by_id(user_id:int,user_validator:CreateInt
     return resp
 
 @router.put("/user/profile-image", summary="Update User Profile Image", responses={201:{"model":SuccessfulJsonResponseValidator}}, status_code=201)
-async def update_user_image(image:UploadFile = Form(...),user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+async def update_user_image(image:UploadFile = Form(...), user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
         This api updates the user information for profile image, uses request.body.file
     """
@@ -88,6 +88,16 @@ async def update_user_image(image:UploadFile = Form(...),user_email_role:RoleVer
     return resp
 
 
+@router.get("/user/image", summary="Access User Profile Image using token", responses={302:{"model":SuccessfulJsonResponseValidator}}, status_code=302)
+async def get_user_image(user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
+    """
+        This api returns the user information for profile image, uses request.body.file
+    """
+
+    current_user_email = user_email_role.get_user_email()
+    resp = UserController(db).get_user_image(user_email=current_user_email)
+    return resp
+
 @router.delete("/user/{user_id}", summary="Delete a user",responses={200:{"description":"Delete a user and all associated applications and it's rights"}})
 async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     """
@@ -96,8 +106,11 @@ async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Dep
     user_to_delete = UserController(db).delete_user(user_id)
     return user_to_delete
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> f1b12b8a8eaf024a4ace95bfac56a6d5f54f9fa9
 @router.get("/user/selected/apps/practices/roles", summary="Get User Information with practices and roles",
             responses={200:{"model": GetLogedInUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
 async def get_user_practices_roles_by_id( user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -107,6 +120,7 @@ async def get_user_practices_roles_by_id( user_email_role:RoleVerifierImplemente
     current_user_email = user_email_role.get_user_email()
     resp = UserController(db).get_loged_in_user_practices_roles_by_id(user_email=current_user_email)
     return resp
+<<<<<<< HEAD
 
 
 @router.get("/user/selected/apps", summary="Get User selected unselected  apps",
@@ -118,3 +132,5 @@ async def get_user_selected_unselected_apps(user_email_role:RoleVerifierImplemen
     current_user_email = user_email_role.get_user_email()
     resp = UserController(db).get_user_selected_unselected_apps(user_email=current_user_email)
     return resp
+=======
+>>>>>>> f1b12b8a8eaf024a4ace95bfac56a6d5f54f9fa9
