@@ -17,7 +17,7 @@ class UsersService():
         self.db = db
     
 
-    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:str,\
         
         select_practices:str) -> tuple:
 
@@ -66,7 +66,7 @@ class UsersService():
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")
 
-    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:str,\
         select_practices:str) -> tuple:
         try:
             get_order_by= get_order_by_query(order_by,latest)
