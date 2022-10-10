@@ -1,4 +1,4 @@
-import threading
+from select import select
 from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.daos.sps_dao import SyncSpsDAO
@@ -11,8 +11,9 @@ from src.apis.v1.services.sps_service import SPSService
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulResponseValidator
 from fastapi import status
 
+from src.apis.v1.validators.user_validator import LogedInUserSPPracticeRoleValidator, SPPracticeRoleValidator
 from src.apis.v1.validators.sps_validator import FilterServiceProviderValidator, ListFilterServiceProviderValidator, ListServiceProviderValidatorOut, ListServiceProviders, ListSpAppsGeneralValidator
-from src.apis.v1.validators.user_validator import SPPracticeRoleValidator
+
 class SPSController():
     def __init__(self, db):
         self.db = db
@@ -92,10 +93,10 @@ class SPSController():
     def assign_sps_to_user(self, **kwargs):
         return SPSService(self.db).assign_sps_to_user_db(**kwargs)
 
-    def get_practices_roles_by_apps(self,apps_list,app, selected_apps, user_id, selected_id):
 
-        apps = SPPracticeRoleValidator(id=app["id"],name=app["sp_app_name"],
-        sp_app_name=app["name"],sp_app_image=app["image"],is_selected=False,
+    def get_practices_roles_by_apps(self,apps_list,app, selected_apps, user_id, selected_id):
+        apps = SPPracticeRoleValidator(id=app["id"],name=app["name"],
+        sp_app_name=app["sp_app_name"],sp_app_image=app["image"],is_selected=False,
         roles=RolesController(self.db).get_allowed_roles_by_userid(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid(app["id"],user_id,selected_id)) 
 
@@ -113,6 +114,60 @@ class SPSController():
 
         else:
             apps_list.append(apps.dict())
+            
+   
+    def get_apps_selected_unselected(self,total_apps, selected_apps):
+
+        apps_list=[]
+        for t_data in total_apps:
+            not_matched=0
+            apps={}
+            for s_data in selected_apps:
+                if t_data['id']==s_data['id']:            
+                    apps['id']=s_data["id"]
+                    apps['name']=s_data["name"]
+                    apps['sp_app_name']=s_data["display_name"]
+                    apps['logo_url']=s_data["logo_url"]
+                    apps['host_url']=s_data["host_url"]
+                    apps['is_selected'] = True
+                else:
+                    not_matched=not_matched+1
+                if(not_matched==len(selected_apps)):
+                    apps['id']=t_data["id"]
+                    apps['name']=t_data["name"]
+                    apps['sp_app_name']=t_data["display_name"]
+                    apps['logo_url']=t_data["logo_url"]
+                    apps['host_url']=t_data["host_url"]
+                    apps['is_selected'] = False
+            apps_list.append(apps)
+        
+        return apps_list
+   
+   
+            
+
+    def get_practices_roles_by_apps_loged_in_user(self,apps_list,app, selected_apps, user_id, selected_id):
+        apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["name"],
+        sp_app_name=app["sp_app_name"],sp_app_image=app["image"],is_selected=False,
+        role=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id),
+        practices=PracticesController(self.db).get_allowed_practices_by_userid_loged_in_user(app["id"],user_id,selected_id)) 
+
+        for iteration2 in selected_apps:
+            if app["id"] == iteration2["id"]:
+                pass
+
+        if apps.id == 7: ## ez login id
+            apps_list.insert(0,apps.dict())
+
+        elif apps.id == 3: ## dr iq app id
+            gender_data = GenderService(self.db).get_driq_selected_gender_loged_in_user(selected_id)
+            apps.gender = gender_data
+            apps_list.append(apps.dict())
+
+        else:
+            apps_list.append(apps.dict())
+
+
 
     def get_allowed_apps_by_userid(self, user_email, selected_email, user_id, selected_id):
 
@@ -126,6 +181,32 @@ class SPSController():
 
         for apps_object in total_allowed_apps:
             self.get_practices_roles_by_apps(apps_list,apps_object, selected_apps, user_id, selected_id)
+        return apps_list
+    
+    def get_selected_unselected_apps(self,selected_email):
+
+        sps_app_object = SPSService(self.db)
+        total_apps = sps_app_object.get_selected_unselected_sps_app()
+        selected_apps = sps_app_object.get_sps_app(selected_email)
+        if len(total_apps) == 0:
+            return []
+        else:
+            apps_list=self.get_apps_selected_unselected(total_apps, selected_apps)
+        return apps_list
+    
+    
+    def get_allowed_apps_by_userid_for_loged_in_user(self,selected_email, user_id, selected_id):
+
+        apps_list = [] # contains all the apps 
+        sps_app_object = SPSService(self.db)
+        total_allowed_apps = sps_app_object.get_sps_app(selected_email)
+        selected_apps = sps_app_object.get_sps_app(selected_email)
+
+        if len(total_allowed_apps) == 0:
+            return apps_list
+
+        for apps_object in total_allowed_apps:
+            self.get_practices_roles_by_apps_loged_in_user(apps_list,apps_object, selected_apps, user_id, selected_id)
         return apps_list
 
     def get_specific_product_byappid(self, app_id:int):

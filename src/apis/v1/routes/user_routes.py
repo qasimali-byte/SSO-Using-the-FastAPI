@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from src.apis.v1.helpers.role_verifier import RoleVerifierImplemented
 from . import oauth2_scheme
-from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, CreateUserValidator, ExternalUserValidator, GetUsersValidatorUpdateApps, UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
+from src.apis.v1.validators.user_validator import AdminUserValidator, CreateInternalExternalUserValidatorIn, CreateUserValidator, ExternalUserValidator, GetLogedInUsersValidatorUpdateApps, GetUsersValidatorSelectedUnSelectedApps, GetUsersValidatorUpdateApps,  UpdateUserValidatorIn, UserInfoValidator, UserSPPracticeRoleValidatorOut, UserValidatorIn, UserValidatorOut
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 
 router = APIRouter(tags=["User-Management"])
@@ -105,3 +105,24 @@ async def delete_user(user_id:int, user_email_role:RoleVerifierImplemented = Dep
     """
     user_to_delete = UserController(db).delete_user(user_id)
     return user_to_delete
+
+@router.get("/user/selected/apps/practices/roles", summary="Get User Information with practices and roles",
+            responses={200:{"model": GetLogedInUsersValidatorUpdateApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
+async def get_user_practices_roles_by_id( user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """
+        This api get the user information according to relevant service providers and practices
+    """
+    current_user_email = user_email_role.get_user_email()
+    resp = UserController(db).get_loged_in_user_practices_roles_by_id(user_email=current_user_email)
+    return resp
+
+
+@router.get("/user/selected/apps", summary="Get User selected unselected  apps",
+            responses={200:{"model": GetUsersValidatorSelectedUnSelectedApps},404:{"model":ErrorResponseValidator,"description":"Error Occured when not found"}})
+async def get_user_selected_unselected_apps(user_email_role:RoleVerifierImplemented = Depends(), token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """
+        This api get the selected and unselected apps for loged in user
+    """
+    current_user_email = user_email_role.get_user_email()
+    resp = UserController(db).get_user_selected_unselected_apps(user_email=current_user_email)
+    return resp

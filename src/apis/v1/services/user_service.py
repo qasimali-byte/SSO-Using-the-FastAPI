@@ -337,7 +337,8 @@ class UserService():
 
         except Exception as e:
             return "Error: {}".format(e), status.HTTP_500_INTERNAL_SERVER_ERROR
-
+        
+    
     def test_insert_practices_userid(self, email, user_id):
         objects = []
         data = self.db.query(practices).with_entities(practices.id).all()

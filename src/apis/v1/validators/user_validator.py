@@ -1,8 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, validator, typing, Field
-from src.apis.v1.validators.practices_validator import SPRegionsValidator
-from src.apis.v1.validators.roles_validator import RolesValidator, SPRolesValidator
-from src.apis.v1.validators.gender_validator import ListGenderValidator
+from src.apis.v1.validators.practices_validator import LogedInUserSPRegionsValidator, SPRegionsValidator
+from src.apis.v1.validators.roles_validator import LogedInUserListRolesValidatorWithOutOrm,  RolesValidator, SPRolesValidator
+from src.apis.v1.validators.gender_validator import ListGenderValidator, LogedInUserListGenderValidator
 import uuid
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 
@@ -93,12 +93,89 @@ class SPPracticeRoleValidator(BaseModel):
         allow_population_by_field_name = True
         validate_assignment = True
 
+
+
+class UserSelectedUnselectedSPApps(BaseModel):
+    """
+        SP Apps Validator
+    """
+    id: int
+    name: str
+    sp_app_name: str
+    logo_url: str
+    host_url: str
+    is_selected: typing.Optional[bool]
+    
+    class Config:
+        allow_population_by_field_name = True
+        validate_assignment = True
+
+
+
+
+class LogedInUserSPPracticeRoleValidator(BaseModel):
+    """
+        SP Practice Role Validator
+    """
+    id: int
+    name: str
+    gender: typing.Optional[LogedInUserListGenderValidator]
+    sp_app_name: str
+    sp_app_image: str
+    practices: LogedInUserSPRegionsValidator = []
+    role: typing.Optional[LogedInUserListRolesValidatorWithOutOrm]
+    # is_selected: typing.Optional[bool] = Field(alias='selected')
+    
+    class Config:
+        allow_population_by_field_name = True
+        validate_assignment = True
+
 class UserSPPracticeRoleValidatorOut(BaseModel):
     sp_practice_roles: typing.List['SPPracticeRoleValidator']
     message: str = "successfully fetched sp practice roles"
     statuscode: int = 200
+    
+
+class LogedInUserSPPracticeRoleValidatorOut(BaseModel):
+    sp_practice_roles: typing.List['LogedInUserSPPracticeRoleValidator']
+    message: str = "successfully fetched sp practice roles"
+    statuscode: int = 200
 
 class GetUsersValidatorUpdateApps(UserSPPracticeRoleValidatorOut):
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
+    is_active: typing.Optional[bool] 
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
+
+
+
+class UserSelectedSPAppsValidatorOut(BaseModel):
+    selected_unselected_sp_apps: typing.List['UserSelectedUnselectedSPApps']
+    message: str = "successfully fetched sp apps"
+    statuscode: int = 200
+
+
+class GetUsersValidatorSelectedUnSelectedApps(UserSelectedSPAppsValidatorOut):
+    firstname: str 
+    lastname: str 
+    email: EmailStr
+    type_of_user: typing.Literal['internal','external']
+    is_active: typing.Optional[bool] 
+
+    @validator('email')
+    def validate_email(cls, v):
+        return v.lower()
+
+
+
+    
+class GetLogedInUsersValidatorUpdateApps(LogedInUserSPPracticeRoleValidatorOut):
     firstname: str 
     lastname: str 
     email: EmailStr

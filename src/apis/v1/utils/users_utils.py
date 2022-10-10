@@ -30,9 +30,9 @@ def get_order_by_query(order_by,latest):
 
 def get_subquery(search,select_practices,user_status):
     # this sort of list will recieve by front end ['ez-login,dr-iq,ez-web']
-    if select_practices != ['All']:
-        select_practices=[value.split(',') for value in select_practices]
-        select_practices=select_practices[0]
+    # if select_practices != ['All']:
+    #     select_practices=[value.split(',') for value in select_practices]
+    #     select_practices=select_practices[0]
 
     if  search is None and select_practices ==['All'] and user_status == True:
         # Case 1
@@ -44,7 +44,6 @@ def get_subquery(search,select_practices,user_status):
         return  query
     elif search is None and select_practices !=['All'] and user_status == True:
         # Case 3
-        print(select_practices,type(select_practices))
         query= {idp_users.is_active==True,SPAPPS.name.in_(select_practices)}
         return query
     elif search is None and select_practices !=['All'] and user_status == False:
