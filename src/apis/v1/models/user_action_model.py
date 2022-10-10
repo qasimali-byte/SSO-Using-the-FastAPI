@@ -32,5 +32,5 @@ class user_action(Base):
             "action_date": self.action_date,
             "status": self.status,
             "display_name": self.sp_app.display_name if self.sp_app else "",
-            "logo": self.sp_app.logo if self.sp_app else "",
+            "logo": self.sp_app.logo_url if self.sp_app else "",
         }
