@@ -11,14 +11,9 @@ from src.apis.v1.services.sps_service import SPSService
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulResponseValidator
 from fastapi import status
 
-<<<<<<< HEAD
-from src.apis.v1.validators.sps_validator import FilterServiceProviderValidator, ListFilterServiceProviderValidator, ListServiceProviderValidatorOut, ListServiceProviders
-from src.apis.v1.validators.user_validator import LogedInUserSPPracticeRoleValidator, SPPracticeRoleValidator, UserSelectedUnselectedSPApps
-=======
 from src.apis.v1.validators.user_validator import LogedInUserSPPracticeRoleValidator, SPPracticeRoleValidator
 from src.apis.v1.validators.sps_validator import FilterServiceProviderValidator, ListFilterServiceProviderValidator, ListServiceProviderValidatorOut, ListServiceProviders, ListSpAppsGeneralValidator
 
->>>>>>> f1b12b8a8eaf024a4ace95bfac56a6d5f54f9fa9
 class SPSController():
     def __init__(self, db):
         self.db = db

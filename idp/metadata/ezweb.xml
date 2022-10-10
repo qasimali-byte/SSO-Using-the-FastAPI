@@ -74,27 +74,15 @@ x5Ql0ejivIJAYcMGUyA+/YwJg2FGoA==
         <md:AssertionConsumerService
             index="0"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-<<<<<<< HEAD
             Location="http://ezweb-api.local/v1/ez-web/acs"/>
-=======
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
->>>>>>> f1b12b8a8eaf024a4ace95bfac56a6d5f54f9fa9
         <md:AssertionConsumerService
             isDefault="true"
             index="1"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-<<<<<<< HEAD
             Location="http://ezweb-api.local/v1/ez-web/acs"/>
         <md:AssertionConsumerService
             index="2"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
             Location="http://ezweb-api.local/v1/ez-web/acs"/>
-=======
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
-        <md:AssertionConsumerService
-            index="2"
-            Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
->>>>>>> f1b12b8a8eaf024a4ace95bfac56a6d5f54f9fa9
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
