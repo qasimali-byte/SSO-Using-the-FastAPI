@@ -163,10 +163,10 @@ class AccessController():
                 # SPSController(self.db).assign_sps_to_user(user_id=user_created_data.id, sps_object_list=products_ids)
                 apps_list = []
                 for ids in products_ids:
-                    if ids == 4:
-                        apps_list.append(EZAnalyticsMigrate().user_migration_request(email=validator_data.email,app_id=ids))
-                    elif ids == 6:
-                        apps_list.append(EZWEBMigrate().user_migration_request(email=validator_data.email,app_id=ids))
+                    if ids == '4':
+                        apps_list.append(EZAnalyticsMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
+                    elif ids == '6':
+                        apps_list.append(EZWEBMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
                     
                 user_validator = CreateInternalExternalUserValidatorIn(firstname="first name",
                                                                         lastname="last name",
