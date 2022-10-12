@@ -48,18 +48,17 @@ def get_subquery(search,select_practices,user_status):
         else:
             return {}
 
-
     else:
         if user_status == "true":
             user_status = True
         elif user_status == "false":
             user_status = False
 
-        if  search is None and select_practices ==['All'] and user_status == True:
+        if  search is None and select_practices == ['All'] and user_status == True:
             # Case 1
-            query= {idp_users.is_active==True}
+            query= {idp_users.is_active == True}
             return  query
-        elif search is None and select_practices ==['All'] and user_status == False:
+        elif search is None and select_practices == ['All'] and user_status == False:
             # Case 2
             query= {idp_users.is_active==False}
             return  query
