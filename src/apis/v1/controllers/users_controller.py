@@ -14,7 +14,7 @@ class UsersController():
         self._metadata = {}
         
 
-    def get_users(self, user_role:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:bool,select_practices:str) -> dict:
+    def get_users(self, user_role:str, page_limit:int, page_offset:int,order_by:str, latest:bool,search:str,user_status:str,select_practices:str) -> dict:
         """
             Get Users according to the roles of user email
         """
