@@ -57,8 +57,8 @@ class AuthController:
         # access and refresh tokens
         user_info_data = UserService(self.db).get_user_info_db(email)
         get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
-        access_token = authorize.create_access_token(subject=str({'email':email,'roles':get_ezlogin_roles_only}),fresh=True)
-        refresh_token = authorize.create_refresh_token(subject=str({'email':email,'roles':get_ezlogin_roles_only}))
+        access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
+        refresh_token = authorize.create_refresh_token(subject=email,roles=get_ezlogin_roles_only)
         data = LoginValidatorOut(
             product_name="ez-login",
             message="successfully authenticated",
@@ -79,7 +79,9 @@ class AuthController:
             
         # Use create_access_token() and create_refresh_token() to create our
         # access and refresh tokens
-        access_token = authorize.create_access_token(subject=email,fresh=True)
+        user_info_data = UserService(self.db).get_user_info_db(email)
+        get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
+        access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
         data = RefreshTokenValidatorOut(
             message="successfully generated new access token",
             access_token= access_token,
@@ -128,7 +130,9 @@ class AuthController:
             return response
 
         current_user = authorize.get_jwt_current_user()
-        new_access_token = authorize.create_access_token(subject=current_user,fresh=False)
+        user_info_data = UserService(self.db).get_user_info_db(current_user)
+        get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
+        new_access_token = authorize.create_access_token(subject=current_user,roles=get_ezlogin_roles_only,fresh=False)
         data = RefreshTokenValidatorOut(
             message = "successfully generated new access token",
             access_token = new_access_token,
