@@ -17,7 +17,7 @@ class UsersService():
         self.db = db
     
 
-    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+    def get_external_users_info_db(self,user_type_id:int, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:str,\
         
         select_practices:str) -> tuple:
 
@@ -26,13 +26,18 @@ class UsersService():
 
             sub_query=get_subquery(search,select_practices,user_status)
 
+            # subquery_2 = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True,*sub_query)).subquery()
 
-            subquery_2 = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True,*sub_query))\
-                .subquery()
+            subquery_2 = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,
+                                                                 idp_users.is_approved == True,
+                                                                 *sub_query))\
+                .join(idp_sp, idp_users.id == idp_sp.idp_users_id)\
+                .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).subquery()
 
             count_records=self.db.query(idp_users.id).filter(idp_users.id.in_(select(subquery_2))).count()
 
-            subquery_3=self.db.query(idp_users.id).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))).limit(page_limit).offset(page_offset*page_limit).subquery()
+            subquery_3=self.db.query(idp_users.id).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_2))).\
+                limit(page_limit).offset(page_offset*page_limit).subquery()
 
             users_info_object=self.db.query(idp_users,SPAPPS).order_by(get_order_by).filter(idp_users.id.in_(select(subquery_3))).\
                 join(idp_sp, idp_users.id == idp_sp.idp_users_id).\
@@ -61,7 +66,7 @@ class UsersService():
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e)+"- error occured in users_service.py")
 
-    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:bool,\
+    def get_internal_external_users_info_db(self,user_role:str, page_limit:int, page_offset:int,order_by:str,latest:bool,search:str,user_status:str,\
         select_practices:str) -> tuple:
         try:
             get_order_by= get_order_by_query(order_by,latest)
@@ -78,7 +83,7 @@ class UsersService():
                 .join(sp_apps_role, idp_user_apps_roles.sp_apps_role_id == sp_apps_role.id) \
                 .join(roles, sp_apps_role.roles_id == roles.id) \
                 .filter(or_(roles.name == "super-admin",roles.name == "sub-admin")).subquery()
-                
+
 
             sub_query=get_subquery(search,select_practices,user_status)
 

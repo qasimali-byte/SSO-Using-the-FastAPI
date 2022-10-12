@@ -1,3 +1,5 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field, typing
 from src.apis.v1.validators.common_validators import MetaDataValidator
 
@@ -17,4 +19,7 @@ class UsersValidatorOut(BaseModel):
     message: str
     status_code: int
 
-    
+class UserStatus(str, Enum):
+    true = "true"
+    false = "false"
+    all = "all"

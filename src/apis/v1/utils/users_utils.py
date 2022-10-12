@@ -34,39 +34,59 @@ def get_subquery(search,select_practices,user_status):
     #     select_practices=[value.split(',') for value in select_practices]
     #     select_practices=select_practices[0]
 
-    if  search is None and select_practices ==['All'] and user_status == True:
-        # Case 1
-        query= {idp_users.is_active==True}
-        return  query
-    elif search is None and select_practices ==['All'] and user_status == False:
-        # Case 2
-        query= {idp_users.is_active==False}
-        return  query
-    elif search is None and select_practices !=['All'] and user_status == True:
-        # Case 3
-        query= {idp_users.is_active==True,SPAPPS.name.in_(select_practices)}
-        return query
-    elif search is None and select_practices !=['All'] and user_status == False:
-        # Case 4
-        query= {idp_users.is_active==False,SPAPPS.name.in_(select_practices)}
-        return query
-    elif search is not None and select_practices ==['All'] and user_status == True:
-        #Case 5
-        query= {idp_users.is_active==True,idp_users.username.ilike(f"%{search}%")}
-        return query
-    elif search is not None and select_practices ==['All'] and user_status == False:
-        # Case 6
-        query= {idp_users.is_active==False,idp_users.username.ilike(f"%{search}%")}
-        return query
-    elif search is not None and select_practices !=['All'] and user_status == True:
-        query= {idp_users.is_active==True,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.in_(select_practices)}
-        return query
-    elif search is not None and select_practices !=['All'] and user_status == False:
-        # Case 8
-        query= {idp_users.is_active==False,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.in_(select_practices)}
-        return query
+    if user_status == "all":
+        if search is None and select_practices != ['All']:
+            query = {SPAPPS.name.in_(select_practices)}
+            return query
+        elif search is not None and select_practices == ['All']:
+            query = {idp_users.username.ilike(f"%{search}%")}
+            return query
+        elif search is not None and select_practices != ['All']:
+            query = {idp_users.username.ilike(f"%{search}%"),
+                     SPAPPS.name.in_(select_practices)}
+            return query
+        else:
+            return {}
+
     else:
-        return {}
+        if user_status == "true":
+            user_status = True
+        elif user_status == "false":
+            user_status = False
+
+        if  search is None and select_practices == ['All'] and user_status == True:
+            # Case 1
+            query= {idp_users.is_active == True}
+            return  query
+        elif search is None and select_practices == ['All'] and user_status == False:
+            # Case 2
+            query= {idp_users.is_active==False}
+            return  query
+        elif search is None and select_practices !=['All'] and user_status == True:
+            # Case 3
+            query= {idp_users.is_active==True,SPAPPS.name.in_(select_practices)}
+            return query
+        elif search is None and select_practices !=['All'] and user_status == False:
+            # Case 4
+            query= {idp_users.is_active==False,SPAPPS.name.in_(select_practices)}
+            return query
+        elif search is not None and select_practices ==['All'] and user_status == True:
+            #Case 5
+            query= {idp_users.is_active==True,idp_users.username.ilike(f"%{search}%")}
+            return query
+        elif search is not None and select_practices ==['All'] and user_status == False:
+            # Case 6
+            query= {idp_users.is_active==False,idp_users.username.ilike(f"%{search}%")}
+            return query
+        elif search is not None and select_practices !=['All'] and user_status == True:
+            query= {idp_users.is_active==True,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.in_(select_practices)}
+            return query
+        elif search is not None and select_practices !=['All'] and user_status == False:
+            # Case 8
+            query= {idp_users.is_active==False,idp_users.username.ilike(f"%{search}%"),SPAPPS.name.in_(select_practices)}
+            return query
+        else:
+            return {}
 
     
     
