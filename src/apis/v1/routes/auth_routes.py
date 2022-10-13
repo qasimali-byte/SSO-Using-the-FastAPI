@@ -97,8 +97,8 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 req.store_session(session, email, db)
                 user_info_data = UserService(db).get_user_info_db(email)
                 get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
-                access_token = authorize.create_access_token(subject=email,role=get_ezlogin_roles_only,fresh=True)
-                refresh_token = authorize.create_refresh_token(subject=email,role=get_ezlogin_roles_only)
+                access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
+                refresh_token = authorize.create_refresh_token(subject=email,roles=get_ezlogin_roles_only)
                 data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="You don't have access to this sp application",
                 roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url="http://dev-sso-frontend.attech-ltd.com/backend/notification",saml_response="", product_name="ezlogin",
                 statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
@@ -122,8 +122,8 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             data = HTMLPARSER().parse_html(resp["data"]["data"])
             user_info_data = UserService(db).get_user_info_db(email)
             get_ezlogin_roles_only = RolesService(db).get_ezlogin_role_only(user_info_data.id)
-            access_token = authorize.create_access_token(subject=email,role=get_ezlogin_roles_only,fresh=True)
-            refresh_token = authorize.create_refresh_token(subject=email,role=get_ezlogin_roles_only)
+            access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
+            refresh_token = authorize.create_refresh_token(subject=email,roles=get_ezlogin_roles_only)
             data_out = LoginValidatorOutRedirect(access_token=access_token,refresh_token=refresh_token,message="successfully authenticated",
             roles=get_ezlogin_roles_only,token_type="Bearer",redirect_url=data[0],saml_response=data[1], product_name=application_entity_id,
             statuscode=status.HTTP_307_TEMPORARY_REDIRECT)
