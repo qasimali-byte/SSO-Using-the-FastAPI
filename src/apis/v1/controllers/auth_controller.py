@@ -60,7 +60,7 @@ class AuthController:
         access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
         refresh_token = authorize.create_refresh_token(subject=email,roles=get_ezlogin_roles_only)
         data = LoginValidatorOut(
-            product_name="ez-login",
+            product_name="ezlogin",
             message="successfully authenticated",
             access_token= access_token, 
             refresh_token=refresh_token,

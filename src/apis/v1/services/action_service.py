@@ -29,4 +29,4 @@ class ActionService:
             return
 
         except Exception as e:
-            raise CustomException(message= str(e) + self.error_string +"- error occured in Action Service", status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise CustomException(message= str(e) +"- error occured in Action Service", status_code= status.HTTP_500_INTERNAL_SERVER_ERROR)
