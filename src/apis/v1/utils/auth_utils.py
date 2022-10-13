@@ -6,6 +6,7 @@ from jose import JWTError, jwt
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.auth import AuthJWT
 
+
 settings = Settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -69,7 +70,7 @@ def generate_password(size=9, custom=True):
 def get_current_logged_in_user(authorize, response_body):
     current_user = None
     try:
-        current_user = authorize.get_jwt_subject()
+         current_user = authorize.get_jwt_subject()
     except:
         current_user = None
 
