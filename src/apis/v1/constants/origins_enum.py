@@ -7,5 +7,7 @@ origins = [
     "http://localhost:8088",
     "http://dev-sso-app.attech-ltd.com",
     "http://dev-sso-frontend.attech-ltd.com",
-    "http://127.0.0.1:5500/"
+    "http://127.0.0.1:5500/",
+    "https://qa1-driq-server.attech-ltd.com",
+    "https://dev-eza-server.attech-ltd.com"
 ]

@@ -141,6 +141,8 @@ class RolesService():
         if role_name == "super-admin":
             user_roles = {"id":15,"name":"Super Admin","sub_roles":None}
         elif role_name == "sub-admin":
+            user_roles = {"id":1, "name":"Sub Admin","sub_roles":None}
+        elif role_name == "practice-administrator":
             user_roles = {"id":16, "name":"Practice Admin","sub_roles":None}
         else:
             user_roles = {"id":17, "name":"External User","sub_roles":None}

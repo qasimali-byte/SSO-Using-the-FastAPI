@@ -30,11 +30,21 @@ class EZAnalyticsMigrate:
             raise CustomException(message="ez analytics not working", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         response = response.json()
+        roles_data = self.roles_data_by_app_id(app_id)
         if len(response['Data']['selected_practice']) < 1:
-            raise CustomException(message="ez analytics user contains no practice", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return {
+            'id':app_id,
+            'practices': [],
+            'role':{
+                'id':roles_data[0]['id'],
+                'sub_role': None
+                }
+            }
+
+            # raise CustomException(message="ez analytics user contains no practice", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         practice_ids = self.validate_practices_data_by_response(response['Data']['selected_practice'],practices_app['__root__'])
-        roles_data = self.roles_data_by_app_id(app_id)
+        
         role_id = self.validate_roles_by_response_role(response['Data']['selected_practice'][0]['role'],roles_data)
         return {
             'id':app_id,
