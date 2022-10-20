@@ -25,7 +25,7 @@ CONFIG = {
     "delete_tmpfiles": True,
     "metadata": {
             'local': ['idp/metadata/sp.xml','idp/metadata/sp1.xml','idp/metadata/ezsp.xml','idp/metadata/ezsplocal.xml',
-            'idp/metadata/ezweb.xml']
+            'idp/metadata/ezweb.xml','idp/metadata/ezwebtest.xml']
         },
     
     # "attribute_map_dir": "attributemaps",
