@@ -18,7 +18,7 @@ services:
     volumes:
       - .:/app:rw
     ports:
-      - "443:443"
+      - "80:80"
     command: >
       sh -c "python3 main.py -e prod"
     depends_on:
