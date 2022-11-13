@@ -18,7 +18,7 @@ def registering_routes(app):
     app.include_router(idp_routes.router)
     app.include_router(auth_routes.router, prefix=api_url)
     app.include_router(user_routes.router, prefix=api_url)
-    # app.include_router(frontend_routes.router)
+    app.include_router(frontend_routes.router)
     app.include_router(roles_routes.router, prefix=api_url)
     app.include_router(practices_routes.router, prefix=api_url)
     app.include_router(users_routes.router,prefix=api_url)
