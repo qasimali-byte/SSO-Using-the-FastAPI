@@ -13,4 +13,4 @@ class SpAppsEnum(str,Enum):
         obj._all_values = values
         return obj
 
-# print(SpAppsEnum('ez_analytics/saml/').name)
+# print(SpAppsEnum('ezanalytics/saml').name)
