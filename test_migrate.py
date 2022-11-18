@@ -7,6 +7,7 @@ from src.apis.v1.controllers.practices_controller import PracticesController
 from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.db.session import get_db
+from src.apis.v1.helpers.html_parser import HTMLPARSER
 from src.apis.v1.services.practices_service import PracticesService
 from src.apis.v1.services.sps_service import SPSService
 from src.apis.v1.services.user_service import UserService
@@ -104,7 +105,7 @@ class UserMigrate:
 
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=email)
-        value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,destination='http://localhost:3000')
+        value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,destination='http://localhost:3000',in_response_to='id12',sp_entity_id="loadbalancer-9.siroe.com")
 
         http_args = self.idp_server.apply_binding(
             binding=BINDING_HTTP_POST,
@@ -116,7 +117,9 @@ class UserMigrate:
             "data": http_args,
             "type": "REDIRECT",
         }
-        print(html_response)
+        # print(value)
+        data = HTMLPARSER().parse_html(html_response["data"]["data"])
+        print(data[1])
         # return html_response, resp_args
 
     def user_migration_request(self, email, app_id):
@@ -197,4 +200,4 @@ class UserMigrate:
 
 with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
     db = session
-UserMigrate().get('umair@gmail.com', db)
+UserMigrate().get('syedfaisalsaleem.100@gmail.com', db)
