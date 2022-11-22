@@ -140,7 +140,7 @@ class LoginProcessView():
                 temp_list.append(app_practices_list[i]['parent'])
                 temp_list.append(app_practices_list[i]['practices'][index]['name'])
                 try:
-                    temp_list.append(app_role[1].name)
+                    temp_list.append(app_role[1].label)
                 except Exception as e:
                     temp_list.append(None)
                 app_practices.append(str(temp_list))
