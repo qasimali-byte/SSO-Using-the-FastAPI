@@ -200,4 +200,4 @@ class UserMigrate:
 
 with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
     db = session
-UserMigrate().get('syedfaisalsaleem.100@gmail.com', db)
+# UserMigrate().get('syedfaisalsaleem.100@gmail.com', db)
