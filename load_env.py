@@ -22,3 +22,5 @@ elif config['env'] == "heroku":
 else:
     env_path = Path(".") / "envs/.env.dev"
     load_dotenv(dotenv_path=env_path)
+
+W
