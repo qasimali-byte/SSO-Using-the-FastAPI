@@ -14,7 +14,7 @@ pipeline {
         stage ('testing') {
           steps {
             sh 'ls'
-            sh 'echo Attech@789 | sudo -S'
+            sh 'echo Attech@789 | sudo su'
             sh 'sudo virtualenv env'
             sh 'source ./env/bin/activate'
             sh 'pip3 install -r requirements.txt'
