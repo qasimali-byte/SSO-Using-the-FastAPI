@@ -13,6 +13,7 @@ pipeline {
         }
         stage ('testing') {
           steps {
+            sh 'virtualenv env'
             sh 'source ./env/bin/activate'
             sh 'pip3 install -r requirements.txt'
             sh 'python3 tests_development.py' 
