@@ -36,8 +36,8 @@ services:
     volumes:
       - .:/app
     environment:
-      - CELERY_BROKER_URL=redis://localhost:6379/0
-      - CELERY_RESULT_BACKEND=redis://localhost:6379/0
+      - CELERY_BROKER_URL=redis://18.134.217.103:6379/0
+      - CELERY_RESULT_BACKEND=redis://18.134.217.103:6379/0
     depends_on:
       - app
       # - redis
