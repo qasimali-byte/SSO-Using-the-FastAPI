@@ -11,6 +11,18 @@ pipeline {
                     '''
             }
         }
+        stage ('testing') {
+          steps {
+            sh 'source env/bin/activate'
+            sh 'pip3 install -r requirements.txt'
+            try{
+                sh 'python3 tests_development.py'
+            }
+            catch (err){
+                echo err
+            }
+          }  
+        }
         stage('Start container'){
             steps {
                 sh 'docker-compose down'
