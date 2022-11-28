@@ -12,7 +12,7 @@ pipeline {
             }
         }
         stage ('testing') {
-          steps {
+          
             sh 'source env/bin/activate'
             sh 'pip3 install -r requirements.txt'
             try{
@@ -21,7 +21,7 @@ pipeline {
             catch (err){
                 echo err
             }
-          }  
+            
         }
         stage('Start container'){
             steps {
