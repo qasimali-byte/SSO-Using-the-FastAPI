@@ -19,7 +19,7 @@ services:
       - .:/app:rw
     ports:
       - "3000:3000"
-    command: >
+    command:
       sh -c "python3 main.py -e prod"
     # depends_on:
     #   - db_idp

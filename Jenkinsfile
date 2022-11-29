@@ -11,6 +11,15 @@ pipeline {
                     '''
             }
         }
+        // stage ('testing') {
+        //   steps {
+        //     sh 'ls'
+        //     sh 'echo Attech@789 | sudo -S -k virtualenv env'
+        //     sh 'source ./env/bin/activate'
+        //     sh 'pip3 install -r requirements.txt'
+        //     sh 'python3 tests_development.py' 
+        //   }
+        // }
         stage('Start container'){
             steps {
                 sh 'docker-compose down'
