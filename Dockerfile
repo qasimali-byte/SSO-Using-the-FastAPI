@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.10.8-slim-buster
 # ENV NODE_ENV development
 # Add a work directory
 WORKDIR /SSO_IDP
