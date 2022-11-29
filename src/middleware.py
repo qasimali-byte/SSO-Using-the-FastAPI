@@ -23,10 +23,6 @@ from Secweb.CacheControl import CacheControl
 
 
 
-
-
-
-
 def registering_middleware(application):
     application.add_middleware(
         CORSMiddleware,
@@ -35,7 +31,7 @@ def registering_middleware(application):
         allow_methods=["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE"],
         allow_headers=["Access-Control-Allow-Headers","Set-Cookie", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
     )
-    '''
+    
     application.add_middleware(ExpectCt, Option={'max-age': 128, 'enforce': True})
     application.add_middleware(OriginAgentCluster)
     application.add_middleware(ReferrerPolicy, Option={'Referrer-Policy': 'strict-origin-when-cross-origin'})
@@ -52,8 +48,6 @@ def registering_middleware(application):
     # application.add_middleware(ClearSiteData, Option={'cookies': True}, Routes=['/login', '/logout/{id}'])
     application.add_middleware(ClearSiteData, Option={'cookies': True})
     application.add_middleware(CacheControl, Option={'s-maxage': 600, 'public': True})
-    '''
-    application.add_middleware(SecurityHeadersMiddleware)
     application.add_middleware(AddActionMiddleWare)
    
     
