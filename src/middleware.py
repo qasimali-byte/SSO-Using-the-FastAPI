@@ -1,5 +1,4 @@
 from src.apis.v1.middleware.middleware import AddActionMiddleWare
-from src.apis.v1.middleware.middleware import SecurityHeadersMiddleware
 from src.apis.v1.constants.origins_enum import origins
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
