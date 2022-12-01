@@ -53,7 +53,7 @@ def registering_middleware(application):
     application.add_middleware(ClearSiteData, Option={'cookies': True})
     application.add_middleware(CacheControl, Option={'s-maxage': 600, 'public': True})
     '''
-    application.add_middleware(SecurityHeadersMiddleware)
+    # application.add_middleware(SecurityHeadersMiddleware)
     application.add_middleware(AddActionMiddleWare)
    
     
