@@ -25,6 +25,7 @@ async def get_session_without_context_manager() -> AsyncIterator[AsyncSession]:
             try:
                 yield session
             finally:
+                await session.commit()
                 await session.close()
 
 @asynccontextmanager
@@ -34,4 +35,5 @@ async def get_session() -> AsyncIterator[AsyncSession]:
             try:
                 yield session
             finally:
+                await session.commit()
                 await session.close()

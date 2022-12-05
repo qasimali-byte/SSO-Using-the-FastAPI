@@ -19,7 +19,7 @@ services:
       - .:/app:rw
     ports:
       - "3000:3000"
-    command: >
+    command:
       sh -c "python3 main.py -e prod"
     # depends_on:
     #   - db_idp
@@ -36,8 +36,8 @@ services:
     volumes:
       - .:/app
     environment:
-      - CELERY_BROKER_URL=redis://18.134.217.103:6379/0
-      - CELERY_RESULT_BACKEND=redis://18.134.217.103:6379/0
+      - CELERY_BROKER_URL=redis://:Attech123@18.134.217.103:6379/0
+      - CELERY_RESULT_BACKEND=redis://:Attech123@18.134.217.103:6379/0
     depends_on:
       - app
       # - redis
