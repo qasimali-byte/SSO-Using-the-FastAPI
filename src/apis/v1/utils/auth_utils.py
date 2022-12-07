@@ -6,6 +6,16 @@ from jose import JWTError, jwt
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.auth import AuthJWT
 
+from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
+from saml2.time_util import in_a_while
+from saml2 import (
+    BINDING_HTTP_POST,
+    BINDING_HTTP_REDIRECT,
+    entity,
+    BINDING_SOAP
+)
+import requests
+
 
 settings = Settings()
 
@@ -85,3 +95,37 @@ def auth_jwt_verifier_and_get_subject(request):
     authorize=AuthJWT(request)
     current_user_email = authorize.get_jwt_subject()
     return current_user_email
+
+def logout_request_from_idp(remove_sp, name_id):
+        
+    
+    from saml2.samlp import SessionIndex
+    from saml2 import server
+    idp_server = server.Server(config_file="idp/idp_conf.py")
+    nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
+                 text=name_id)
+    t_l = [
+        "loadbalancer-91.siroe.com",
+        "loadbalancer-9.siroe.com"
+    ]
+    t_l_2 = {
+        "loadbalancer-9.siroe.com": "http://localhost:8000/slo/request",
+        "loadbalancer-91.siroe.com": "http://localhost:8010/slo/request"
+    }
+    t_l.remove(remove_sp)
+
+    req_id, req = idp_server.create_logout_request(
+        issuer_entity_id=t_l[0],
+        destination=t_l_2[t_l[0]],
+        name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
+        session_indexes=["_foo"])
+
+    info = idp_server.apply_binding(
+        BINDING_SOAP, req, t_l_2[t_l[0]],
+        relay_state="relay2")
+    redirect_url = None
+    try:
+        response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+    except Exception as e:
+        print(e, "----e")
+

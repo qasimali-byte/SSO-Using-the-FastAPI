@@ -6,3 +6,5 @@ class Sps(Base):
     id = Column(Integer, primary_key=True, index=True)
     sp_id = Column(String(100),nullable=False, unique=True )
     sp_name = Column(String(100),nullable=True, unique=False, default="")
+    sp_entity_id= Column(String(100),nullable=True, unique=True)
+    sp_destination_url= Column(String(100),nullable=True, unique=True)

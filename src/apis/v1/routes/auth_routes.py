@@ -26,6 +26,7 @@ from src.apis.v1.routes.idp_routes import cookie, cookie_frontend
 from . import oauth2_scheme
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.apis.v1.utils.idp_initiated_single_logout import logout_request_from_idp
 
 router = APIRouter(tags=["Authentication"])
 templates = Jinja2Templates(directory="templates/")
@@ -166,7 +167,7 @@ def check_if_token_in_denylist(decrypted_token):
 
 
 @router.post("/logout", summary="Submit Logout Page API submission")
-async def sso_logout(logout_validator: LogoutValidator, request: Request, authorize: AuthJWT = Depends()):
+async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Session = Depends(get_db), authorize: AuthJWT = Depends()):
     # validate the cookie in db
     # if unique cookie is valid, use all emails
     # if email is admin: return cookie_idp + token
@@ -195,12 +196,12 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
             , status_code=status.HTTP_200_OK)
             response = delete_all_cookies(response)
             return response
-
+        resp = AuthController(db).idp_initiated_single_logout()
         jti = authorize.get_jti(access_token)
         redis_conn.setex(jti, Settings().authjwt_access_token_expires, 'true')
         jti = authorize.get_jti(refresh_token)
         redis_conn.setex(jti, Settings().authjwt_refresh_token_expires, 'true')
-
+        
     except Exception as e:
         response = custom_response(data={
         "message": "token has expired"

@@ -8,6 +8,7 @@ from src.apis.v1.controllers.roles_controller import RolesController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.db.session import get_db
 from src.apis.v1.helpers.html_parser import HTMLPARSER
+from src.apis.v1.services.auth_service import AuthService
 from src.apis.v1.services.practices_service import PracticesService
 from src.apis.v1.services.sps_service import SPSService
 from src.apis.v1.services.user_service import UserService
@@ -200,5 +201,8 @@ class UserMigrate:
 
 with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
     db = session
+    data=AuthService(db).get_all_service_providers()
+    for services_provider in data:
+        print(services_provider.sp_entity_id,services_provider.sp_destination_url)    
 # UserMigrate().get('syedfaisalsaleem.100@gmail.com', db)
 

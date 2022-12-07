@@ -71,18 +71,22 @@ x5Ql0ejivIJAYcMGUyA+/YwJg2FGoA==
         <!-- <NameIDFormat>
             urn:oasis:names:tc:SAML:2.0:nameid-format:transient
         </NameIDFormat> -->
+
+
         <md:AssertionConsumerService
             index="0"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
+            Location="http://localhost:8088/sso/redirect"/>
         <md:AssertionConsumerService
             isDefault="true"
             index="1"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
+            Location="http://localhost:8000/sso/acs"/>
         <md:AssertionConsumerService
             index="2"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="https://qa1-driq-server.attech-ltd.com/v1/ez-web/acs"/>
+            Location="http://localhost:8000/sso/acs"/>
+
+
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
