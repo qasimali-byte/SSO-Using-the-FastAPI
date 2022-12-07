@@ -104,15 +104,15 @@ def logout_request_from_idp(remove_sp, name_id):
     idp_server = server.Server(config_file="idp/idp_conf.py")
     nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
                  text=name_id)
-    t_l = [
-        "loadbalancer-91.siroe.com",
-        "loadbalancer-9.siroe.com"
-    ]
-    t_l_2 = {
-        "loadbalancer-9.siroe.com": "http://localhost:8000/slo/request",
-        "loadbalancer-91.siroe.com": "http://localhost:8010/slo/request"
-    }
-    t_l.remove(remove_sp)
+    # t_l = [
+    #     "loadbalancer-91.siroe.com",
+    #     "loadbalancer-9.siroe.com"
+    # ]
+    # t_l_2 = {
+    #     "loadbalancer-9.siroe.com": "http://localhost:8000/slo/request",
+    #     "loadbalancer-91.siroe.com": "http://localhost:8010/slo/request"
+    # }
+    # t_l.remove(remove_sp)
 
     req_id, req = idp_server.create_logout_request(
         issuer_entity_id=t_l[0],

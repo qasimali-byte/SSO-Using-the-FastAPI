@@ -197,6 +197,7 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Ses
             response = delete_all_cookies(response)
             return response
         resp = AuthController(db).idp_initiated_single_logout()
+        authorize.get_jwt_subject()
         jti = authorize.get_jti(access_token)
         redis_conn.setex(jti, Settings().authjwt_access_token_expires, 'true')
         jti = authorize.get_jti(refresh_token)

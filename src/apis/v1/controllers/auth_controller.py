@@ -142,4 +142,7 @@ class AuthController:
         return response
 
 
-    
+    def idp_initiated_single_logout(self,email: str):
+        service_provders=AuthService(self.db).get_all_service_providers()
+        for service_provder in service_provders:
+            
