@@ -3,9 +3,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from src.apis.v1.helpers.auth import AuthJWT
 from src.apis.v1.helpers.global_helpers import remove_int_from_urls
 from src.apis.v1.utils.middleware_utils import store_logs_db
+<<<<<<< HEAD
 
 """Middleware for security."""
 from collections import OrderedDict
+=======
+>>>>>>> 3d6d1277ab41be7d23c06f1c549d506a5cff47f6
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 class AddActionMiddleWare(BaseHTTPMiddleware):
@@ -30,6 +33,7 @@ class AddActionMiddleWare(BaseHTTPMiddleware):
         return response
     
     
+<<<<<<< HEAD
 
 
 
@@ -112,3 +116,5 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers.update(headers)
 
         return response
+=======
+>>>>>>> 3d6d1277ab41be7d23c06f1c549d506a5cff47f6
