@@ -96,7 +96,7 @@ def auth_jwt_verifier_and_get_subject(request):
     current_user_email = authorize.get_jwt_subject()
     return current_user_email
 
-def logout_request_from_idp(remove_sp, name_id):
+def logout_request_from_idp(sp_entity_id,destination_url, name_id):
         
     
     from saml2.samlp import SessionIndex
@@ -104,28 +104,22 @@ def logout_request_from_idp(remove_sp, name_id):
     idp_server = server.Server(config_file="idp/idp_conf.py")
     nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
                  text=name_id)
-    # t_l = [
-    #     "loadbalancer-91.siroe.com",
-    #     "loadbalancer-9.siroe.com"
-    # ]
-    # t_l_2 = {
-    #     "loadbalancer-9.siroe.com": "http://localhost:8000/slo/request",
-    #     "loadbalancer-91.siroe.com": "http://localhost:8010/slo/request"
-    # }
-    # t_l.remove(remove_sp)
 
     req_id, req = idp_server.create_logout_request(
-        issuer_entity_id=t_l[0],
-        destination=t_l_2[t_l[0]],
+        issuer_entity_id=sp_entity_id,
+        destination=destination_url,
         name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
         session_indexes=["_foo"])
 
     info = idp_server.apply_binding(
-        BINDING_SOAP, req, t_l_2[t_l[0]],
+        BINDING_SOAP, req, destination_url,
         relay_state="relay2")
     redirect_url = None
     try:
+        print(info['url'],info['data'])
+        
         response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+        print('------------------------------',response.status_code)
     except Exception as e:
         print(e, "----e")
 

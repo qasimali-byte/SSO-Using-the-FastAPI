@@ -26,7 +26,6 @@ from src.apis.v1.routes.idp_routes import cookie, cookie_frontend
 from . import oauth2_scheme
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.apis.v1.utils.idp_initiated_single_logout import logout_request_from_idp
 
 router = APIRouter(tags=["Authentication"])
 templates = Jinja2Templates(directory="templates/")
@@ -167,7 +166,10 @@ def check_if_token_in_denylist(decrypted_token):
 
 
 @router.post("/logout", summary="Submit Logout Page API submission")
-async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Session = Depends(get_db), authorize: AuthJWT = Depends()):
+async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Session = Depends(get_db)):
+    
+    AuthController(db).idp_initiated_single_logout('syedfaisalsaleem@gmail.com')
+    
     # validate the cookie in db
     # if unique cookie is valid, use all emails
     # if email is admin: return cookie_idp + token
@@ -176,47 +178,49 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Ses
     # if unique cookie is not valid, use only admin emails
     # if admin email is valid, return cookie_idp + token
     # if admin email is not valid return error
-    #
-    try:
-        req = await request.json()
+    
+    # print('will logout the from idp -------',authorize.get_jwt_subject())
+    # try:
 
-        access_token, refresh_token = req["access_token"], req["refresh_token"]
-        if not access_token or not refresh_token:
-            response = custom_response(data={
-            "message": "access token or refresh token is missing"
-            }
-            , status_code=status.HTTP_200_OK)
-            response = delete_all_cookies(response)
-            return response
+    #     req = await request.json()
+    #     access_token, refresh_token = req["access_token"], req["refresh_token"]
+    #     if not access_token or not refresh_token:
             
-        if (redis_conn.get(authorize.get_jti(access_token)) or redis_conn.get(authorize.get_jti(refresh_token))):
-            response = custom_response(data={
-            "message": "already logged out"
-            }
-            , status_code=status.HTTP_200_OK)
-            response = delete_all_cookies(response)
-            return response
-        resp = AuthController(db).idp_initiated_single_logout()
-        authorize.get_jwt_subject()
-        jti = authorize.get_jti(access_token)
-        redis_conn.setex(jti, Settings().authjwt_access_token_expires, 'true')
-        jti = authorize.get_jti(refresh_token)
-        redis_conn.setex(jti, Settings().authjwt_refresh_token_expires, 'true')
+    #         # resp = AuthController(db).idp_initiated_single_logout(authorize.get_jwt_subject())
+    #         response = custom_response(data={
+    #         "message": "access token or refresh token is missing"
+    #         }
+    #         , status_code=status.HTTP_200_OK)
+    #         # resp = AuthController(db).idp_initiated_single_logout(authorize.get_jwt_subject())
+    #         response = delete_all_cookies(response)
+    #         return response
+            
+    #     if (redis_conn.get(authorize.get_jti(access_token)) or redis_conn.get(authorize.get_jti(refresh_token))):
+    #         response = custom_response(data={
+    #         "message": "already logged out"
+    #         }
+    #         , status_code=status.HTTP_200_OK)
+    #         response = delete_all_cookies(response)
+    #         return response
+    #     jti = authorize.get_jti(access_token)
+    #     redis_conn.setex(jti, Settings().authjwt_access_token_expires, 'true')
+    #     jti = authorize.get_jti(refresh_token)
+    #     redis_conn.setex(jti, Settings().authjwt_refresh_token_expires, 'true')
         
-    except Exception as e:
-        response = custom_response(data={
-        "message": "token has expired"
-        }
-        , status_code=status.HTTP_200_OK)
-        response = delete_all_cookies(response)
-        return response
+    # except Exception as e:
+    #     response = custom_response(data={
+    #     "message": "token has expired"
+    #     }
+    #     , status_code=status.HTTP_200_OK)
+    #     response = delete_all_cookies(response)
+    #     return response
 
-    response = custom_response(data={
-        "message": "successfully logged out"
-    }
-        , status_code=status.HTTP_200_OK)
-    response = delete_all_cookies(response)
-    return response
+    # response = custom_response(data={
+    #     "message": "successfully logged out"
+    # }
+    #     , status_code=status.HTTP_200_OK)
+    # response = delete_all_cookies(response)
+    # return response
 
 
 @router.post("/token")

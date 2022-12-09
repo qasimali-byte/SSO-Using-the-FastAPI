@@ -199,10 +199,10 @@ class UserMigrate:
     def storing_migration_data():
         pass
 
-with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
-    db = session
-    data=AuthService(db).get_all_service_providers()
-    for services_provider in data:
-        print(services_provider.sp_entity_id,services_provider.sp_destination_url)    
+# with contextmanager(get_db)() as session:  # execute until yield. Session is yielded value
+#     db = session
+#     data=AuthService(db).get_all_service_providers()
+#     for services_provider in data:
+#         print(services_provider.sp_entity_id,services_provider.sp_destination_url)    
 # UserMigrate().get('syedfaisalsaleem.100@gmail.com', db)
 
