@@ -17,5 +17,4 @@ def registering_middleware(application):
     )
     
     application.add_middleware(AddActionMiddleWare)
-    application.add_middleware(SecurityHeadersMiddleware, csp=True)
     
