@@ -5,13 +5,8 @@ from src.handling_exceptions import registering_exceptions
 from src.middleware import registering_middleware
 from fastapi.staticfiles import StaticFiles
 from src.routes import registering_routes
-from fastapi_redis_session.config import basicConfig
-basicConfig(
-    redisURL="redis://redis:6379/1",
-    sessionIdName="sessionId",
-    sessionIdGenerator=lambda: str(random.randint(1000, 9999)),
-    expireTime=timedelta(days=1),
-    )
+# from fastapi_redis_session.config import basicConfig
+
 def create_app():
     app = FastAPI()
     app.mount("/static", StaticFiles(directory="build/static"), name="static")
