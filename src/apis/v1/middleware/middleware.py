@@ -4,10 +4,6 @@ from src.apis.v1.helpers.auth import AuthJWT
 from src.apis.v1.helpers.global_helpers import remove_int_from_urls
 from src.apis.v1.utils.middleware_utils import store_logs_db
 
-"""Middleware for security."""
-from collections import OrderedDict
-from fastapi import FastAPI, Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 class AddActionMiddleWare(BaseHTTPMiddleware):
     def __init__(
             self,
@@ -28,7 +24,3 @@ class AddActionMiddleWare(BaseHTTPMiddleware):
         await store_logs_db(authorize,response,method,url)
 
         return response
-    
-    
-
-
