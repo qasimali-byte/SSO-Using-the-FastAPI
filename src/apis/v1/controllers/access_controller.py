@@ -4,8 +4,8 @@ import datetime
 
 import pyotp
 from starlette import status
-
-from celery_worker import otp_sender, otp_sender_products
+from fastapi import Request, Response
+from celery_worker import otp_sender, otp_sender_products, otp_sms_sender
 from src.apis.v1.controllers.async_auth_controller import AsyncAuthController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.controllers.user_controller import UserController
@@ -36,7 +36,7 @@ class AccessController():
         user_data = AccessService(self.db).get_user_apps_info_db(user_email=email)
         product_names = [p["product_name"] for p in user_data.get("products")]
         products_ids = [p["product_id"] for p in user_data.get("products")]
-        logo = [ p["logo"] for p in user_data.get("products") if p["product_id"] == product_id][0]
+        logo = [p["logo"] for p in user_data.get("products") if p["product_id"] == product_id][0]
         if user_data:
             if product_name in product_names or product_id in products_ids:
                 OTP = ''.join([random.choice("123456789") for _ in range(6)])
@@ -108,20 +108,19 @@ class AccessController():
         return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
 
 
-
     def verify_otp_email(self, otp_validator):
         saved_otp_hash = redis_client.get(otp_validator.email)
 
         if saved_otp_hash:
             saved_otp, product_id = get_decrypted_text(saved_otp_hash).split(":")
-            if saved_otp == otp_validator.otp and product_id==otp_validator.app_id:
+            if saved_otp == otp_validator.otp and int(product_id)==otp_validator.app_id:
                 redis_client.delete(otp_validator.email)
                 data = {
                     "message": 'otp verified success',
                     "statuscode": status.HTTP_200_OK
                 }
                 validated_data = SuccessfulJsonResponseValidator(**data)
-                return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+                return custom_response(status_code=status.HTTP_200_OK, data=validated_data)
 
             data = {
                 "message": 'otp verification failed',
@@ -181,3 +180,45 @@ class AccessController():
             else:
                 raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
+
+    def get_contact_no_by_email(self, user_email, request):
+        contact_no = AccessService(self.db).get_contact_no_by_email(user_email)
+        if contact_no:
+            data = {"contact_no": contact_no, "cookie_verification": False}
+            try:  # now check if its cookie exists
+                phone_cookie = request.cookies.get("phone_cookie")
+                res = AccessService(self.db).get_two_factor_authentication_cookie(contact_no, phone_cookie)
+                if res:
+                    data["cookie_verification"] = True
+            except Exception as err:
+                print(err)
+            return custom_response(data=data, status_code=status.HTTP_200_OK)
+        data = {"message": "contact_no not found in db", "status_code": 404}
+        return custom_response(data=data, status_code=status.HTTP_404_NOT_FOUND)
+
+    def send_otp_sms(self, email, contact_no):
+        res = AccessService(self.db).if_user_exists_db(email)
+        if res:
+            otp_sms = ''.join([random.choice("123456789") for _ in range(4)])
+            otp_sms_hash = get_encrypted_text(otp_sms)
+            redis_client.setex(name=contact_no, value=otp_sms_hash, time=15 * 60 + 5)
+            date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+            data = { "contact_no": contact_no, "otp": otp_sms}
+            task = otp_sms_sender.delay(user_data=data)
+            # if contact_no is not already in db then saving it for future purpose
+            res = self.get_contact_no_by_email(email, "")
+            if res.status_code == status.HTTP_404_NOT_FOUND:
+                AccessService(self.db).save_contact_no_db(email, contact_no)
+            return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
+        return custom_response(data={"message": "user email not found in db", "status_code": 404}, status_code=status.HTTP_404_NOT_FOUND)
+
+    def verify_otp_sms(self, otp_sms, contact_no):
+        saved_otp_sms_hash = redis_client.get(contact_no)
+        if saved_otp_sms_hash:
+            saved_otp_sms = get_decrypted_text(saved_otp_sms_hash)
+            if saved_otp_sms == otp_sms:
+                redis_client.delete(contact_no)
+                return custom_response(status_code=status.HTTP_200_OK, data={"message": 'OTP Verification Succeeded', "status_code": 200})
+            return custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data={"message": 'OTP Verification Failed', "status_code": 406})
+        else:
+            return custom_response(status_code=status.HTTP_404_NOT_FOUND, data={"message": 'OTP-SMS Expired', "status_code": 404})

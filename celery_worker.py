@@ -14,7 +14,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import load_env
 from jinja2 import Environment, FileSystemLoader
-
+import requests
 
 def email_sender_core(mail_content, recipient, attachment):
     try:
@@ -104,7 +104,8 @@ def send_otp(user_data, attachment=None):
         print("           Create User OTP Task Started            ")
         print("===================================================")
         recipient = user_data["recipient"]
-        html_ = populate_html_file_otp_products(user_data)
+        base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
+        html_ = populate_html_file_otp_products(user_data, base_url)
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
         if email_sender_core(mail_content=mail_content, recipient=recipient, attachment=False):
@@ -162,6 +163,23 @@ def send_email(url, recipient, user_name, attachment=None):
         return False
 
 
+def send_otp_sms(user_data):
+    """
+       input  : contact_no, OTP
+       output : True / False
+       Description: To send OTP to contact_no using SMS API
+    """
+    print("\nCelery (send_otp_sms): ", user_data)
+    try:
+        raw_json = {"phone_number": user_data['contact_no'], "message": user_data['otp']}
+        sms_api_url = os.environ.get('SMS_API_URL')
+        res = requests.post(url=sms_api_url, json=raw_json)
+        if res.status_code == 200:
+            print("OTP sent via SMS")
+            return True
+    except Exception as err:
+        raise ValueError(err)
+
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
@@ -180,6 +198,11 @@ def otp_sender(user_data):
 @celery.task(name="otp_sender_products")
 def otp_sender_products(user_data):
     return send_otp_products(user_data=user_data)
+
+
+@celery.task(name="otp_sms_sender")
+def otp_sms_sender(user_data):
+    return send_otp_sms(user_data)
 
 
 if __name__ == "__main__":
