@@ -11,6 +11,8 @@ from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.sp_apps_model import SPAPPS
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
 from src.apis.v1.models.roles_model import roles
+from src.apis.v1.models.type_role_permissions_model import type_role_permissions
+
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.idp_user_types_model import idp_user_types
 from src.apis.v1.validators.roles_validator import  RolesValidator, SubRolesValidator
@@ -184,3 +186,56 @@ class RolesService():
             return ezlogin_role
         else:
             return ['external user']
+
+    def create_role_api_db(self, role_api_data):
+        try:
+            create_role_api = role_api(**role_api_data)
+            self.db.add(create_role_api)
+            self.db.commit()
+            return "successfully created a role_api", status.HTTP_201_CREATED
+        except Exception as e:
+            raise CustomException(str(e) + "error occurred in roles_service.py", status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete_role_api_db(self, role_api_id):
+        try:
+            role_api_res = self.db.query(role_api).filter(role_api.id == role_api_id).first()
+            if role_api_res is not None:
+                self.db.query(role_api).filter(role_api.id == role_api_id).delete()
+                self.db.commit()
+                return "successfully deleted role_api", status.HTTP_200_OK
+            else:
+                return "role_api_id not found", status.HTTP_404_NOT_FOUND
+        except Exception as e:
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                  message=str(e) + "- error occurred in roles_service.py")
+
+    def create_role_db(self, roles_data):
+        try:
+            create_role = roles(**roles_data)
+            self.db.add(create_role)
+            self.db.commit()
+            return "created a role", status.HTTP_201_CREATED
+        except Exception as e:
+            raise CustomException(str(e) + "error occurred in roles_service.py",
+                                  status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete_role_db(self, roles_id):
+        if roles_id in [1, 15, 16, 17]:
+            return "Roles [1,15,16,17] can't be deleted", status.HTTP_406_NOT_ACCEPTABLE
+        else:
+            try:
+                role_res = self.db.query(roles).filter(roles.id == roles_id).first()
+                if role_res is not None:
+                    # First deleting where this role is assigned
+                    self.db.query(role_api).filter(role_api.role_id == roles_id).delete()
+                    self.db.query(sp_apps_role).filter(sp_apps_role.roles_id == roles_id).delete()
+                    self.db.query(type_role_permissions).filter(type_role_permissions.roles_id == roles_id).delete()
+                    # Now deleting role
+                    self.db.query(roles).filter(roles.id == roles_id).delete()
+                    self.db.commit()
+                    return "Role deleted successfully", status.HTTP_200_OK
+                else:
+                    return "Role_id not found", status.HTTP_404_NOT_FOUND
+            except Exception as e:
+                raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                      message=str(e) + "- error occurred in roles_service.py")

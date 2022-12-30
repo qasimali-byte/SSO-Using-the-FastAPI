@@ -3,23 +3,20 @@ from pydantic.typing import List,Dict, Optional, Literal
 
 class RoleValidatorIn(BaseModel):
     role: Literal['internal', 'external'] = 'internal'
-class InternalRoleValidator(BaseModel):
-    id : int
+class InternalRoleValidatorIn(BaseModel):
     name : str
     label : str
-    is_active : str
-    type_of_user: str
+    is_active : bool = True
+    user_type_id: int = 1
 
 class InternalRoleValidatorOut(BaseModel):
     message: str = "success"
     statuscode: int = 200
-    roles: Optional[List[InternalRoleValidator]] = None
+    roles: Optional[List[InternalRoleValidatorIn]] = None
 
 class ListSPRolesValidator(BaseModel):
     id: int
     name: str
-
-
 
 class ListSubRolesValidator(BaseModel):
     id: int
@@ -27,9 +24,6 @@ class ListSubRolesValidator(BaseModel):
 
     class Config:
         orm_mode = True
-    
-
-
 
 class SubRolesValidator(BaseModel):
     id: int
@@ -95,3 +89,26 @@ class SPRolesValidator(BaseModel):
     """
     __root__: List[ListRolesValidatorWithOutOrm]
     
+
+class RoleAPIValidatorIn(BaseModel):
+    """
+        Create User Validator
+    """
+    role_id: int
+    api_id: int
+    is_allowed: bool = False
+
+
+class RoleAPIValidatorOut(BaseModel):
+    statuscode: int = 201
+    message: str = "successfully created a role_api"
+
+
+class RoleAPIDeleteValidatorOut(BaseModel):
+    message: str
+    status_code: int
+
+    class Config:
+        orm_mode = True
+
+
