@@ -246,9 +246,9 @@ class CreateUserValidator(BaseModel):
     last_name: str = Field(alias="lastname")
     username : str
     email : EmailStr
-    nhs_number = "123456789"
+    nhs_number: str
     organization_id = "2"
-    contact_no = "+92123456789"
+    contact_no: str
     address = "enter address here"
     password_hash = create_password_hash("admin")
     reset_password_token = 'reset_password_token',
