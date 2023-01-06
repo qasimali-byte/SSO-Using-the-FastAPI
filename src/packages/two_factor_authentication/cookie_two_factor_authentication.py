@@ -11,7 +11,7 @@ def create_phone_cookie(response, user_id, db):
     # redis_client.setex(name=cookie_key, value=cookie_key)  # persistency in redis is not reliable/affordable
 
     session_id = store_phone_session_db(user_id, db)  # check in db and create if not already present
-    response.set_cookie(key="phone_cookie", value=session_id, samesite=None, domain="attech-ltd.com", httponly=True secure=True)
+    response.set_cookie(key="phone_cookie", value=session_id, samesite=None, domain="attech-ltd.com", httponly=True, secure=True)
     return response
 
 
