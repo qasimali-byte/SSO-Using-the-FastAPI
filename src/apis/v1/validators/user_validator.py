@@ -246,7 +246,7 @@ class CreateUserValidator(BaseModel):
     last_name: str = Field(alias="lastname")
     username : str
     email : EmailStr
-    nhs_number = "123456789"
+    nhs_number: str
     organization_id = "2"
     contact_no: str
     address = "enter address here"
