@@ -3,7 +3,7 @@ from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.services.roles_service import RolesService
 from src.apis.v1.validators.common_validators import ErrorResponseValidator
 from fastapi import status
-from src.apis.v1.validators.roles_validator import InternalRoleValidatorOut
+from src.apis.v1.validators.roles_validator import InternalRoleValidatorOut, RoleAPIDeleteValidatorOut
 
 class RolesController():
     def __init__(self, db):
@@ -88,3 +88,25 @@ class RolesController():
 
     def get_roles_by_app_id(self, app_id):
         return RolesService(self.db).get_apps_practice_roles(app_id)
+
+    def create_role_api(self, role_api_data):
+        message, status_code = RolesService(self.db).create_role_api_db(role_api_data)
+        response = custom_response(data=message, status_code=status_code)
+        return response
+
+    def delete_role_api(self, role_api_id):
+
+        message, status_code = RolesService(self.db).delete_role_api_db(role_api_id)
+        response = custom_response(data=message, status_code=status_code)
+        return response
+
+    def create_role(self, roles_data):
+        message, status_code = RolesService(self.db).create_role_db(roles_data)
+        response = custom_response(data=message, status_code=status_code)
+        return response
+
+    def delete_role(self, roles_id):
+
+        message, status_code = RolesService(self.db).delete_role_db(roles_id)
+        response = custom_response(data=message, status_code=status_code)
+        return response

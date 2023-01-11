@@ -88,3 +88,25 @@ class PracticesService():
         formated_practices=format_practices_user_data_selected(practices_of_selecteduserid)
         return formated_practices
 
+    def create_practice_db(self, practice_data):
+        try:
+            create_practice = practices(**practice_data)
+            self.db.add(create_practice)
+            self.db.commit()
+            return "successfully created practice", status.HTTP_201_CREATED
+        except Exception as e:
+            raise CustomException(str(e) + "error occurred in practice service", status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete_practice_db(self, practice_id):
+        try:
+            practice = self.db.query(practices).filter(practices.id == practice_id).first()
+            if practice is not None:
+                self.db.query(idp_users_practices).filter(idp_users_practices.practices_id == practice_id).delete()
+                self.db.query(practices).filter(practices.id == practice_id).delete()
+                self.db.commit()
+                return "Practice deleted successfully", status.HTTP_200_OK
+            else:
+                return "Practice not found", status.HTTP_404_NOT_FOUND
+        except Exception as e:
+            raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                  message=str(e) + "- error occurred in practices_service.py")

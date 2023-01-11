@@ -28,3 +28,4 @@ from .user_action_model import user_action
 from .action_api_model import action_api
 from .api_model import api
 from .role_api_model import role_api
+from .two_factor_authentication_model import two_factor_authentication

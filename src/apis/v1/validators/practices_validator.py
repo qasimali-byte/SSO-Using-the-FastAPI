@@ -62,3 +62,18 @@ class LogedInUserSPRegionsValidator(BaseModel):
         List SP Practices Validator
     """
     __root__: typing.List[LogedInUserListSPRegionsValidator]
+
+
+class PracticeValidatorIn(BaseModel):
+    """
+        Create User Validator
+    """
+    name: str
+    sp_apps_id: int
+    practice_region_id: int = None
+
+
+class PracticeValidatorOut(BaseModel):
+    statuscode: int = 201
+    message: str = "successfully created practice"
+
