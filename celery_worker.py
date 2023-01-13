@@ -182,7 +182,7 @@ def send_email(url, recipient, user_name, attachment=None):
 #         print("===================================================")
 #         recipient = user_data.created_by
 #         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-#         html_ = populate_super_admin_html_file(base_url=base_url,super_admin_name='Super Admin',user_name=user_data.username,user_role=user_role,user_number=user_data.contact_number)
+#         html_ = populate_super_admin_html_file(base_url=base_url,user_name=user_data.username,user_role=user_role,user_number=user_data.contact_number)
 #         mail_content = MIMEText(html_, "html")
 #         print("=======================Status======================")
 #         if email_sender_core(mail_content=mail_content, recipient=user_data.created_by, attachment=False):
@@ -204,7 +204,7 @@ def super_admin_email(attachment=None):
         print("===================================================")
         # recipient = user_data.created_by
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-        html_ = populate_super_admin_html_file(base_url=base_url,super_admin_name='Super Admin',user_name='Qasim',user_role='Practice Admin',user_number="+923354440475")
+        html_ = populate_super_admin_html_file(base_url=base_url,user_name='Qasim',user_role='Practice Admin',user_number="+923354440475")
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
         if email_sender_core(mail_content=mail_content, recipient="qasim.ali+5@attech-ltd.com", attachment=False):
