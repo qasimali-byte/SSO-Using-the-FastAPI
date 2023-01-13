@@ -15,8 +15,16 @@ from email.mime.text import MIMEText
 import load_env
 from jinja2 import Environment, FileSystemLoader
 import requests
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
-def email_sender_core(mail_content, recipient, attachment):
+
+
+
+def send_email(mail_content, recipient, attachment, subject_env):
     try:
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
@@ -24,7 +32,7 @@ def email_sender_core(mail_content, recipient, attachment):
         message = MIMEMultipart()
         message['From'] = sender_address
         message['To'] = recipient
-        message['Subject'] = os.environ.get("EMAIL_SUBJECT")
+        message['Subject'] = os.environ.get(subject_env)
         # The body and the attachments for the mail
         message.attach(mail_content)
         # attach files if given
@@ -46,6 +54,13 @@ def email_sender_core(mail_content, recipient, attachment):
         return True
     except:
         return False
+
+
+def email_sender_core(mail_content, recipient, attachment):
+    return send_email(mail_content, recipient, attachment, "EMAIL_SUBJECT")
+
+def super_admin_email_sender_core(mail_content, recipient, attachment):
+    return send_email(mail_content, recipient, attachment, "SUPER_ADMIN_EMAIL_SUBJECT")
 
 
 def populate_html_file(url, user_name):
@@ -154,24 +169,24 @@ def send_otp_products(user_data, attachment=None):
         return False
 
 
-def send_email(url, recipient, user_name, attachment=None):
-    try:
-        print("===================================================")
-        print("                Email Task Started                 ")
-        print("===================================================")
+# def send_email(url, recipient, user_name, attachment=None):
+#     try:
+#         print("===================================================")
+#         print("                Email Task Started                 ")
+#         print("===================================================")
 
-        html_ = populate_html_file(url, user_name)
-        mail_content = MIMEText(html_, "html")
-        print("=====================Status=========================")
-        if email_sender_core(mail_content=mail_content, recipient=recipient, attachment=False):
-            print(f"      Success: {recipient}")
-        else:
-            print(f"      Failed: {recipient}")
-        print("===================================================")
-        return True
-    except Exception as e:
-        print(str(e))
-        return False
+#         html_ = populate_html_file(url, user_name)
+#         mail_content = MIMEText(html_, "html")
+#         print("=====================Status=========================")
+#         if email_sender_core(mail_content=mail_content, recipient=recipient, attachment=False):
+#             print(f"      Success: {recipient}")
+#         else:
+#             print(f"      Failed: {recipient}")
+#         print("===================================================")
+#         return True
+#     except Exception as e:
+#         print(str(e))
+#         return False
 
 
 
@@ -204,10 +219,10 @@ def super_admin_email(attachment=None):
         print("===================================================")
         # recipient = user_data.created_by
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-        html_ = populate_super_admin_html_file(base_url=base_url,user_name='Qasim',user_role='Practice Admin',user_number="+923354440475")
+        html_ = populate_super_admin_html_file(base_url=base_url,user_name='Qasim Ali',user_role='Practice Admin',user_number="+923354440475")
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
-        if email_sender_core(mail_content=mail_content, recipient="qasim.ali+5@attech-ltd.com", attachment=False):
+        if super_admin_email_sender_core(mail_content=mail_content, recipient="qasim.ali+5@attech-ltd.com", attachment=False):
             print(f"       Success: ")
         else:
             print(f"       Failed: ")

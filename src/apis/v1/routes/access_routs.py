@@ -53,7 +53,7 @@ async def send_otp(email_validator: OtpEmailValidator, db: Session = Depends(
 
 @router.post("/send-email-super-admin", summary="Send Phone Number Changed email to Super Admin",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def send_otp(email_validator: EmailValidator, db: Session = Depends(
+async def send_email_super_admin(email_validator: EmailValidator, db: Session = Depends(
     get_db)): # ,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
 

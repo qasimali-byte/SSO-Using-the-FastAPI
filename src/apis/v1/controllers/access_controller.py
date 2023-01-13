@@ -38,7 +38,8 @@ class AccessController():
         user_info_data = UserService(self.db).get_user_info_db(user_email)
         user_role_data = RolesService(self.db).get_user_selected_role("ez-login", user_info_data.id)
         if user_info_data:
-                task = super_admin_email_sender.delay(user_data=user_info_data,user_role=user_role_data)
+                # task = super_admin_email_sender.delay(user_data=user_info_data,user_role=user_role_data)
+                task = super_admin_email_sender.delay()
                 # 2022-05-20 04:10:29.098
                 return {'status_code': status.HTTP_200_OK, 'task_id': task.id}
         else:
