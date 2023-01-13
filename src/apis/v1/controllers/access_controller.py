@@ -53,14 +53,13 @@ class AccessController():
 
 
     def send_otp_email(self, email, product_name,product_id):
-
         user_data = AccessService(self.db).get_user_apps_info_db(user_email=email)
         product_names = [p["product_name"] for p in user_data.get("products")]
         products_ids = [p["product_id"] for p in user_data.get("products")]
         logo = [p["logo"] for p in user_data.get("products") if p["product_id"] == product_id][0]
         if user_data:
             if product_name in product_names or product_id in products_ids:
-                OTP = ''.join([random.choice("123456789") for _ in range(6)])
+                OTP = ''.join([random.choice("123456789") for _ in range(4)])
                 otp_hash = get_encrypted_text(OTP + ":" + str(product_id))
                 redis_client.setex(name=email, value=otp_hash, time=15 * 60 + 5)
                 date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
