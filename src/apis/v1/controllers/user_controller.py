@@ -191,22 +191,6 @@ class UserController():
         response = custom_response(status_code=status.HTTP_200_OK, data=data)
         return response
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def update_user_practices_roles_by_id(self, user_id: int, user_data):
         """
             Update User Practices, SP Applications And Roles By User ID
