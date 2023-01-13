@@ -173,23 +173,44 @@ def send_email(url, recipient, user_name, attachment=None):
         print(str(e))
         return False
 
-# populate_super_admin_html_file(super_admin_name, user_name,user_role,user_number)
 
 
-def super_admin_email(user_data,user_role, attachment=None):
+# def super_admin_email(user_data,user_role, attachment=None):
+#     try:
+#         print("===================================================")
+#         print("           Send acknowledgement email to Super Admin            ")
+#         print("===================================================")
+#         recipient = user_data.created_by
+#         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
+#         html_ = populate_super_admin_html_file(base_url=base_url,super_admin_name='Super Admin',user_name=user_data.username,user_role=user_role,user_number=user_data.contact_number)
+#         mail_content = MIMEText(html_, "html")
+#         print("=======================Status======================")
+#         if email_sender_core(mail_content=mail_content, recipient=user_data.created_by, attachment=False):
+#             print(f"       Success: {recipient}")
+#         else:
+#             print(f"       Failed: {recipient}")
+#         print("===================================================")
+#         return True
+#     except Exception as e:
+#         print(str(e))
+#         return False
+
+
+
+def super_admin_email(attachment=None):
     try:
         print("===================================================")
         print("           Send acknowledgement email to Super Admin            ")
         print("===================================================")
-        recipient = user_data["recipient"]
+        # recipient = user_data.created_by
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-        html_ = populate_super_admin_html_file(base_url=base_url,super_admin_name='Super Admin',user_name=user_data.username,user_role=user_role,user_number=user_data.contact_number)
+        html_ = populate_super_admin_html_file(base_url=base_url,admin_name='Super Admin',user_name='Qasim',user_role='Practice Admin',user_number="+923354440475")
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
-        if email_sender_core(mail_content=mail_content, recipient=user_data.created_by, attachment=False):
-            print(f"       Success: {recipient}")
+        if email_sender_core(mail_content=mail_content, recipient="qasim.ali+5@attech-ltd.com", attachment=False):
+            print(f"       Success: ")
         else:
-            print(f"       Failed: {recipient}")
+            print(f"       Failed: ")
         print("===================================================")
         return True
     except Exception as e:
@@ -226,10 +247,13 @@ def email_sender(user_verification_url, user_email, user_name):
     return send_email(url=user_verification_url, recipient=user_email, user_name=user_name)
 
 
-@celery.task(name="super_admin email_sender")
-def super_admin_email_sender(user_data,user_role):
-    return super_admin_email(user_data=user_data,user_role=user_role)
+# @celery.task(name="super_admin email_sender")
+# def super_admin_email_sender(user_data,user_role):
+#     return super_admin_email(user_data=user_data,user_role=user_role)
 
+@celery.task(name="super_admin email_sender")
+def super_admin_email_sender():
+    return super_admin_email()
 
 
 @celery.task(name="otp_sender")
@@ -260,4 +284,5 @@ if __name__ == "__main__":
     # otp_sender_products(user_data=user_data)
     # print(user_data)
     # [p.update((k, p["logo"].replace("svg","png")) for k, v in p.items() if k=="logo") for p in user_data["products"]]
+    print(super_admin_email_sender())
     # print(user_data)
