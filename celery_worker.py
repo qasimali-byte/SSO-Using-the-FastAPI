@@ -61,13 +61,13 @@ def populate_html_file(url, user_name):
     #     # f.truncate()
 
 
-def populate_super_admin_html_file(super_admin_name, user_name,user_role,user_number,base_url):
+def populate_super_admin_html_file( user_name,user_role,user_number,base_url):
     base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/image/"
     if not "http" in base_url:
         base_url = "http://" + base_url
     environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("super_admin_email.html")
-    return template.render(admin_name=super_admin_name, base_url=base_url, user_name=user_name,user_role=user_role,user_updated_number=user_number)
+    return template.render( base_url=base_url, user_name=user_name,user_role=user_role,user_updated_number=user_number)
 
 
 
