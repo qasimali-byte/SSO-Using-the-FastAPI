@@ -163,7 +163,7 @@ class UserService():
             self.db.commit()
             return create_user
         except Exception as e:
-            raise CustomException(str(e) + "error occured in user service", status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise CustomException(str(e) + "error occurred in user service", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create_internal_idp_user(self, **kwargs):
         try:
