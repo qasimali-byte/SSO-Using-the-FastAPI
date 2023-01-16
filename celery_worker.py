@@ -220,6 +220,7 @@ def send_otp_products(user_data, attachment=None):
 
 def super_admin_email(user_name,created_by,contact_no, user_role, attachment=None):
     try:
+        print('created_by----',created_by)
         print("===================================================")
         print("           Send acknowledgement email to Super Admin            ")
         print("===================================================")
@@ -273,6 +274,7 @@ def email_sender(user_verification_url, user_email, user_name):
 
 @celery.task(name="super_admin email_sender")
 def super_admin_email_sender(user_name,created_by,contact_no, user_role):
+    print('created_by',created_by)
     return super_admin_email(user_name,created_by,contact_no, user_role)
 
 
