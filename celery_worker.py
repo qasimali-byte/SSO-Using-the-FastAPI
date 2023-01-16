@@ -26,6 +26,7 @@ from email import encoders
 
 def send_email(mail_content, recipient, attachment, subject_env):
     try:
+        print(mail_content)
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
         # Set up the MIME
@@ -45,15 +46,18 @@ def send_email(mail_content, recipient, attachment, subject_env):
             payload.add_header('Content-Decomposition', 'attachment', filename=attachment.split("\"")[-1])
             message.attach(payload)
         # Create SMTP session for sending the mail
-        session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
-        session.starttls()  # enable security
-        session.login(sender_address, sender_pass)  # login with mail_id and password
-        text = message.as_string()
-        session.sendmail(sender_address, recipient, text)
-        session.quit()
-        return True
+        try:
+            session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
+            session.starttls()  # enable security
+            session.login(sender_address, sender_pass)  # login with mail_id and password
+            text = message.as_string()
+            session.sendmail(sender_address, recipient, text)
+            session.quit()
+            return True
+        except Exception as e:
+            print('Exception is here',e)
     except Exception as e:
-        print('Error inn celery',e)
+        print('Error in celery',e)
         return False
 
 
