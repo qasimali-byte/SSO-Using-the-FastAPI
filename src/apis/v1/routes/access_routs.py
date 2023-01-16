@@ -38,7 +38,10 @@ async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db
 
 
 @router.post("/send-otp", summary="Send OTP via email",
-             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+             responses={200: {"model": SuccessfulJsonResponseValidator},
+                        400: {"model": ErrorResponseValidator},
+                        500:{"description":"Internal Server Error","model":ErrorResponseValidator 
+                        }})
 async def send_otp(email_validator: OtpEmailValidator, db: Session = Depends(
     get_db)): # ,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
@@ -50,7 +53,21 @@ async def send_otp(email_validator: OtpEmailValidator, db: Session = Depends(
     return response
 
 
-@router.post("/verify-otp", summary="Verify OTP")
+
+@router.post("/send-email-super-admin", summary="Send Phone Number Changed email to Super Admin",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def send_email_super_admin(email_validator: EmailValidator, db: Session = Depends(
+    get_db)): # ,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+
+
+    response = AccessController(db).send_email_to_super_admin(user_email=email_validator.email)
+    return response
+
+
+
+
+
+@router.post("/verify-otp", summary="Verify OTP", responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
 async def request_account(otp_validator: OtpAccountValidator, db: Session = Depends(get_db)):
     """
         This api verifies emails using OTPs sent previously.

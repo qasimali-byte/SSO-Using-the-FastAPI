@@ -246,7 +246,7 @@ class CreateUserValidator(BaseModel):
     last_name: str = Field(alias="lastname")
     username : str
     email : EmailStr
-    nhs_number: str = "0"
+    nhs_number: str = "1"
     organization_id = "2"
     contact_no: str = None
     address = "enter address here"
@@ -255,7 +255,6 @@ class CreateUserValidator(BaseModel):
     reset_password_token_expiry = 'reset_password_token_expiry',
     profile_image = "image/profile_image.jpg"
     created_date: datetime = Field(default_factory=datetime.now)
-    created_by: str = None
     updated_date: datetime = Field(default_factory=datetime.now)
     last_login_date: datetime = Field(default_factory=datetime.now)
     user_type_id: int

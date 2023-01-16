@@ -3,9 +3,10 @@ import random
 import datetime
 
 import pyotp
+from src.apis.v1.services.roles_service import RolesService
 from starlette import status
 from fastapi import Request, Response
-from celery_worker import otp_sender, otp_sender_products, otp_sms_sender
+from celery_worker import otp_sender, otp_sender_products, otp_sms_sender, super_admin_email_sender
 from src.apis.v1.controllers.async_auth_controller import AsyncAuthController
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.controllers.user_controller import UserController
@@ -31,15 +32,34 @@ class AccessController():
     def __init__(self, db):
         self.db = db
 
-    def send_otp_email(self, email, product_name,product_id):
+    def send_email_to_super_admin(self,user_email):
+        print('email sent to',user_email)
 
+        user_info_data = UserService(self.db).get_user_info_db(user_email)
+        user_role_data = RolesService(self.db).get_user_selected_role("ez-login", user_info_data.id)
+        if user_info_data:
+                # task = super_admin_email_sender.delay(user_data=user_info_data,user_role=user_role_data)
+                task = super_admin_email_sender.delay()
+                # 2022-05-20 04:10:29.098
+                return {'status_code': status.HTTP_200_OK, 'task_id': task.id}
+        else:
+            data = {
+                "message": 'User not found',
+                "statuscode": status.HTTP_404_NOT_FOUND
+            }
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+
+
+
+    def send_otp_email(self, email, product_name,product_id):
         user_data = AccessService(self.db).get_user_apps_info_db(user_email=email)
         product_names = [p["product_name"] for p in user_data.get("products")]
         products_ids = [p["product_id"] for p in user_data.get("products")]
         logo = [p["logo"] for p in user_data.get("products") if p["product_id"] == product_id][0]
         if user_data:
             if product_name in product_names or product_id in products_ids:
-                OTP = ''.join([random.choice("123456789") for _ in range(6)])
+                OTP = ''.join([random.choice("123456789") for _ in range(4)])
                 otp_hash = get_encrypted_text(OTP + ":" + str(product_id))
                 redis_client.setex(name=email, value=otp_hash, time=15 * 60 + 5)
                 date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
