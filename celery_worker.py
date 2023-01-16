@@ -26,7 +26,7 @@ from email import encoders
 
 def send_email(mail_content, recipient, attachment, subject_env):
     try:
-        print(mail_content)
+        print(recipient)
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
         # Set up the MIME
