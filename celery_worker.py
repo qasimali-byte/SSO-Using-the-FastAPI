@@ -169,46 +169,28 @@ def send_otp_products(user_data, attachment=None):
         return False
 
 
-# def send_email(url, recipient, user_name, attachment=None):
-#     try:
-#         print("===================================================")
-#         print("                Email Task Started                 ")
-#         print("===================================================")
+def send_email_user(url, recipient, user_name, attachment=None):
+    try:
+        print("===================================================")
+        print("                Email Task Started                 ")
+        print("===================================================")
 
-#         html_ = populate_html_file(url, user_name)
-#         mail_content = MIMEText(html_, "html")
-#         print("=====================Status=========================")
-#         if email_sender_core(mail_content=mail_content, recipient=recipient, attachment=False):
-#             print(f"      Success: {recipient}")
-#         else:
-#             print(f"      Failed: {recipient}")
-#         print("===================================================")
-#         return True
-#     except Exception as e:
-#         print(str(e))
-#         return False
+        html_ = populate_html_file(url, user_name)
+        mail_content = MIMEText(html_, "html")
+        print("=====================Status=========================")
+        if email_sender_core(mail_content=mail_content, recipient=recipient, attachment=False):
+            print(f"      Success: {recipient}")
+        else:
+            print(f"      Failed: {recipient}")
+        print("===================================================")
+        return True
+    except Exception as e:
+        print(str(e))
+        return False
 
 
 
-# def super_admin_email(user_data,user_role, attachment=None):
-#     try:
-#         print("===================================================")
-#         print("           Send acknowledgement email to Super Admin            ")
-#         print("===================================================")
-#         recipient = user_data.created_by
-#         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-#         html_ = populate_super_admin_html_file(base_url=base_url,user_name=user_data.username,user_role=user_role,user_number=user_data.contact_number)
-#         mail_content = MIMEText(html_, "html")
-#         print("=======================Status======================")
-#         if email_sender_core(mail_content=mail_content, recipient=user_data.created_by, attachment=False):
-#             print(f"       Success: {recipient}")
-#         else:
-#             print(f"       Failed: {recipient}")
-#         print("===================================================")
-#         return True
-#     except Exception as e:
-#         print(str(e))
-#         return False
+
 
 
 
@@ -258,12 +240,10 @@ celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://re
 
 @celery.task(name="email_sender")
 def email_sender(user_verification_url, user_email, user_name):
-    return send_email(url=user_verification_url, recipient=user_email, user_name=user_name)
+    return send_email_user(url=user_verification_url, recipient=user_email, user_name=user_name)
 
 
-# @celery.task(name="super_admin email_sender")
-# def super_admin_email_sender(user_data,user_role):
-#     return super_admin_email(user_data=user_data,user_role=user_role)
+
 
 @celery.task(name="super_admin email_sender")
 def super_admin_email_sender(user_name,created_by,contact_no, user_role):
