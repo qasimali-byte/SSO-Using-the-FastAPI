@@ -32,13 +32,12 @@ class AccessController():
     def __init__(self, db):
         self.db = db
 
-    def send_email_to_super_admin(self,user_email):
+    def send_email_to_super_admin(self,user_email, contact_no):
         user_info_data = UserService(self.db).get_user_info_db(user_email)
         user_role = RolesService(self.db).get_user_selected_role("ez-login", user_info_data.id)
         if user_info_data:
                 user_name = user_info_data.username
                 created_by = user_info_data.created_by
-                contact_no = user_info_data.contact_no
                 task = super_admin_email_sender.delay(user_name,created_by,contact_no, user_role)
                 # 2022-05-20 04:10:29.098
                 return {'status_code': status.HTTP_200_OK, 'task_id': task.id}
