@@ -59,7 +59,6 @@ async def send_otp(email_validator: OtpEmailValidator, db: Session = Depends(
 async def send_email_super_admin(contact_validator: ContactNoValidator, db: Session = Depends(
     get_db)): # ,authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
-
     response = AccessController(db).send_email_to_super_admin(contact_validator.email, contact_validator.contact_no)
     return response
 

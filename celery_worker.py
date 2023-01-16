@@ -26,7 +26,6 @@ from email import encoders
 
 def send_email(mail_content, recipient, attachment, subject_env):
     try:
-        print('--------------',recipient)
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
         # Set up the MIME
@@ -46,18 +45,14 @@ def send_email(mail_content, recipient, attachment, subject_env):
             payload.add_header('Content-Decomposition', 'attachment', filename=attachment.split("\"")[-1])
             message.attach(payload)
         # Create SMTP session for sending the mail
-        try:
-            session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
-            session.starttls()  # enable security
-            session.login(sender_address, sender_pass)  # login with mail_id and password
-            text = message.as_string()
-            session.sendmail(sender_address, recipient, text)
-            session.quit()
-            return True
-        except Exception as e:
-            print('Exception is here',e)
+        session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
+        session.starttls()  # enable security
+        session.login(sender_address, sender_pass)  # login with mail_id and password
+        text = message.as_string()
+        session.sendmail(sender_address, recipient, text)
+        session.quit()
+        return True
     except Exception as e:
-        print('Error in celery',e)
         return False
 
 
@@ -65,7 +60,6 @@ def email_sender_core(mail_content, recipient, attachment):
     return send_email(mail_content, recipient, attachment, "EMAIL_SUBJECT")
 
 def super_admin_email_sender_core(mail_content, recipient, attachment):
-    print('recipient',recipient)
     return send_email(mail_content, recipient, attachment, "SUPER_ADMIN_EMAIL_SUBJECT")
 
 
@@ -220,7 +214,6 @@ def send_otp_products(user_data, attachment=None):
 
 def super_admin_email(user_name,created_by,contact_no, user_role, attachment=None):
     try:
-        print('created_by----',created_by)
         print("===================================================")
         print("           Send acknowledgement email to Super Admin            ")
         print("===================================================")
@@ -274,7 +267,6 @@ def email_sender(user_verification_url, user_email, user_name):
 
 @celery.task(name="super_admin email_sender")
 def super_admin_email_sender(user_name,created_by,contact_no, user_role):
-    print('created_by',created_by)
     return super_admin_email(user_name,created_by,contact_no, user_role)
 
 
