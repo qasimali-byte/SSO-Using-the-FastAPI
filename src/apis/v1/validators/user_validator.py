@@ -255,6 +255,7 @@ class CreateUserValidator(BaseModel):
     reset_password_token_expiry = 'reset_password_token_expiry',
     profile_image = "image/profile_image.jpg"
     created_date: datetime = Field(default_factory=datetime.now)
+    created_by: str = None
     updated_date: datetime = Field(default_factory=datetime.now)
     last_login_date: datetime = Field(default_factory=datetime.now)
     user_type_id: int
