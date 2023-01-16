@@ -33,6 +33,7 @@ class idp_users(Base):
     is_superuser = Column(Boolean, nullable=False, unique=False, default=False)
     is_active = Column(Boolean, nullable=False, unique=False, default=True)
     created_date = Column(DateTime, nullable=False, unique=False)
+    created_by = Column(String(100), nullable=True, unique=False)
     updated_date = Column(DateTime, nullable=False, unique=False)
     last_login_date = Column(DateTime, nullable=True, unique=False)
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))

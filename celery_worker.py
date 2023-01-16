@@ -212,17 +212,16 @@ def send_otp_products(user_data, attachment=None):
 
 
 
-def super_admin_email(attachment=None):
+def super_admin_email(user_name,created_by,contact_no, user_role, attachment=None):
     try:
         print("===================================================")
         print("           Send acknowledgement email to Super Admin            ")
         print("===================================================")
-        # recipient = user_data.created_by
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
-        html_ = populate_super_admin_html_file(base_url=base_url,user_name='Qasim Ali',user_role='Practice Admin',user_number="+923354440475")
+        html_ = populate_super_admin_html_file(base_url=base_url,user_name=user_name,user_role=user_role,user_number=contact_no)
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
-        if super_admin_email_sender_core(mail_content=mail_content, recipient="qasim.ali+5@attech-ltd.com", attachment=False):
+        if super_admin_email_sender_core(mail_content=mail_content, recipient=created_by, attachment=False):
             print(f"       Success: ")
         else:
             print(f"       Failed: ")
@@ -267,8 +266,8 @@ def email_sender(user_verification_url, user_email, user_name):
 #     return super_admin_email(user_data=user_data,user_role=user_role)
 
 @celery.task(name="super_admin email_sender")
-def super_admin_email_sender():
-    return super_admin_email()
+def super_admin_email_sender(user_name,created_by,contact_no, user_role):
+    return super_admin_email(user_name,created_by,contact_no, user_role)
 
 
 @celery.task(name="otp_sender")

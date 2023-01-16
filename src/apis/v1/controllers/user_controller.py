@@ -49,7 +49,7 @@ class UserController():
 
         return 200
 
-    def create_user(self, user_data):
+    def create_user(self, user_data, user_creator_email):
         """
             Create User Controller
         """
@@ -78,6 +78,7 @@ class UserController():
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
                                             user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,
                                             password_hash=create_password_hash(generate_password(size=12)),
+                                            created_by=user_creator_email
         )
         # ## create user in db
         user_created_data = UserService(self.db).create_user_db(idp_user_data.dict())

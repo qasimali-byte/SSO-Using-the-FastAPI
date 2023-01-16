@@ -50,7 +50,7 @@ async def create_internal_external_user(user_validator:CreateInternalExternalUse
     """
         Create User
     """
-    resp = UserController(db).create_user(user_validator.dict())
+    resp = UserController(db).create_user(user_validator.dict(), user_email_role._user_email)
     return resp
 
 
