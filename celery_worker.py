@@ -52,7 +52,8 @@ def send_email(mail_content, recipient, attachment, subject_env):
         session.sendmail(sender_address, recipient, text)
         session.quit()
         return True
-    except:
+    except Exception as e:
+        print('Error inn celery',e)
         return False
 
 
