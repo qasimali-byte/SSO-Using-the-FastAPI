@@ -26,7 +26,7 @@ from email import encoders
 
 def send_email(mail_content, recipient, attachment, subject_env):
     try:
-        print(recipient)
+        print('--------------',recipient)
         sender_address = os.environ.get("EMAIL_SENDER")
         sender_pass = os.environ.get("EMAIL_SENDER_PASSWORD")
         # Set up the MIME
@@ -65,6 +65,7 @@ def email_sender_core(mail_content, recipient, attachment):
     return send_email(mail_content, recipient, attachment, "EMAIL_SUBJECT")
 
 def super_admin_email_sender_core(mail_content, recipient, attachment):
+    print('recipient',recipient)
     return send_email(mail_content, recipient, attachment, "SUPER_ADMIN_EMAIL_SUBJECT")
 
 
