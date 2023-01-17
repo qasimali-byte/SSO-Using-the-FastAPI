@@ -49,7 +49,7 @@ class UserController():
 
         return 200
 
-    def create_user(self, user_data, user_creator_email):
+    def create_user(self, user_data, user_creator_email=None):
         """
             Create User Controller
         """
