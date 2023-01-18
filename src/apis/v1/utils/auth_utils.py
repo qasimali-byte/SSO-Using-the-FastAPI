@@ -97,7 +97,6 @@ def get_current_logged_in_user(authorize, response_body):
 
 
 def auth_jwt_verifier_and_get_subject(request):
-    print('i am authenticated')
     authorize=AuthJWT(request)
     current_user_email = authorize.get_jwt_subject()
     return current_user_email
