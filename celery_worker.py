@@ -160,6 +160,7 @@ def send_otp_products(user_data, attachment=None):
         print("=======================Status======================")
         if email_sender_core(mail_content=mail_content,recipient=recipient,attachment=False):
             print(f"      Success: {recipient}")
+            print('otp======= ',user_data["otp"])
         else:
             print(f"      Failed: {recipient}")
         print("===================================================")
