@@ -217,6 +217,8 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
 
 
 def test_logout_request_from_idp(remove_sp, name_id):
+        
+    
     from saml2.samlp import SessionIndex
     from saml2 import server
     idp_server = server.Server(config_file="idp/idp_conf.py")
@@ -259,7 +261,7 @@ async def logout(request: Request, response: Response, SAMLRequest: str, db: Ses
     samlreq = SAMLRequest
 
     req_info = idp_server.parse_logout_request(samlreq, BINDING_HTTP_REDIRECT)
-    print(vars(req_info), "---req_info---", req_info.message.name_id.text, vars(req_info.message),
+    print(vars(req_info), "---req_info---", "req_info.message.name_id.text",req_info.message.name_id.text, vars(req_info.message),
           req_info.message.issuer.text)
     # response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
 

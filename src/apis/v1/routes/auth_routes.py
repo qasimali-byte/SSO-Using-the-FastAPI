@@ -26,7 +26,7 @@ from src.apis.v1.routes.idp_routes import cookie, cookie_frontend
 from . import oauth2_scheme
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
-
+import jwt
 router = APIRouter(tags=["Authentication"])
 templates = Jinja2Templates(directory="templates/")
 
@@ -176,15 +176,18 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
     # if admin email is valid, return cookie_idp + token
     # if admin email is not valid return error
     #
+    
     try:
         req = await request.json()
-
         access_token, refresh_token = req["access_token"], req["refresh_token"]
+        payload = jwt.decode(access_token, verify=False)
+        loged_in_user_email = payload.get("sub")
         if not access_token or not refresh_token:
             response = custom_response(data={
             "message": "access token or refresh token is missing"
             }
             , status_code=status.HTTP_200_OK)
+            AuthController(db).idp_initiated_single_logout(loged_in_user_email)
             response = delete_all_cookies(response)
             return response
             
@@ -193,6 +196,7 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
             "message": "already logged out"
             }
             , status_code=status.HTTP_200_OK)
+            AuthController(db).idp_initiated_single_logout(loged_in_user_email)
             response = delete_all_cookies(response)
             return response
 
@@ -206,6 +210,7 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
         "message": "token has expired"
         }
         , status_code=status.HTTP_200_OK)
+        AuthController(db).idp_initiated_single_logout(loged_in_user_email)
         response = delete_all_cookies(response)
         return response
 
@@ -213,6 +218,7 @@ async def sso_logout(logout_validator: LogoutValidator, request: Request, author
         "message": "successfully logged out"
     }
         , status_code=status.HTTP_200_OK)
+    AuthController(db).idp_initiated_single_logout(loged_in_user_email)
     response = delete_all_cookies(response)
     return response
 

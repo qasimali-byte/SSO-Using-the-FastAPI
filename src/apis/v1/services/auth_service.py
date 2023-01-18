@@ -1,4 +1,5 @@
 from src.apis.v1.models.idp_users_model import idp_users
+from src.apis.v1.models.serviceprovidersmodel import Sps
 from src.apis.v1.utils.auth_utils import verify_password
 from sqlalchemy import and_
 class AuthService:
@@ -36,3 +37,7 @@ class AuthService:
         if not verify_password(password, user.password_hash):
             return False
         return user
+    def get_all_service_providers(self):
+        service_providers=self.db.query(Sps).all()
+        return service_providers
+        

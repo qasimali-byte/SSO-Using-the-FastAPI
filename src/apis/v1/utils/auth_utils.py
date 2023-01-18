@@ -6,9 +6,21 @@ from jose import JWTError, jwt
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.auth import AuthJWT
 
+from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
+from saml2.time_util import in_a_while
+from saml2 import (
+    BINDING_HTTP_POST,
+    BINDING_HTTP_REDIRECT,
+    entity,
+    BINDING_SOAP
+)
+import requests
+from saml2.samlp import SessionIndex
+from saml2 import server
+
+from fastapi import HTTPException,status
 
 settings = Settings()
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -81,7 +93,33 @@ def get_current_logged_in_user(authorize, response_body):
 
     return current_user
 
+
+
+
 def auth_jwt_verifier_and_get_subject(request):
     authorize=AuthJWT(request)
     current_user_email = authorize.get_jwt_subject()
     return current_user_email
+
+def logout_request_from_idp(sp_entity_id,destination_url, name_id):
+        
+    idp_server = server.Server(config_file="idp/idp_conf.py")
+    nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
+                 text=name_id)
+
+    req_id, req = idp_server.create_logout_request(
+        issuer_entity_id=sp_entity_id,
+        destination=destination_url,
+        name_id=nid, reason="Tired", expire=in_a_while(minutes=15),
+        session_indexes=["_foo"])
+
+    info = idp_server.apply_binding(
+        BINDING_SOAP, req, destination_url,
+        relay_state="relay2")
+    redirect_url = None
+    try:
+        response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
+        return response.status_code
+    except Exception as e:
+        return status.HTTP_500_BAD_REQUEST
+

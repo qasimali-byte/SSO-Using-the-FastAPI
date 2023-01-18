@@ -9,6 +9,7 @@ from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.auth_validators import EmailValidatorError, EmailValidatorOut, LoginValidator, LoginValidatorOut, RefreshTokenValidatorOut
 from fastapi import status
 from src.apis.v1.services.user_service import UserService
+from src.apis.v1.utils.auth_utils import logout_request_from_idp
 class AuthController:
 
     def __init__(self, db: Session):
@@ -142,4 +143,9 @@ class AuthController:
         return response
 
 
-    
+    def idp_initiated_single_logout(self,email: str):
+        service_provders=AuthService(self.db).get_all_service_providers()
+        for service_provder in service_provders:
+            logout_request_from_idp(service_provder.sp_entity_id,service_provder.sp_destination_url,email)
+            
+            
