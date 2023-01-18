@@ -15,10 +15,12 @@ from saml2 import (
     BINDING_SOAP
 )
 import requests
+from saml2.samlp import SessionIndex
+from saml2 import server
 
+from fastapi import HTTPException,status
 
 settings = Settings()
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -91,16 +93,17 @@ def get_current_logged_in_user(authorize, response_body):
 
     return current_user
 
+
+
+
 def auth_jwt_verifier_and_get_subject(request):
+    print('i am authenticated')
     authorize=AuthJWT(request)
     current_user_email = authorize.get_jwt_subject()
     return current_user_email
 
 def logout_request_from_idp(sp_entity_id,destination_url, name_id):
         
-    
-    from saml2.samlp import SessionIndex
-    from saml2 import server
     idp_server = server.Server(config_file="idp/idp_conf.py")
     nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
                  text=name_id)
@@ -116,10 +119,8 @@ def logout_request_from_idp(sp_entity_id,destination_url, name_id):
         relay_state="relay2")
     redirect_url = None
     try:
-        print(info['url'],info['data'])
-        
         response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
-        print('------------------------------',response.status_code)
+        return response.status_code
     except Exception as e:
-        print(e, "----e")
+        return status.HTTP_500_BAD_REQUEST
 
