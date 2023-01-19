@@ -79,6 +79,7 @@ def generate_password(size=9, custom=True):
 #     if user is None:
 #         raise credentials_exception
 #     return user
+#print('just added comment')
 def get_current_logged_in_user(authorize, response_body):
     current_user = None
     try:
