@@ -166,7 +166,7 @@ def check_if_token_in_denylist(decrypted_token):
 
 
 @router.post("/logout", summary="Submit Logout Page API submission")
-async def sso_logout(logout_validator: LogoutValidator, request: Request, authorize: AuthJWT = Depends()):
+async def sso_logout(logout_validator: LogoutValidator, request: Request,db: Session = Depends(get_db),authorize: AuthJWT = Depends()):
     # validate the cookie in db
     # if unique cookie is valid, use all emails
     # if email is admin: return cookie_idp + token
