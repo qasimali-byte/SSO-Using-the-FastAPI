@@ -40,7 +40,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://:Attech123@18.134.217.103:6379/0
     depends_on:
       - app
-      # - redis
+      - redis
 # volumes:
 #     postgres_data:
                 
