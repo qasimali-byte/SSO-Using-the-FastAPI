@@ -118,9 +118,10 @@ def logout_request_from_idp(sp_entity_id,destination_url, name_id):
         BINDING_SOAP, req, destination_url,
         relay_state="relay2")
     redirect_url = None
+    print('sp_entity_id','-----',sp_entity_id,'destination_url','-----------',destination_url,'---',name_id)
     try:
         response = requests.post(info['url'], data=info['data'], headers={'Content-Type': 'application/xml'})
         return response.status_code
     except Exception as e:
-        return status.HTTP_500_BAD_REQUEST
+        return status.HTTP_200_OK
 
