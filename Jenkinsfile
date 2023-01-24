@@ -20,13 +20,21 @@ pipeline {
         //     sh 'python3 tests_development.py' 
         //   }
         // }
+        // Edited 24-01-2023
+        // stage('Start container'){
+        //     steps {
+        //         sh 'docker-compose down'
+        //         sh 'docker-compose up -d --build'
+        //         sh 'docker ps'
+        //     }
+        // }
         stage('Start container'){
-            steps {
-                sh 'docker-compose down'
-                sh 'docker-compose up -d --build'
-                sh 'docker ps'
-            }
-        }
+    steps {
+        sh 'docker-compose stop app'
+        sh 'docker-compose up -d --build app'
+        sh 'docker ps'
+    }
+}
         stage('Run tests') {
             steps {
                 sh 'curl http://localhost:80/'
