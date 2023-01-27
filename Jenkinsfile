@@ -30,9 +30,9 @@ pipeline {
         // }
         stage('Start container'){
     steps {
-        sh 'docker-compose stop app'
-        sh 'docker-compose up -d --build app'
-        sh 'docker ps'
+        sh 'sudo docker-compose stop app'
+        sh 'sudo docker-compose up -d --build app'
+        sh 'sudo docker ps'
     }
 }
         stage('Run tests') {
