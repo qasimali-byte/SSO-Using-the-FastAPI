@@ -4,10 +4,10 @@ pipeline {
         stage('verify tooling') {
             steps {
                 sh '''
-                    sudo docker info
-                    sudo docker version
-                    sudo docker-compose version
-                    sudo curl --version
+                    echo Attech@789 | sudo -S docker info
+                    echo Attech@789 docker version
+                    echo Attech@789 docker-compose version
+                    echo Attech@789 curl --version
                     '''
             }
         }
@@ -30,9 +30,9 @@ pipeline {
         // }
         stage('Start container'){
     steps {
-        sh 'sudo docker-compose stop app'
-        sh 'sudo docker-compose up -d --build app'
-        sh 'sudo docker ps'
+        sh 'echo Attech@789 docker-compose stop app'
+        sh 'echo Attech@789 docker-compose up -d --build app'
+        sh 'echo Attech@789 docker ps'
     }
 }
         stage('Run tests') {
