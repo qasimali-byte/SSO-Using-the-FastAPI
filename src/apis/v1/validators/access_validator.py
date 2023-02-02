@@ -49,6 +49,7 @@ class ContactNoValidator(BaseModel):
 class OtpSmsValidator(BaseModel):
     otp_sms: str
     contact_no: str
+    email:EmailStr
 
     @validator("otp_sms")
     def otp_sms_validator(cls, value):
