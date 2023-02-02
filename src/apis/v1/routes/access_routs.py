@@ -126,11 +126,11 @@ async def send_otp_sms(contact_no_validator: ContactNoValidator, db: Session = D
 
 
 @router.post("/verify-otp-sms", summary="Verify OTP SMS", responses={200: {"model": SuccessfulJsonResponseValidator}, 406: {"model": ErrorResponseValidator, "description": "OTP verification failed"}})
-async def verify_otp_sms(otp_sms_validator: OtpSmsValidator,email_validator:EmailValidator, db: Session = Depends(get_db)):
+async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depends(get_db)):
     """
         This api verifies emails using OTPs sent previously.
     """
-    response = AccessController(db).verify_otp_sms(email_validator.email,otp_sms_validator.otp_sms, otp_sms_validator.contact_no)
+    response = AccessController(db).verify_otp_sms(otp_sms_validator.email,otp_sms_validator.otp_sms, otp_sms_validator.contact_no)
 
     if response.status_code == 200:  # let's create phone cookie
         response = create_phone_cookie(response, otp_sms_validator.contact_no, db)
