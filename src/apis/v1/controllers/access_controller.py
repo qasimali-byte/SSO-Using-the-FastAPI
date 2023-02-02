@@ -224,19 +224,22 @@ class AccessController():
             date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
             data = { "contact_no": contact_no, "otp": otp_sms}
             task = otp_sms_sender.delay(user_data=data)
-            # if contact_no is not already in db then saving it for future purpose
-            res = self.get_contact_no_by_email(email, "")
-            if res.status_code == status.HTTP_404_NOT_FOUND:
-                AccessService(self.db).save_contact_no_db(email, contact_no)
+            # res = self.get_contact_no_by_email(email, "")
+            # if res.status_code == status.HTTP_404_NOT_FOUND:
+            #     AccessService(self.db).save_contact_no_db(email, contact_no)
             return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
         return custom_response(data={"message": "user email not found in db", "status_code": 404}, status_code=status.HTTP_404_NOT_FOUND)
 
-    def verify_otp_sms(self, otp_sms, contact_no):
+    def verify_otp_sms(self,email, otp_sms, contact_no):
         saved_otp_sms_hash = redis_client.get(contact_no)
         if saved_otp_sms_hash:
             saved_otp_sms = get_decrypted_text(saved_otp_sms_hash)
             if saved_otp_sms == otp_sms:
                 redis_client.delete(contact_no)
+                res = self.get_contact_no_by_email(email, "")
+                # if contact_no is not already in db then saving it for future purpose
+                if res.status_code == status.HTTP_404_NOT_FOUND:
+                    AccessService(self.db).save_contact_no_db(email, contact_no)
                 return custom_response(status_code=status.HTTP_200_OK, data={"message": 'OTP Verification Succeeded', "status_code": 200})
             return custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data={"message": 'OTP Verification Failed', "status_code": 406})
         else:
