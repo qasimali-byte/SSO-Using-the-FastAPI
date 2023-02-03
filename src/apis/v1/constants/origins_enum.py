@@ -1,5 +1,4 @@
 origins = [
-    "https://chilly-snakes-throw-58-181-125-118.loca.lt",
     "http://localhost:3000",
     "http://localhost:3000/",
     "http://localhost:3001",
@@ -10,5 +9,9 @@ origins = [
     "http://127.0.0.1:5500/",
     "https://qa1-driq-server.attech-ltd.com",
     "https://dev-eza-server.attech-ltd.com",
-    "http://ezweb-api.local"
+    "http://ezweb-api.local",
+    "https://qa-sso-app.attech-ltd.com",
+    "https://qa-sso-frontend.attech-ltd.com",
+    "http://localhost:4000"
+    
 ]
