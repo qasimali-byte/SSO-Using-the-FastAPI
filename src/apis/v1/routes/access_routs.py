@@ -1,9 +1,11 @@
 from fastapi import Depends, APIRouter, Request
 from starlette import status
+from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.common_validators import SuccessfulResponseValidator
 from src.apis.v1.db.session import get_db
 from sqlalchemy.orm import Session
 from src.apis.v1.helpers.role_verifier import RoleVerifierImplemented
+from src.apis.v1.validators.sps_validator import ListUnAccessibleServiceProviderValidatorOut
 from . import oauth2_scheme
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from ..controllers.access_controller import AccessController
@@ -20,21 +22,46 @@ from src.packages.two_factor_authentication.cookie_two_factor_authentication imp
 router = APIRouter(tags=["Account Access"])
 
 
-@router.post("/request-account", summary=" Load all the registered apps and emails in SSO.",
-             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+@router.get("/request-account", summary=" Load all the registered apps and emails in SSO.",
+             responses={200: {"model": ListUnAccessibleServiceProviderValidatorOut}}, status_code=200)
 async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
-        This api returns the emails and apps list to grant access using emails.
+        This api returns  apps list to on which user don't have access.
+        Select query will be use over the idp_user table id_sp and spapps table 
+        in id_sp table we added more fields 
+    
+    select sa.id,sa.name,sa.display_name,sa.logo_url, in_ex.is_verified, in_ex.is_accessible,in_ex.requested_email 
+    from (
+    select  * from  sp_apps where id not in
+    (select sp_apps_id from idp_sp is2  where idp_users_id =230 and is_accessible is true)) sa 
+    left join 
+    (select id, is_accessible, is_verified, sp_apps_id,requested_email  from idp_sp is2  
+    where idp_users_id =230 and is_accessible is false) in_ex
+    on sa.id=in_ex.sp_apps_id
+        
 
     """
 
     current_user_email = user_email_role.get_user_email()
-    user_data = AccessService(db).get_user_apps_info_db(user_email=current_user_email)
-    user_data["user"] = dict({"name": user_data.get("user").first_name,
-                              "id": user_data.get("user").id,
-                              "is_active": user_data.get("user").is_active})
+    user_data=AccessController(db).get_user_apps_info_db(current_user_email)
     return user_data
+
+
+@router.get("/verify-serviceprovider", summary=" This will verify the service provider.",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+
+
+
+    current_user_email = user_email_role.get_user_email()
+    user_data=AccessController(db).get_user_apps_info_db(current_user_email)
+    return user_data
+
+
+
+
+
 
 
 @router.post("/send-otp", summary="Send OTP via email",

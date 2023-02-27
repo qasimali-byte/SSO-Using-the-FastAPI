@@ -29,6 +29,23 @@ class ListServiceProviderValidatorOut(BaseModel):
     message : str = "success"
     statuscode : int = 200
 
+
+
+class UnAccessibleServiceProvider(BaseModel):
+    app_id: int
+    app_name: str
+    display_name: str
+    image: str
+    is_verified: bool
+    is_accessible: bool
+    requested_email: Optional[str] = None
+
+class ListUnAccessibleServiceProviderValidatorOut(BaseModel):
+    serviceproviders: Optional[List[UnAccessibleServiceProvider]] = None
+    message: str = "success"
+    statuscode: int = 200
+
+
 class FilterServiceProviderValidator(BaseModel):
     
     name: str

@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import os
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
@@ -50,6 +51,13 @@ class SPSService():
         except Exception as e:
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    
+    
+    
+    
+    
+    
+    
     def get_sps_app(self,user_email):
         try:
             
@@ -63,6 +71,48 @@ class SPSService():
             return serviceproviders
 
         except Exception as e:
+            return []
+        
+    def get_spapps_status(self,user_email):
+        try:
+            
+            # Generate the query and execute it to retrieve the results
+            query = (self.db.query(SPAPPS.id.label("app_id"),
+                                SPAPPS.name.label("app_name"),
+                                SPAPPS.display_name.label("display_name"),
+                                SPAPPS.logo_url.label("image"),
+                                idp_sp.is_verified.label("is_verified"),
+                                idp_sp.is_accessible.label("is_accessible"),
+                                idp_sp.requested_email.label("requested_email"))
+                        .outerjoin(idp_sp, SPAPPS.id == idp_sp.sp_apps_id)
+                        .filter(SPAPPS.id.notin_(
+                            self.db.query(idp_sp.sp_apps_id)
+                            .filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == True)))
+                        .filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == False)
+                        .all())
+
+            # Convert the results to a list of dictionaries
+            result_list = []
+            for row in query:
+                result_dict = {
+                    "app_id": row["app_id"],
+                    "app_name": row["app_name"],
+                    "display_name": row["display_name"],
+                    "image": row["image"],
+                    "is_verified": row["is_verified"],
+                    "is_accessible":row["is_accessible"]
+                }
+                if row["is_verified"]:  # if is_verified is True
+                    result_dict["requested_email"] = row["requested_email"]
+                result_list.append(result_dict)
+
+            # Convert the list of dictionaries to JSON
+            result_json = json.dumps(result_list)
+
+            return result_json
+
+        except Exception as e:
+            print(e)
             return []
         
     def get_sps_app_for_sp_redirections(self, user_email):

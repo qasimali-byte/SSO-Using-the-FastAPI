@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import datetime
@@ -16,9 +17,11 @@ from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.models import idp_users
 from src.apis.v1.services.access_service import AccessService
 from src.apis.v1.services.user_service import UserService
+from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
+from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut, ListUnAccessibleServiceProviderValidatorOut
 from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
 from src.packages.usermigrations.ezanalytics import EZAnalyticsMigrate
 from src.packages.usermigrations.ezweb import EZWEBMigrate
@@ -244,3 +247,22 @@ class AccessController():
             return custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data={"message": 'OTP Verification Failed', "status_code": 406})
         else:
             return custom_response(status_code=status.HTTP_404_NOT_FOUND, data={"message": 'OTP-SMS Expired', "status_code": 404})
+
+
+    def get_user_apps_info_db(self,user_email):
+        
+        '''
+        this function will return the list of all those spapps,
+        verified/not verified/not accessible
+        '''
+        user_info=UserService(self.db).get_user_info_db(user_email)
+        user_spapps_info=SPSController(self.db).get_spapps_status(user_info.id)
+        user_spapps_info = json.loads(user_spapps_info)
+        validator_out = ListUnAccessibleServiceProviderValidatorOut(serviceproviders=user_spapps_info)
+
+        try:
+            validator_out = ListUnAccessibleServiceProviderValidatorOut(**validator_out.dict())
+        except Exception as e:
+            print(e)
+        return user_spapps_info
+        
