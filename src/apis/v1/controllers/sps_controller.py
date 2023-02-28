@@ -247,3 +247,7 @@ class SPSController():
     def get_specific_product_byappid(self, app_id:int):
         dto = SyncSpsDAO(self.db).get(filter_data={SPAPPS.is_active: True,SPAPPS.id:app_id})
         return ListSpAppsGeneralValidator.from_orm(dto).dict()
+    
+    def check_already_verified_sp_apps(self,idp_user_id,sp_app_id,is_verified,requested_email,requested_user_id):
+        return SPSService(self.db).get_verifried_sp_apps(idp_user_id,sp_app_id,is_verified,requested_email,requested_user_id)
+    

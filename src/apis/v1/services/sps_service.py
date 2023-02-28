@@ -184,3 +184,24 @@ class SPSService():
 
         except Exception as e:
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def get_verifried_sp_apps(self,idp_user_id,sp_apps_id,is_verified,requested_email,requested_user_id):
+        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=sp_apps_id, is_verified=is_verified).first()
+        if existing_idp_sp:
+            return {'message':"App already verified",'status_code':409}
+        else:
+            new_idp_sp = idp_sp(
+            idp_users_id=idp_user_id,
+            sp_apps_id=sp_apps_id,
+            is_accessible=False,
+            is_verified=is_verified,
+            requested_email=requested_email,
+            requested_user_id=requested_user_id,
+        )
+            print(new_idp_sp)
+            self.db.add(new_idp_sp)
+            self.db.commit()
+            return {'message':"user verified successfully",'status_code':200}
+        
+
+        

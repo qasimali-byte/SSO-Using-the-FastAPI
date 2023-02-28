@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, Request
+from fastapi import Depends, APIRouter, Query, Request
 from starlette import status
 from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.common_validators import SuccessfulResponseValidator
@@ -23,7 +23,11 @@ router = APIRouter(tags=["Account Access"])
 
 
 @router.get("/request-account", summary=" Load all the registered apps and emails in SSO.",
-             responses={200: {"model": ListUnAccessibleServiceProviderValidatorOut}}, status_code=200)
+             responses={200: {"model": ListUnAccessibleServiceProviderValidatorOut},
+                        400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                        401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                        500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+            },status_code=200)
 async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
@@ -48,20 +52,19 @@ async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db
     return user_data
 
 
-@router.get("/verify-serviceprovider", summary=" This will verify the service provider.",
-             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+@router.post("/verify-account-request", summary=" This will verify the Account request.",
+             responses={
+                 200: {"model": SuccessfulJsonResponseValidator},
+                 400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                 401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+             }, status_code=200)
+async def verify_account_request(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
+    user_email:str= Query(default=''),sp_app_id:int = Query(default=0),is_verified:bool = Query(default=False)):
 
-
-
-    current_user_email = user_email_role.get_user_email()
-    user_data=AccessController(db).get_user_apps_info_db(current_user_email)
+    # current_user_email = user_email_role.get_user_email()
+    user_data=AccessController(db).add_user_verification_request(user_email,sp_app_id,is_verified,requested_email='example.com',requested_user_id=233)
     return user_data
-
-
-
-
-
 
 
 @router.post("/send-otp", summary="Send OTP via email",

@@ -265,4 +265,15 @@ class AccessController():
         except Exception as e:
             print(e)
         return user_spapps_info
+    
+    def add_user_verification_request(self, current_user_email,sp_app_id,is_verified,requested_email,requested_user_id):
+        
+        user_info=UserService(self.db).get_user_info_db(current_user_email)
+        response=SPSController(self.db).check_already_verified_sp_apps(user_info.id,sp_app_id,is_verified,requested_email,requested_user_id)
+        if response['status_code']==409:
+            return response
+        else:
+            return response
+             
+            
         
