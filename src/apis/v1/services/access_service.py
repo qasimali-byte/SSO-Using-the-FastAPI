@@ -18,6 +18,7 @@ class AccessService():
         return True if self.db.query(idp_users, SPAPPS).filter(
             idp_users.email == user_email).first() is not None else False
 
+
     def get_user_apps_info_db(self, user_email) -> dict:
         users_info_object = self.db.query(idp_users, SPAPPS).filter(
         idp_users.email==user_email). \
@@ -54,6 +55,8 @@ class AccessService():
 
     def get_two_factor_authentication_cookie(self, user_id, phone_cookie) -> bool:
         res = self.db.query(two_factor_authentication).filter(two_factor_authentication.user_id == user_id).one_or_none()
+        print('get_two_factor_authentication_cookie--',res,res.cookie_id)
+        print('Phone Cookie --',phone_cookie)
         if res:
             cookie_id_db = str(res.cookie_id)
             if cookie_id_db == phone_cookie:
