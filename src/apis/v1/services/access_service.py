@@ -55,7 +55,7 @@ class AccessService():
 
     def get_two_factor_authentication_cookie(self, user_id, phone_cookie) -> bool:
         res = self.db.query(two_factor_authentication).filter(two_factor_authentication.user_id == user_id).one_or_none()
-        print('get_two_factor_authentication_cookie--',res,res.cookie_id)
+        print('get_two_factor_authentication_cookie--',res.cookie_id,'Request Cookie--',phone_cookie)
         print('Phone Cookie --',phone_cookie)
         if res:
             cookie_id_db = str(res.cookie_id)
