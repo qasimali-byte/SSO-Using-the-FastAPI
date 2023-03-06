@@ -12,8 +12,8 @@ from ..controllers.access_controller import AccessController
 from ..helpers.auth import AuthJWT
 from ..helpers.customize_response import custom_response
 from ..services.access_service import AccessService
-from ..validators.access_validator import OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, \
-    VerifyProductsValidator, OtpAccountValidator
+from ..validators.access_validator import OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, \
+    VerifyProductsValidator, OtpAccountValidator,VerifyAccountAccessValidator
 from celery_worker import otp_sender
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.graphql.db.session import get_session_without_context_manager
@@ -22,7 +22,7 @@ from src.packages.two_factor_authentication.cookie_two_factor_authentication imp
 router = APIRouter(tags=["Account Access"])
 
 
-@router.get("/request-account", summary=" Load all the registered apps and emails in SSO.",
+@router.get("/request-spapps-account", summary=" Load all the registered apps and emails in SSO.",
              responses={200: {"model": ListUnAccessibleServiceProviderValidatorOut},
                         400: {"description": "Bad Request", "model": ErrorResponseValidator},
                         401: {"description": "Unauthorized", "model": ErrorResponseValidator},
@@ -59,12 +59,14 @@ async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db
                  401: {"description": "Unauthorized", "model": ErrorResponseValidator},
                  500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
              }, status_code=200)
-async def verify_account_request(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
-    user_email:str= Query(default=''),sp_app_id:int = Query(default=0),is_verified:bool = Query(default=False)):
+
+async def verify_account_request(account_access_verify_validator: VerifyAccountAccessValidator,db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
+    ):
 
     # current_user_email = user_email_role.get_user_email()
-    user_data=AccessController(db).add_user_verification_request(user_email,sp_app_id,is_verified,requested_email='example.com',requested_user_id=233)
+    user_data=AccessController(db).verify_account_access_otp(account_access_verify_validator)
     return user_data
+
 
 
 @router.post("/send-otp", summary="Send OTP via email",
@@ -120,6 +122,20 @@ async def send_otp_products(products_validator: OtpProductsValidator,
     return response
 
 
+@router.post("/send-account-access-otp", summary="Send OTP via email for account access request",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def send_account_access_otp(account_access_validator: OtpaccountaccessValidator,
+                            db: Session = Depends(get_db)
+                            ):
+    """
+    here we call the conserned service provider API for user verification
+    """
+    
+    response = await AccessController(db).send_otp_for_account_access_request(account_access_validator)
+    return response
+
+
+
 @router.post("/verify-otp-products", summary="Verify OTP")
 async def verify_otp_products(otp_products_validator: VerifyProductsValidator,
                               # authorize: AuthJWT = Depends(),
@@ -166,3 +182,59 @@ async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depen
         response = create_phone_cookie(response, otp_sms_validator.contact_no, db)
 
     return response
+
+
+
+# from datetime import datetime
+# from typing import List
+# from fastapi import APIRouter, Depends, HTTPException
+# from pydantic import BaseModel, validator
+# from sqlalchemy.orm import Session
+# from myapp.database import get_db
+# from myapp.models import idp_sp
+
+
+# class RequestUpdate(BaseModel):
+#     idp_users_id: int
+#     sp_apps_ids: List[int]
+
+#     @validator('sp_apps_ids')
+#     def check_sp_apps_ids(cls, sp_apps_ids):
+#         if not all(isinstance(item, int) for item in sp_apps_ids):
+#             raise ValueError('sp_apps_ids must be a list of integers')
+#         return sp_apps_ids
+
+
+# router = APIRouter()
+
+
+# @router.put("/update_request_status")
+# async def update_request_status(request: RequestUpdate, db: Session = Depends(get_db)):
+#     idp_users_id = request.idp_users_id
+#     sp_apps_ids = request.sp_apps_ids
+#     requests = db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id, idp_sp.sp_apps_id.in_(sp_apps_ids), idp_sp.is_verified == True).all()
+#     if not requests:
+#         raise HTTPException(status_code=404, detail="Request not found")
+#     for request in requests:
+#         request.is_requested = True
+#         request.requested_date = datetime.utcnow()
+#     db.commit()
+#     return {"message": "Request status updated successfully"}
+
+
+
+    # current_user_email = user_email_role.get_user_email()
+
+
+
+# @router.put("/submit-spapps-account-request", summary=" This will submit spapps account request to the super admin .",
+#              responses={
+#                  200: {"model": SuccessfulJsonResponseValidator},
+#                  400: {"description": "Bad Request", "model": ErrorResponseValidator},
+#                  401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+#                  500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+#              }, status_code=200)
+# async def submit_account_request(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
+#     user_email:str= Query(default=''),sp_app_id:int = Query(default=0),is_verified:bool = Query(default=False)):
+#     user_data=AccessController(db).add_user_verification_request(user_email,sp_app_id,is_verified,requested_email='example.com',requested_user_id=233)
+#     return user_data

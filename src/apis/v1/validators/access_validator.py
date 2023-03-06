@@ -1,3 +1,4 @@
+from typing import Union
 from pydantic import BaseModel,EmailStr, validator
 from pydantic.class_validators import List
 import re
@@ -19,11 +20,23 @@ class OtpProductsValidator(BaseModel):
     selected_products: List
 
 
+class OtpaccountaccessValidator(BaseModel):
+    email: EmailStr
+    product: str
+
 class VerifyProductsValidator(BaseModel):
     email: EmailStr
     selected_products: List
     otp:str
 
+
+class VerifyAccountAccessValidator(BaseModel):
+    email: EmailStr
+    requested_product: str
+    otp: str
+    is_verified: bool
+    requested_email: str
+    requested_user_id: Union[int, str, None] = None
 
 class EmailValidator(BaseModel):
     email: EmailStr

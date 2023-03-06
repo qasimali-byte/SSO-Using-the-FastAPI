@@ -185,18 +185,29 @@ class SPSService():
         except Exception as e:
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    def get_verifried_sp_apps(self,idp_user_id,sp_apps_id,is_verified,requested_email,requested_user_id):
-        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=sp_apps_id, is_verified=is_verified).first()
+    def add_sp_app_verification_status(self,idp_user_id,account_access_verify_validator):
+        print(idp_user_id,account_access_verify_validator)
+        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=int(account_access_verify_validator.requested_product),\
+            is_verified=account_access_verify_validator.is_verified).first()
         if existing_idp_sp:
             return {'message':"App already verified",'status_code':409}
         else:
+            self.add_sp_app_verification(idp_user_id,account_access_verify_validator)
+    
+    def add_sp_app_verification(self,idp_user_id,account_access_verify_validator):
+        # email: EmailStr
+        # requested_product: str
+        # otp: str
+        # is_verified: bool
+        # requested_email: str
+        # requested_user_id: Union[int, str, None] = None
             new_idp_sp = idp_sp(
             idp_users_id=idp_user_id,
-            sp_apps_id=sp_apps_id,
+            sp_apps_id=int(account_access_verify_validator.requested_product),
             is_accessible=False,
-            is_verified=is_verified,
-            requested_email=requested_email,
-            requested_user_id=requested_user_id,
+            is_verified=account_access_verify_validator.is_verified,
+            requested_email=account_access_verify_validator.requested_email,
+            requested_user_id=account_access_verify_validator.requested_user_id,
         )
             print(new_idp_sp)
             self.db.add(new_idp_sp)
@@ -204,4 +215,14 @@ class SPSService():
             return {'message':"user verified successfully",'status_code':200}
         
 
-        
+    def get_sp_app_by_id(self, app_id):
+        result = self.db.query(SPAPPS.id.label('sp_apps_id'),
+                       SPAPPS.name.label('sp_apps_name'),
+                       SPAPPS.logo_url.label('sp_apps_logo_url')
+                       ).filter_by(is_active=True, id=app_id).one()
+        app_list = [{'id': result.sp_apps_id, 'name': result.sp_apps_name, 'logo': result.sp_apps_logo_url} ]
+        if len(app_list) > 0:
+            return app_list
+        else:
+            return list([])
+

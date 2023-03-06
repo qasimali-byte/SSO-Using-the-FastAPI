@@ -100,14 +100,13 @@ class AccessController():
             raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='user already exists with this email')
         products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products(products_validator.email)
-
+        print(products_allowed)
         products_allowed_ids= [p.get("id")for p in products_allowed]
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
         if len(products_validator.selected_products)==0:
             raise CustomException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                                   message='no product is selected.')
-
         for p in products_validator.selected_products:
             keep_products+=p+","
             if not int(p) in products_allowed_ids:
@@ -119,10 +118,31 @@ class AccessController():
         redis_client.setex(name=products_validator.email + ",products", value=otp_apps, time=15 * 60 + 5)
         date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
         natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
+        print(email_products)
         data = {
             "name": "There",
             "recipient": products_validator.email,
             "products": email_products,
+            "otp": OTP,
+            "expires": natural_datetime,
+        }
+        task = otp_sender_products.delay(user_data=data)
+        return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
+
+
+    async def send_otp_for_account_access_request(self, account_access_validator):
+
+        get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.product)
+        OTP = ''.join([random.choice("0123456789") for _ in range(4)])
+        otp_apps = f"{OTP}+{account_access_validator.product}"
+        redis_client.setex(name=account_access_validator.email + ",products", value=otp_apps, time=15 * 60 + 5)
+        date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+        natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
+        product_list=list(account_access_validator.product)
+        data = {
+            "name": "There",
+            "recipient": account_access_validator.email,
+            "products": get_sp_app_data,
             "otp": OTP,
             "expires": natural_datetime,
         }
@@ -266,14 +286,30 @@ class AccessController():
             print(e)
         return user_spapps_info
     
-    def add_user_verification_request(self, current_user_email,sp_app_id,is_verified,requested_email,requested_user_id):
+    def add_user_verification_request(self,account_access_verify_validator):
         
-        user_info=UserService(self.db).get_user_info_db(current_user_email)
-        response=SPSController(self.db).check_already_verified_sp_apps(user_info.id,sp_app_id,is_verified,requested_email,requested_user_id)
+        user_info=UserService(self.db).get_user_info_db(account_access_verify_validator.email)
+        response=SPSController(self.db).add_verified_sp_apps(user_info.id,account_access_verify_validator)
         if response['status_code']==409:
             return response
         else:
             return response
              
             
+    def verify_account_access_otp(self,account_access_verify_validator):
+        key = account_access_verify_validator.email + ",products"
+        temp_data = redis_client.get(key)
+        print(temp_data)
+        if temp_data:
+            saved_otp, products = temp_data.split('+')
+            print(saved_otp, products)
+            if account_access_verify_validator.requested_product!= products:
+                raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                        message='failed, Illegal product requested.')
+            if saved_otp == account_access_verify_validator.otp:
+                self.add_user_verification_request(account_access_verify_validator)
+                raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps and reset password mail has been generated')
         
+            else:
+                raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
+        raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
