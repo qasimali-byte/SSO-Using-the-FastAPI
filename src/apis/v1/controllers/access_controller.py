@@ -299,17 +299,21 @@ class AccessController():
     def verify_account_access_otp(self,account_access_verify_validator):
         key = account_access_verify_validator.email + ",products"
         temp_data = redis_client.get(key)
-        print(temp_data)
         if temp_data:
             saved_otp, products = temp_data.split('+')
             print(saved_otp, products)
             if account_access_verify_validator.requested_product!= products:
                 raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                                        message='failed, Illegal product requested.')
+                                        message='failed, Invalid product requested.')
             if saved_otp == account_access_verify_validator.otp:
-                self.add_user_verification_request(account_access_verify_validator)
-                raise CustomException(status_code=status.HTTP_200_OK, message='otp verified, user created for apps and reset password mail has been generated')
+                return self.add_user_verification_request(account_access_verify_validator)
+                # raise CustomException(status_code=status.HTTP_200_OK, message='otp successfully verified')
         
             else:
                 raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
+
+    def submit_account_access_requests(self,submit_account_access_validator):
+        user_info=UserService(self.db).get_user_info_db(submit_account_access_validator.email)
+        response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
+        return response

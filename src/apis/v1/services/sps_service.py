@@ -76,22 +76,25 @@ class SPSService():
     def get_spapps_status(self,user_email):
         try:
             
-            # Generate the query and execute it to retrieve the results
-            query = (self.db.query(SPAPPS.id.label("app_id"),
-                                SPAPPS.name.label("app_name"),
-                                SPAPPS.display_name.label("display_name"),
-                                SPAPPS.logo_url.label("image"),
-                                idp_sp.is_verified.label("is_verified"),
-                                idp_sp.is_accessible.label("is_accessible"),
-                                idp_sp.requested_email.label("requested_email"))
-                        .outerjoin(idp_sp, SPAPPS.id == idp_sp.sp_apps_id)
-                        .filter(SPAPPS.id.notin_(
-                            self.db.query(idp_sp.sp_apps_id)
-                            .filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == True)))
-                        .filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == False)
-                        .all())
+        # Generate the query and execute it to retrieve the results
+            
+            subquery_1 = self.db.query(idp_sp.sp_apps_id.label("app_id")).filter(
+                idp_sp.idp_users_id == 230, idp_sp.is_accessible == True)
+            
+            subquery_2 = self.db.query(idp_sp.id, idp_sp.is_accessible, idp_sp.is_verified, 
+                                            idp_sp.sp_apps_id, idp_sp.requested_email).\
+                            filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == False).\
+                            subquery()
+            query = self.db.query(SPAPPS.id.label("app_id"), SPAPPS.name.label("app_name"),
+                                        SPAPPS.display_name.label("display_name"), SPAPPS.logo_url.label("image"),
+                                        subquery_2.c.is_verified.label("is_verified"), 
+                                        subquery_2.c.is_accessible.label("is_accessible"),
+                                        subquery_2.c.requested_email.label("requested_email")).\
+                            filter(SPAPPS.id.notin_(subquery_1)).\
+                            outerjoin(subquery_2, SPAPPS.id == subquery_2.c.sp_apps_id).\
+                            all()
 
-            # Convert the results to a list of dictionaries
+        # Convert the results to a list of dictionaries
             result_list = []
             for row in query:
                 result_dict = {
@@ -99,16 +102,14 @@ class SPSService():
                     "app_name": row["app_name"],
                     "display_name": row["display_name"],
                     "image": row["image"],
-                    "is_verified": row["is_verified"],
-                    "is_accessible":row["is_accessible"]
+                    "is_verified": row["is_verified"] or False,  # set to False if is_verified is None
+                    "is_accessible": row["is_accessible"] or False,  # set to False if is_accessible is None
+                    "requested_email": row["requested_email"] if row["is_verified"] else None  # set to None if is_verified is False
                 }
-                if row["is_verified"]:  # if is_verified is True
-                    result_dict["requested_email"] = row["requested_email"]
                 result_list.append(result_dict)
 
             # Convert the list of dictionaries to JSON
             result_json = json.dumps(result_list)
-
             return result_json
 
         except Exception as e:
@@ -192,15 +193,9 @@ class SPSService():
         if existing_idp_sp:
             return {'message':"App already verified",'status_code':409}
         else:
-            self.add_sp_app_verification(idp_user_id,account_access_verify_validator)
+            return self.add_sp_app_verification(idp_user_id,account_access_verify_validator)
     
     def add_sp_app_verification(self,idp_user_id,account_access_verify_validator):
-        # email: EmailStr
-        # requested_product: str
-        # otp: str
-        # is_verified: bool
-        # requested_email: str
-        # requested_user_id: Union[int, str, None] = None
             new_idp_sp = idp_sp(
             idp_users_id=idp_user_id,
             sp_apps_id=int(account_access_verify_validator.requested_product),
@@ -209,7 +204,6 @@ class SPSService():
             requested_email=account_access_verify_validator.requested_email,
             requested_user_id=account_access_verify_validator.requested_user_id,
         )
-            print(new_idp_sp)
             self.db.add(new_idp_sp)
             self.db.commit()
             return {'message':"user verified successfully",'status_code':200}
