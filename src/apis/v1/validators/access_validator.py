@@ -1,7 +1,9 @@
-from typing import Union
+from typing import Optional, Union
 from pydantic import BaseModel,EmailStr, validator
 from pydantic.class_validators import List
 import re
+from datetime import datetime
+
 
 class OtpAccountValidator(BaseModel):
     email: EmailStr
@@ -53,7 +55,21 @@ class SubmitAccountAccessValidator(BaseModel):
         return sp_apps_ids
 
 
+class SPApp(BaseModel):
+    requested_email: str
+    requested_user_id: str
+    requested_date: datetime
+    sp_app_name: str
+    sp_app_id: int
 
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    sp_apps: List[SPApp]
+
+class UsersList(BaseModel):
+    users_list: List[User]
 
 class ContactNoValidatorOut(BaseModel):
     contact_no: str
@@ -91,3 +107,20 @@ class OtpSmsValidator(BaseModel):
         if not re.search(regex, value):
             raise ValueError("invalid format")
         return value
+
+
+class SPApp(BaseModel):
+    requested_email: str
+    requested_user_id: str
+    requested_date: datetime
+    sp_app_name: str
+    sp_app_id: int
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    sp_apps: List[SPApp]
+
+class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
+    users_list:  Optional[List[User]]=None

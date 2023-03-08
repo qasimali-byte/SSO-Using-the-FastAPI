@@ -20,6 +20,7 @@ from src.apis.v1.services.user_service import UserService
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
+from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsersListValidatorOut
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
 from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut, ListUnAccessibleServiceProviderValidatorOut
 from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
@@ -317,3 +318,8 @@ class AccessController():
         user_info=UserService(self.db).get_user_info_db(submit_account_access_validator.email)
         response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
         return response
+    
+    def get_user_sp_apps_account_access_requests(self,page, limit, search):
+        users_data=AccessService(self.db).get_users_sp_apps_account_access_requests(page, limit, search)
+        user_data=GetAccountAccessRequestUsersListValidatorOut(**users_data)
+        return user_data

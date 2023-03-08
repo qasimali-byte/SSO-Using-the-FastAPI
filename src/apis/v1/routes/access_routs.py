@@ -12,7 +12,7 @@ from ..controllers.access_controller import AccessController
 from ..helpers.auth import AuthJWT
 from ..helpers.customize_response import custom_response
 from ..services.access_service import AccessService
-from ..validators.access_validator import OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
+from ..validators.access_validator import GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
     VerifyProductsValidator, OtpAccountValidator,VerifyAccountAccessValidator
 from celery_worker import otp_sender
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,27 +28,16 @@ router = APIRouter(tags=["Account Access"])
                         401: {"description": "Unauthorized", "model": ErrorResponseValidator},
                         500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
             },status_code=200)
-async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
         This api returns  apps list to on which user don't have access.
         Select query will be use over the idp_user table id_sp and spapps table 
         in id_sp table we added more fields 
-    
-    select sa.id,sa.name,sa.display_name,sa.logo_url, in_ex.is_verified, in_ex.is_accessible,in_ex.requested_email 
-    from (
-    select  * from  sp_apps where id not in
-    (select sp_apps_id from idp_sp is2  where idp_users_id =230 and is_accessible is true)) sa 
-    left join 
-    (select id, is_accessible, is_verified, sp_apps_id,requested_email  from idp_sp is2  
-    where idp_users_id =230 and is_accessible is false) in_ex
-    on sa.id=in_ex.sp_apps_id
         
-
     """
-
-    current_user_email = user_email_role.get_user_email()
-    user_data=AccessController(db).get_user_apps_info_db(current_user_email)
+    current__user_email = authorize.get_jwt_current_user()
+    user_data=AccessController(db).get_user_apps_info_db(current__user_email)
     return user_data
 
 
@@ -191,6 +180,29 @@ async def submit_account_access_request(submit_account_access_validator: SubmitA
     response=AccessController(db).submit_account_access_requests(submit_account_access_validator)
     return response    
 
+
+
+
+@router.get(
+    "/get-users-sp-apps-account-access-requests",
+    summary="Load all the requested sp apps and primary emails.",
+    responses={200:{"model":GetAccountAccessRequestUsersListValidatorOut},
+        400: {"description": "Bad Request", "model": ErrorResponseValidator},
+        401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+        500: {"description": "Internal Server Error", "model": ErrorResponseValidator},
+    }
+)
+async def get_user_sp_apps_account_access_request(
+    user_email_role: RoleVerifierImplemented = Depends(),
+    db: Session = Depends(get_db),
+    authorize: AuthJWT = Depends(),
+    token: str = Depends(oauth2_scheme),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
+    search: str = Query(None),
+):
+    user_data = AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
+    return user_data
 
 
 

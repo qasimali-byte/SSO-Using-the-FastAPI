@@ -73,17 +73,17 @@ class SPSService():
         except Exception as e:
             return []
         
-    def get_spapps_status(self,user_email):
+    def get_spapps_status(self,selected_user_id):
         try:
             
         # Generate the query and execute it to retrieve the results
             
             subquery_1 = self.db.query(idp_sp.sp_apps_id.label("app_id")).filter(
-                idp_sp.idp_users_id == 230, idp_sp.is_accessible == True)
+                idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == True)
             
             subquery_2 = self.db.query(idp_sp.id, idp_sp.is_accessible, idp_sp.is_verified, 
                                             idp_sp.sp_apps_id, idp_sp.requested_email).\
-                            filter(idp_sp.idp_users_id == 230, idp_sp.is_accessible == False).\
+                            filter(idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == False).\
                             subquery()
             query = self.db.query(SPAPPS.id.label("app_id"), SPAPPS.name.label("app_name"),
                                         SPAPPS.display_name.label("display_name"), SPAPPS.logo_url.label("image"),
