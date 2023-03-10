@@ -1,6 +1,9 @@
+from typing import Optional, Union
 from pydantic import BaseModel,EmailStr, validator
 from pydantic.class_validators import List
 import re
+from datetime import datetime
+
 
 class OtpAccountValidator(BaseModel):
     email: EmailStr
@@ -19,15 +22,69 @@ class OtpProductsValidator(BaseModel):
     selected_products: List
 
 
+class OtpaccountaccessValidator(BaseModel):
+    email: EmailStr
+    product: str
+
 class VerifyProductsValidator(BaseModel):
     email: EmailStr
     selected_products: List
     otp:str
 
 
+class VerifyAccountAccessValidator(BaseModel):
+    email: EmailStr
+    requested_product: str
+    otp: str
+    is_verified: bool
+    requested_email: str
+    requested_user_id: Union[int, str, None] = None
+
 class EmailValidator(BaseModel):
     email: EmailStr
 
+
+class SubmitAccountAccessValidator(BaseModel):
+    email: EmailStr
+    sp_apps_ids: List[int]
+
+    @validator('sp_apps_ids')
+    def check_sp_apps_ids(cls, sp_apps_ids):
+        if not all(isinstance(item, int) for item in sp_apps_ids):
+            raise ValueError('sp_apps_ids must be a list of integers')
+        return sp_apps_ids
+
+
+class ApproveAccountAccessValidator(BaseModel):
+    email: EmailStr
+    sp_apps_ids: List[int]
+
+    @validator('sp_apps_ids')
+    def check_sp_apps_ids(cls, sp_apps_ids):
+        if not all(isinstance(item, int) for item in sp_apps_ids):
+            raise ValueError('sp_apps_ids must be a list of integers')
+        return sp_apps_ids
+
+
+
+
+
+
+class SPApp(BaseModel):
+    requested_email: str
+    requested_user_id: str
+    requested_date: datetime
+    sp_app_name: str
+    sp_app_id: int
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    sp_apps: List[SPApp]
+
+class UsersList(BaseModel):
+    users_list: List[User]
 
 class ContactNoValidatorOut(BaseModel):
     contact_no: str
@@ -65,3 +122,20 @@ class OtpSmsValidator(BaseModel):
         if not re.search(regex, value):
             raise ValueError("invalid format")
         return value
+
+
+class SPApp(BaseModel):
+    requested_email: str
+    requested_user_id: str
+    requested_date: datetime
+    sp_app_name: str
+    sp_app_id: int
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    sp_apps: List[SPApp]
+
+class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
+    users_list:  Optional[List[User]]=None

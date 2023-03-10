@@ -1,3 +1,4 @@
+from datetime import datetime
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
@@ -10,7 +11,7 @@ from src.apis.v1.models.idp_user_types_model import idp_user_types
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.helpers.customize_response import file_remover, custom_response
-from fastapi import status
+from fastapi import HTTPException, status
 from ..utils.auth_utils import create_password_hash
 from ..validators.common_validators import SuccessfulJsonResponseValidator
 from sqlalchemy.orm import aliased, load_only,Load
@@ -384,3 +385,26 @@ class UserService():
             return 200
         except Exception as e:
             raise CustomException(str(e)+"error occured in user service", status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
+    def submit_account_access_requests(self, idp_users_id, submit_account_access_validator):
+        sp_apps_ids=submit_account_access_validator.sp_apps_ids
+        requests = self.db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id, idp_sp.sp_apps_id.in_(sp_apps_ids), idp_sp.is_verified == True).all()
+        if not requests:
+            raise HTTPException(status_code=404, detail="Request not found")
+        for request in requests:
+            request.is_requested = True
+            request.requested_date = datetime.utcnow()
+        self.db.commit()
+        return {'message': 'account access request successful sent to super admin','status_code':200}
+    
+    def approve_account_access_requests(self, idp_users_id,approve_account_access_validator ):
+        sp_apps_ids=approve_account_access_validator.sp_apps_ids
+        requests = self.db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id, idp_sp.sp_apps_id.in_(sp_apps_ids), idp_sp.is_verified == True,idp_sp.is_requested==True).all()
+        if not requests:
+            raise HTTPException(status_code=404, detail="Request not found")
+        for request in requests:
+            request.is_accessible = True
+            request.action_date=datetime.utcnow()
+        self.db.commit()
+        return {'message': 'account access request successful approved','status_code':200}

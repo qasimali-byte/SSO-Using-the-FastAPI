@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import datetime
@@ -16,9 +17,12 @@ from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.models import idp_users
 from src.apis.v1.services.access_service import AccessService
 from src.apis.v1.services.user_service import UserService
+from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
 from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
+from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsersListValidatorOut
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
+from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut, ListUnAccessibleServiceProviderValidatorOut
 from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
 from src.packages.usermigrations.ezanalytics import EZAnalyticsMigrate
 from src.packages.usermigrations.ezweb import EZWEBMigrate
@@ -97,14 +101,12 @@ class AccessController():
             raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='user already exists with this email')
         products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products(products_validator.email)
-
         products_allowed_ids= [p.get("id")for p in products_allowed]
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
         if len(products_validator.selected_products)==0:
             raise CustomException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                                   message='no product is selected.')
-
         for p in products_validator.selected_products:
             keep_products+=p+","
             if not int(p) in products_allowed_ids:
@@ -120,6 +122,26 @@ class AccessController():
             "name": "There",
             "recipient": products_validator.email,
             "products": email_products,
+            "otp": OTP,
+            "expires": natural_datetime,
+        }
+        task = otp_sender_products.delay(user_data=data)
+        return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
+
+
+    async def send_otp_for_account_access_request(self, account_access_validator):
+
+        get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.product)
+        OTP = ''.join([random.choice("0123456789") for _ in range(4)])
+        otp_apps = f"{OTP}+{account_access_validator.product}"
+        redis_client.setex(name=account_access_validator.email + ",products", value=otp_apps, time=15 * 60 + 5)
+        date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+        natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
+        product_list=list(account_access_validator.product)
+        data = {
+            "name": "There",
+            "recipient": account_access_validator.email,
+            "products": get_sp_app_data,
             "otp": OTP,
             "expires": natural_datetime,
         }
@@ -246,3 +268,63 @@ class AccessController():
             return custom_response(status_code=status.HTTP_406_NOT_ACCEPTABLE, data={"message": 'OTP Verification Failed', "status_code": 406})
         else:
             return custom_response(status_code=status.HTTP_404_NOT_FOUND, data={"message": 'OTP-SMS Expired', "status_code": 404})
+
+
+    def get_user_apps_info_db(self,user_email):
+        
+        '''
+        this function will return the list of all those spapps,
+        verified/not verified/not accessible
+        '''
+        user_info=UserService(self.db).get_user_info_db(user_email)
+        user_spapps_info=SPSController(self.db).get_spapps_status(user_info.id)
+        user_spapps_info = json.loads(user_spapps_info)
+        validator_out = ListUnAccessibleServiceProviderValidatorOut(serviceproviders=user_spapps_info)
+
+        try:
+            validator_out = ListUnAccessibleServiceProviderValidatorOut(**validator_out.dict())
+        except Exception as e:
+            print(e)
+        return user_spapps_info
+    
+    def add_user_verification_request(self,account_access_verify_validator):
+        
+        user_info=UserService(self.db).get_user_info_db(account_access_verify_validator.email)
+        response=SPSController(self.db).add_verified_sp_apps(user_info.id,account_access_verify_validator)
+        if response['status_code']==409:
+            return response
+        else:
+            return response
+             
+            
+    def verify_account_access_otp(self,account_access_verify_validator):
+        key = account_access_verify_validator.email + ",products"
+        temp_data = redis_client.get(key)
+        if temp_data:
+            saved_otp, products = temp_data.split('+')
+            print(saved_otp, products)
+            if account_access_verify_validator.requested_product!= products:
+                raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                        message='failed, Invalid product requested.')
+            if saved_otp == account_access_verify_validator.otp:
+                return self.add_user_verification_request(account_access_verify_validator)
+                # raise CustomException(status_code=status.HTTP_200_OK, message='otp successfully verified')
+        
+            else:
+                raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
+        raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
+
+    def submit_account_access_requests(self,submit_account_access_validator):
+        user_info=UserService(self.db).get_user_info_db(submit_account_access_validator.email)
+        response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
+        return response
+    
+    def get_user_sp_apps_account_access_requests(self,page, limit, search):
+        users_data=AccessService(self.db).get_users_sp_apps_account_access_requests(page, limit, search)
+        user_data=GetAccountAccessRequestUsersListValidatorOut(**users_data)
+        return user_data
+    
+    def approve_account_access_requests(self,approve_account_access_validator):
+        user_info=UserService(self.db).get_user_info_db(approve_account_access_validator.email)
+        response=UserService(self.db).approve_account_access_requests(user_info.id,approve_account_access_validator)
+        return response

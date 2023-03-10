@@ -142,6 +142,35 @@ class SPSController():
             apps_list.append(apps)
         
         return apps_list
+    
+    
+    
+    def get_unaccessible_apps(self,total_apps, selected_apps):
+
+        apps_list=[]
+        for t_data in total_apps:
+            not_matched=0
+            apps={}
+            for s_data in selected_apps:
+                if t_data['id']==s_data['id']:            
+                    apps['id']=s_data["id"]
+                    apps['name']=s_data["name"]
+                    apps['sp_app_name']=s_data["display_name"]
+                    apps['logo_url']=s_data["logo_url"]
+                    apps['host_url']=s_data["host_url"]
+                    apps['is_selected'] = True
+                else:
+                    not_matched=not_matched+1
+                if(not_matched==len(selected_apps)):
+                    apps['id']=t_data["id"]
+                    apps['name']=t_data["name"]
+                    apps['sp_app_name']=t_data["display_name"]
+                    apps['logo_url']=t_data["logo_url"]
+                    apps['host_url']=t_data["host_url"]
+                    apps['is_selected'] = False
+            apps_list.append(apps)
+        
+        return apps_list
    
    
             
@@ -194,6 +223,12 @@ class SPSController():
             apps_list=self.get_apps_selected_unselected(total_apps, selected_apps)
         return apps_list
     
+    def get_spapps_status(self,selected_user_id):
+
+        sps_app_object = SPSService(self.db)
+        spapps_status = sps_app_object.get_spapps_status(selected_user_id)
+        return spapps_status
+    
     
     def get_allowed_apps_by_userid_for_loged_in_user(self,selected_email, user_id, selected_id):
 
@@ -212,3 +247,10 @@ class SPSController():
     def get_specific_product_byappid(self, app_id:int):
         dto = SyncSpsDAO(self.db).get(filter_data={SPAPPS.is_active: True,SPAPPS.id:app_id})
         return ListSpAppsGeneralValidator.from_orm(dto).dict()
+    
+    def add_verified_sp_apps(self,idp_user_id,account_access_verify_validator):
+        return SPSService(self.db).add_sp_app_verification_status(idp_user_id,account_access_verify_validator)
+    
+    def get_sp_app_by_id(self,sp_app_id):
+        sp_app_data=SPSService(self.db).get_sp_app_by_id(sp_app_id)
+        return sp_app_data

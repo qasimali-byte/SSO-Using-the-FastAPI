@@ -1,17 +1,19 @@
-from fastapi import Depends, APIRouter, Request
+from fastapi import Depends, APIRouter, Query, Request, Response
 from starlette import status
+from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.common_validators import SuccessfulResponseValidator
 from src.apis.v1.db.session import get_db
 from sqlalchemy.orm import Session
 from src.apis.v1.helpers.role_verifier import RoleVerifierImplemented
+from src.apis.v1.validators.sps_validator import ListUnAccessibleServiceProviderValidatorOut
 from . import oauth2_scheme
 from src.apis.v1.validators.common_validators import ErrorResponseValidator, SuccessfulJsonResponseValidator
 from ..controllers.access_controller import AccessController
 from ..helpers.auth import AuthJWT
 from ..helpers.customize_response import custom_response
 from ..services.access_service import AccessService
-from ..validators.access_validator import OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, \
-    VerifyProductsValidator, OtpAccountValidator
+from ..validators.access_validator import ApproveAccountAccessValidator, GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
+    VerifyProductsValidator, OtpAccountValidator,VerifyAccountAccessValidator
 from celery_worker import otp_sender
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.graphql.db.session import get_session_without_context_manager
@@ -20,21 +22,40 @@ from src.packages.two_factor_authentication.cookie_two_factor_authentication imp
 router = APIRouter(tags=["Account Access"])
 
 
-@router.post("/request-account", summary=" Load all the registered apps and emails in SSO.",
-             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
-async def request_account(user_email_role:RoleVerifierImplemented = Depends(),db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
+@router.get("/request-spapps-account", summary=" Load all the registered apps and emails in SSO.",
+             responses={200: {"model": ListUnAccessibleServiceProviderValidatorOut},
+                        400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                        401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                        500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+            },status_code=200)
+async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
-        This api returns the emails and apps list to grant access using emails.
-
+        This api returns  apps list to on which user don't have access.
+        Select query will be use over the idp_user table id_sp and spapps table 
+        in id_sp table we added more fields 
+        
     """
-
-    current_user_email = user_email_role.get_user_email()
-    user_data = AccessService(db).get_user_apps_info_db(user_email=current_user_email)
-    user_data["user"] = dict({"name": user_data.get("user").first_name,
-                              "id": user_data.get("user").id,
-                              "is_active": user_data.get("user").is_active})
+    current__user_email = authorize.get_jwt_current_user()
+    user_data=AccessController(db).get_user_apps_info_db(current__user_email)
     return user_data
+
+
+@router.post("/verify-account-request", summary=" This will verify the Account request.",
+             responses={
+                 200: {"model": SuccessfulJsonResponseValidator},
+                 400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                 401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+             }, status_code=200)
+
+async def verify_account_request(account_access_verify_validator: VerifyAccountAccessValidator,db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
+    ):
+
+    # current_user_email = user_email_role.get_user_email()
+    user_data=AccessController(db).verify_account_access_otp(account_access_verify_validator)
+    return user_data
+
 
 
 @router.post("/send-otp", summary="Send OTP via email",
@@ -90,6 +111,20 @@ async def send_otp_products(products_validator: OtpProductsValidator,
     return response
 
 
+@router.post("/send-account-access-otp", summary="Send OTP via email for account access request",
+             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+async def send_account_access_otp(account_access_validator: OtpaccountaccessValidator,
+                            db: Session = Depends(get_db)
+                            ):
+    """
+    here we call the conserned service provider API for user verification
+    """
+    
+    response = await AccessController(db).send_otp_for_account_access_request(account_access_validator)
+    return response
+
+
+
 @router.post("/verify-otp-products", summary="Verify OTP")
 async def verify_otp_products(otp_products_validator: VerifyProductsValidator,
                               # authorize: AuthJWT = Depends(),
@@ -136,3 +171,57 @@ async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depen
         response = create_phone_cookie(response, otp_sms_validator.contact_no, db)
 
     return response
+
+
+
+@router.put("/submit-account-access-request")
+async def submit_account_access_request(submit_account_access_validator: SubmitAccountAccessValidator, db: Session = Depends(get_db)):
+
+    response=AccessController(db).submit_account_access_requests(submit_account_access_validator)
+    return response    
+
+
+
+
+@router.get(
+    "/get-users-sp-apps-account-access-requests",
+    summary="Load all the requested sp apps and primary emails.",
+    responses={200:{"model":GetAccountAccessRequestUsersListValidatorOut},
+        400: {"description": "Bad Request", "model": ErrorResponseValidator},
+        401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+        500: {"description": "Internal Server Error", "model": ErrorResponseValidator},
+    }
+)
+async def get_user_sp_apps_account_access_request(
+    user_email_role: RoleVerifierImplemented = Depends(),
+    db: Session = Depends(get_db),
+    authorize: AuthJWT = Depends(),
+    token: str = Depends(oauth2_scheme),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
+    search: str = Query(None),
+):
+
+    try:
+        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
+        return Response(content=response, status_code=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+@router.put("/approve-account-access-request",responses={
+    200: {"description": "Account access requests submitted successfully"},
+    400: {"description": "Invalid input data"},
+    500: {"description": "Internal server error"},})
+async def approve_account_access_request(approve_account_access_validator: ApproveAccountAccessValidator, db: Session = Depends(get_db)):
+    
+    try:
+        response=AccessController(db).approve_account_access_requests(approve_account_access_validator)
+        return response
+    except Exception as e:
+        return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+

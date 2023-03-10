@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import os
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
@@ -50,6 +51,13 @@ class SPSService():
         except Exception as e:
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    
+    
+    
+    
+    
+    
+    
     def get_sps_app(self,user_email):
         try:
             
@@ -63,6 +71,49 @@ class SPSService():
             return serviceproviders
 
         except Exception as e:
+            return []
+        
+    def get_spapps_status(self,selected_user_id):
+        try:
+            
+        # Generate the query and execute it to retrieve the results
+            
+            subquery_1 = self.db.query(idp_sp.sp_apps_id.label("app_id")).filter(
+                idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == True)
+            
+            subquery_2 = self.db.query(idp_sp.id, idp_sp.is_accessible, idp_sp.is_verified, 
+                                            idp_sp.sp_apps_id, idp_sp.requested_email).\
+                            filter(idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == False).\
+                            subquery()
+            query = self.db.query(SPAPPS.id.label("app_id"), SPAPPS.name.label("app_name"),
+                                        SPAPPS.display_name.label("display_name"), SPAPPS.logo_url.label("image"),
+                                        subquery_2.c.is_verified.label("is_verified"), 
+                                        subquery_2.c.is_accessible.label("is_accessible"),
+                                        subquery_2.c.requested_email.label("requested_email")).\
+                            filter(SPAPPS.id.notin_(subquery_1)).\
+                            outerjoin(subquery_2, SPAPPS.id == subquery_2.c.sp_apps_id).\
+                            all()
+
+        # Convert the results to a list of dictionaries
+            result_list = []
+            for row in query:
+                result_dict = {
+                    "app_id": row["app_id"],
+                    "app_name": row["app_name"],
+                    "display_name": row["display_name"],
+                    "image": row["image"],
+                    "is_verified": row["is_verified"] or False,  # set to False if is_verified is None
+                    "is_accessible": row["is_accessible"] or False,  # set to False if is_accessible is None
+                    "requested_email": row["requested_email"] if row["is_verified"] else None  # set to None if is_verified is False
+                }
+                result_list.append(result_dict)
+
+            # Convert the list of dictionaries to JSON
+            result_json = json.dumps(result_list)
+            return result_json
+
+        except Exception as e:
+            print(e)
             return []
         
     def get_sps_app_for_sp_redirections(self, user_email):
@@ -134,3 +185,38 @@ class SPSService():
 
         except Exception as e:
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def add_sp_app_verification_status(self,idp_user_id,account_access_verify_validator):
+        print(idp_user_id,account_access_verify_validator)
+        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=int(account_access_verify_validator.requested_product),\
+            is_verified=account_access_verify_validator.is_verified).first()
+        if existing_idp_sp:
+            return {'message':"App already verified",'status_code':409}
+        else:
+            return self.add_sp_app_verification(idp_user_id,account_access_verify_validator)
+    
+    def add_sp_app_verification(self,idp_user_id,account_access_verify_validator):
+            new_idp_sp = idp_sp(
+            idp_users_id=idp_user_id,
+            sp_apps_id=int(account_access_verify_validator.requested_product),
+            is_accessible=False,
+            is_verified=account_access_verify_validator.is_verified,
+            requested_email=account_access_verify_validator.requested_email,
+            requested_user_id=account_access_verify_validator.requested_user_id,
+        )
+            self.db.add(new_idp_sp)
+            self.db.commit()
+            return {'message':"user verified successfully",'status_code':200}
+        
+
+    def get_sp_app_by_id(self, app_id):
+        result = self.db.query(SPAPPS.id.label('sp_apps_id'),
+                       SPAPPS.name.label('sp_apps_name'),
+                       SPAPPS.logo_url.label('sp_apps_logo_url')
+                       ).filter_by(is_active=True, id=app_id).one()
+        app_list = [{'id': result.sp_apps_id, 'name': result.sp_apps_name, 'logo': result.sp_apps_logo_url} ]
+        if len(app_list) > 0:
+            return app_list
+        else:
+            return list([])
+
