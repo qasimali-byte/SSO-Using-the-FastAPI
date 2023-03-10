@@ -397,4 +397,14 @@ class UserService():
             request.requested_date = datetime.utcnow()
         self.db.commit()
         return {'message': 'account access request successful sent to super admin','status_code':200}
-        
+    
+    def approve_account_access_requests(self, idp_users_id,approve_account_access_validator ):
+        sp_apps_ids=approve_account_access_validator.sp_apps_ids
+        requests = self.db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id, idp_sp.sp_apps_id.in_(sp_apps_ids), idp_sp.is_verified == True,idp_sp.is_requested==True).all()
+        if not requests:
+            raise HTTPException(status_code=404, detail="Request not found")
+        for request in requests:
+            request.is_accessible = True
+            request.action_date=datetime.utcnow()
+        self.db.commit()
+        return {'message': 'account access request successful approved','status_code':200}

@@ -21,15 +21,3 @@ class SPAPPS(Base):
     email_verification_url = Column(String(255),nullable=True, unique=False)
     migration_url = Column(String(255),nullable=True, unique=False)
     roles = relationship("roles", secondary="sp_apps_role", back_populates='sp_apps')
-    # idp_users=relationship("idp_users", secondary="idp_sp", back_populates='SPAPPS')
-    
-# from sqlalchemy.orm import joinedload
-
-# requested_sp_apps = (
-#     session.query(idp_users.email, SPAPPS.name, SPAPPS.id, idp_sp.requested_date)
-#     .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
-#     .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id)
-#     .options(joinedload(idp_sp.idp_users), joinedload(idp_sp.sp_apps))
-#     .filter(idp_sp.is_requested == True)
-#     .all()
-# )

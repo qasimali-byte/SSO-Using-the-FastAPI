@@ -101,7 +101,6 @@ class AccessController():
             raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                   message='user already exists with this email')
         products_allowed = await AsyncAuthController(async_db).find_user_ids_in_other_products(products_validator.email)
-        print(products_allowed)
         products_allowed_ids= [p.get("id")for p in products_allowed]
         email_products = [p for p in products_allowed if str(p.get("id")) in products_validator.selected_products]
         keep_products = ''
@@ -119,7 +118,6 @@ class AccessController():
         redis_client.setex(name=products_validator.email + ",products", value=otp_apps, time=15 * 60 + 5)
         date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
         natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
-        print(email_products)
         data = {
             "name": "There",
             "recipient": products_validator.email,

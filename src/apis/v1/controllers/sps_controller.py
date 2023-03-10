@@ -216,7 +216,7 @@ class SPSController():
 
         sps_app_object = SPSService(self.db)
         total_apps = sps_app_object.get_selected_unselected_sps_app()
-        selected_apps = sps_app_object.get_spsapp_status(selected_email)
+        selected_apps = sps_app_object.get_sps_app(selected_email)
         if len(total_apps) == 0:
             return []
         else:
