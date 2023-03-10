@@ -53,7 +53,8 @@ async def verify_account_request(account_access_verify_validator: VerifyAccountA
     ):
 
     # current_user_email = user_email_role.get_user_email()
-    user_data=AccessController(db).verify_account_access_otp(account_access_verify_validator)
+    current__user_email = authorize.get_jwt_current_user()
+    user_data=AccessController(db).verify_account_access_otp(current__user_email,account_access_verify_validator)
     return user_data
 
 
@@ -114,7 +115,7 @@ async def send_otp_products(products_validator: OtpProductsValidator,
 @router.post("/send-account-access-otp", summary="Send OTP via email for account access request",
              responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
 async def send_account_access_otp(account_access_validator: OtpaccountaccessValidator,
-                            db: Session = Depends(get_db)
+                            db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
                             ):
     """
     here we call the conserned service provider API for user verification
@@ -175,9 +176,9 @@ async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depen
 
 
 @router.put("/submit-account-access-request")
-async def submit_account_access_request(submit_account_access_validator: SubmitAccountAccessValidator, db: Session = Depends(get_db)):
-
-    response=AccessController(db).submit_account_access_requests(submit_account_access_validator)
+async def submit_account_access_request(submit_account_access_validator: SubmitAccountAccessValidator, db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),):
+    current__user_email = authorize.get_jwt_current_user()
+    response=AccessController(db).submit_account_access_requests(current__user_email,submit_account_access_validator)
     return response    
 
 
