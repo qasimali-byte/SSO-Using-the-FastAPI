@@ -224,11 +224,13 @@ class AccessController():
 
     def get_contact_no_by_email(self, user_email, request):
         contact_no = AccessService(self.db).get_contact_no_by_email(user_email)
+        print('contact_no---',contact_no)
         if contact_no:
             data = {"contact_no": contact_no, "cookie_verification": False}
             try:  # now check if its cookie exists
                 phone_cookie = request.cookies.get("phone_cookie")
                 res = AccessService(self.db).get_two_factor_authentication_cookie(contact_no, phone_cookie)
+                print('------------',res)
                 if res:
                     data["cookie_verification"] = True
             except Exception as err:
