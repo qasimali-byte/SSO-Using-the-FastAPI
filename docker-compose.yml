@@ -25,20 +25,6 @@ services:
       - 5432:5432
     restart: always
   
-
-
-  redis:
-    image: "redis:alpine"
-    ports:
-     - 6379:6379
-    restart: always
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: redis-cli ping
-      interval: 5s
-      timeout: 10s
-      retries: 3
   celery_worker:
     container_name: celery_worker
     build: .
@@ -55,6 +41,19 @@ services:
     depends_on:
       - redis
       - db_idp
+  redis:
+    image: "redis:alpine"
+    ports:
+     - 6379:6379
+    restart: always
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      timeout: 10s
+      retries: 3
+  
 volumes:
   redis-data:
   postgres-data:
