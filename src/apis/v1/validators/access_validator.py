@@ -55,6 +55,21 @@ class SubmitAccountAccessValidator(BaseModel):
         return sp_apps_ids
 
 
+class ApproveAccountAccessValidator(BaseModel):
+    email: EmailStr
+    sp_apps_ids: List[int]
+
+    @validator('sp_apps_ids')
+    def check_sp_apps_ids(cls, sp_apps_ids):
+        if not all(isinstance(item, int) for item in sp_apps_ids):
+            raise ValueError('sp_apps_ids must be a list of integers')
+        return sp_apps_ids
+
+
+
+
+
+
 class SPApp(BaseModel):
     requested_email: str
     requested_user_id: str

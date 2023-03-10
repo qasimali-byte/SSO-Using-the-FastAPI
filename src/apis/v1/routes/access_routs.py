@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, Query, Request
+from fastapi import Depends, APIRouter, Query, Request, Response
 from starlette import status
 from src.apis.v1.services.user_service import UserService
 from src.apis.v1.validators.common_validators import SuccessfulResponseValidator
@@ -12,7 +12,7 @@ from ..controllers.access_controller import AccessController
 from ..helpers.auth import AuthJWT
 from ..helpers.customize_response import custom_response
 from ..services.access_service import AccessService
-from ..validators.access_validator import GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
+from ..validators.access_validator import ApproveAccountAccessValidator, GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
     VerifyProductsValidator, OtpAccountValidator,VerifyAccountAccessValidator
 from celery_worker import otp_sender
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -201,10 +201,27 @@ async def get_user_sp_apps_account_access_request(
     limit: int = Query(10, le=100),
     search: str = Query(None),
 ):
-    user_data = AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
-    return user_data
+
+    try:
+        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
+        return Response(content=response, status_code=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+@router.put("/approve-account-access-request",responses={
+    200: {"description": "Account access requests submitted successfully"},
+    400: {"description": "Invalid input data"},
+    500: {"description": "Internal server error"},})
+async def approve_account_access_request(approve_account_access_validator: ApproveAccountAccessValidator, db: Session = Depends(get_db)):
+    
+    try:
+        response=AccessController(db).approve_account_access_requests(approve_account_access_validator)
+        return response
+    except Exception as e:
+        return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
