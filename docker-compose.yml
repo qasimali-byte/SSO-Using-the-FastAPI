@@ -53,7 +53,7 @@ services:
       - POSTGRES_DB=sso_idp
       - DATABASE_URL=postgresql://postgres:faisal@18.134.217.103:5432/sso_idp_1
     depends_on:
-      - app
+      - redis
       - db_idp
 volumes:
   redis-data:
