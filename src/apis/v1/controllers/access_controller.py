@@ -313,8 +313,8 @@ class AccessController():
                 raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
 
-    def submit_account_access_requests(self,current__user_email,submit_account_access_validator):
-        user_info=UserService(self.db).get_user_info_db(current__user_email)
+    def submit_account_access_requests(self,current_user_email,submit_account_access_validator):
+        user_info=UserService(self.db).get_user_info_db(current_user_email)
         response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
         return response
     
