@@ -42,6 +42,8 @@ services:
   celery_worker:
     container_name: celery_worker
     build: .
+    volumes:
+      - .:/app
     command: celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
     environment:
       - CELERY_BROKER_URL=redis://:Attech123@18.134.217.103:6379/0
