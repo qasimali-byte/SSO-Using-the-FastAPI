@@ -153,8 +153,7 @@ def send_otp_products(user_data, attachment=None):
         recipient = user_data["recipient"]
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
         # email only renders png not svg
-        [p.update((k, p["logo"].replace("svg", "png")) for k, v in p.items() if k == "logo") for p in
-         user_data["products"]]
+        [p.update((k, p["logo"].replace("svg", "png")) for k, v in p.items() if k == "logo") for p in user_data["products"]]
         html_ = populate_html_file_otp_products(user_data,base_url)
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")
@@ -168,6 +167,7 @@ def send_otp_products(user_data, attachment=None):
     except Exception as e:
         print(str(e))
         return False
+
 
 
 def send_email_user(url, recipient, user_name, attachment=None):

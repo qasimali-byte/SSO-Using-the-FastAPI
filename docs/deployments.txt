@@ -33,7 +33,7 @@ alembic revision  --autogenerate -m "changing unique contraint in uuid
 alembic upgrade head
 
 ## celery command
-celery worker -A worker.celery --loglevel=INFO -P eventlet
+celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
 
 ## DEFAULT COMMANT FOR AUTO INCREMENT IN postgres
 INSERT INTO public.idp_user_apps_roles(id,idp_users_id,sp_apps_role_id,sub_roles_id) VALUES(DEFAULT,230,8,null);
