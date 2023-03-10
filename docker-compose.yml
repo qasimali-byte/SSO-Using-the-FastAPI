@@ -1,8 +1,8 @@
-version: "3.8"
+version: "3"
+
 services:
   app:
-    build:
-      context: .
+    build: .
     volumes:
       - .:/app:rw
     ports:
@@ -13,6 +13,8 @@ services:
     depends_on:
       - db_idp
       - redis
+      - celery_worker
+
   db_idp:
     image: postgres:13-alpine
     environment:
@@ -24,11 +26,11 @@ services:
     ports:
       - 5432:5432
     restart: always
-  
+
   redis:
     image: "redis:alpine"
     ports:
-     - 6379:6379
+      - "6379:6379"
     restart: always
     volumes:
       - redis-data:/data
@@ -37,23 +39,23 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+
   celery_worker:
-    container_name: celery_worker
     build: .
-    command: celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
     volumes:
       - .:/app
+    command: celery worker -A celery_worker.celery --loglevel=INFO -P eventlet
     environment:
-      - CELERY_BROKER_URL=redis://:Attech123@18.134.217.103:6379/0
-      - CELERY_RESULT_BACKEND=redis://:Attech123@18.134.217.103:6379/0
+      - CELERY_BROKER_URL=redis://:Attech123@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:Attech123@redis:6379/0
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=faisal
       - POSTGRES_DB=sso_idp
-      - DATABASE_URL=postgresql://postgres:faisal@18.134.217.103:5432/sso_idp
+      - DATABASE_URL=postgresql://postgres:faisal@db_idp:5432/sso_idp
     depends_on:
       - redis
       - db_idp
+
 volumes:
   redis-data:
   postgres-data:
-                
