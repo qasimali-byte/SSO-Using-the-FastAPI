@@ -131,16 +131,15 @@ class AccessController():
 
     async def send_otp_for_account_access_request(self, account_access_validator):
 
-        get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.product)
+        get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.requested_sp_app_id)
         OTP = ''.join([random.choice("0123456789") for _ in range(4)])
-        otp_apps = f"{OTP}+{account_access_validator.product}"
-        redis_client.setex(name=account_access_validator.email + ",products", value=otp_apps, time=15 * 60 + 5)
+        otp_apps = f"{OTP}+{str(account_access_validator.requested_sp_app_id)}"
+        redis_client.setex(name=account_access_validator.requested_email + ",products", value=otp_apps, time=15 * 60 + 5)
         date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
         natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
-        product_list=list(account_access_validator.product)
         data = {
             "name": "There",
-            "recipient": account_access_validator.email,
+            "recipient": account_access_validator.requested_email,
             "products": get_sp_app_data,
             "otp": OTP,
             "expires": natural_datetime,
@@ -287,9 +286,9 @@ class AccessController():
             print(e)
         return user_spapps_info
     
-    def add_user_verification_request(self,account_access_verify_validator):
+    def add_user_verification_request(self,current__user_email,account_access_verify_validator):
         
-        user_info=UserService(self.db).get_user_info_db(account_access_verify_validator.email)
+        user_info=UserService(self.db).get_user_info_db(current__user_email)
         response=SPSController(self.db).add_verified_sp_apps(user_info.id,account_access_verify_validator)
         if response['status_code']==409:
             return response
@@ -297,25 +296,25 @@ class AccessController():
             return response
              
             
-    def verify_account_access_otp(self,account_access_verify_validator):
-        key = account_access_verify_validator.email + ",products"
+    def verify_account_access_otp(self,current__user_email,account_access_verify_validator):
+        key = account_access_verify_validator.requested_email + ",products"
         temp_data = redis_client.get(key)
         if temp_data:
             saved_otp, products = temp_data.split('+')
             print(saved_otp, products)
-            if account_access_verify_validator.requested_product!= products:
+            if str(account_access_verify_validator.requested_sp_app_id)!= products:
                 raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                         message='failed, Invalid product requested.')
             if saved_otp == account_access_verify_validator.otp:
-                return self.add_user_verification_request(account_access_verify_validator)
+                return self.add_user_verification_request(current__user_email,account_access_verify_validator)
                 # raise CustomException(status_code=status.HTTP_200_OK, message='otp successfully verified')
         
             else:
                 raise CustomException(status_code=status.HTTP_400_BAD_REQUEST, message='Failed, wrong OTP')
         raise CustomException(status_code=status.HTTP_404_NOT_FOUND, message='Failed, OTP expired')
 
-    def submit_account_access_requests(self,submit_account_access_validator):
-        user_info=UserService(self.db).get_user_info_db(submit_account_access_validator.email)
+    def submit_account_access_requests(self,current__user_email,submit_account_access_validator):
+        user_info=UserService(self.db).get_user_info_db(current__user_email)
         response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
         return response
     

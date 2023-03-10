@@ -188,8 +188,8 @@ class SPSService():
         
     def add_sp_app_verification_status(self,idp_user_id,account_access_verify_validator):
         print(idp_user_id,account_access_verify_validator)
-        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=int(account_access_verify_validator.requested_product),\
-            is_verified=account_access_verify_validator.is_verified).first()
+        existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=int(account_access_verify_validator.requested_sp_app_id),\
+            is_verified=True).first()
         if existing_idp_sp:
             return {'message':"App already verified",'status_code':409}
         else:
@@ -198,9 +198,9 @@ class SPSService():
     def add_sp_app_verification(self,idp_user_id,account_access_verify_validator):
             new_idp_sp = idp_sp(
             idp_users_id=idp_user_id,
-            sp_apps_id=int(account_access_verify_validator.requested_product),
+            sp_apps_id=int(account_access_verify_validator.requested_sp_app_id),
             is_accessible=False,
-            is_verified=account_access_verify_validator.is_verified,
+            is_verified=True,
             requested_email=account_access_verify_validator.requested_email,
             requested_user_id=account_access_verify_validator.requested_user_id,
         )

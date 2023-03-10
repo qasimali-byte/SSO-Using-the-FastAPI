@@ -23,8 +23,8 @@ class OtpProductsValidator(BaseModel):
 
 
 class OtpaccountaccessValidator(BaseModel):
-    email: EmailStr
-    product: str
+    requested_email: EmailStr
+    requested_sp_app_id: int
 
 class VerifyProductsValidator(BaseModel):
     email: EmailStr
@@ -33,11 +33,9 @@ class VerifyProductsValidator(BaseModel):
 
 
 class VerifyAccountAccessValidator(BaseModel):
-    email: EmailStr
-    requested_product: str
-    otp: str
-    is_verified: bool
     requested_email: str
+    requested_sp_app_id: int
+    otp: str
     requested_user_id: Union[int, str, None] = None
 
 class EmailValidator(BaseModel):
@@ -45,7 +43,6 @@ class EmailValidator(BaseModel):
 
 
 class SubmitAccountAccessValidator(BaseModel):
-    email: EmailStr
     sp_apps_ids: List[int]
 
     @validator('sp_apps_ids')
