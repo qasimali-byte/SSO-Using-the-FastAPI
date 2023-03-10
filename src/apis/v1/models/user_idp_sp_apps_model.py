@@ -11,7 +11,7 @@ class idp_sp(Base):
     idp_users_id = Column(ForeignKey('idp_users.id'))
     sp_apps_id = Column(ForeignKey('sp_apps.id'))
     is_accessible = Column(Boolean, nullable=False)
-    is_verified=Column(Boolean, nullable=True)
+    is_verified=Column(Boolean, nullable=False)
     is_requested=Column(Boolean, nullable=True)
     action_status=Column(Boolean, nullable=True)
     requested_email=Column(String(100),nullable=True, unique=False)
