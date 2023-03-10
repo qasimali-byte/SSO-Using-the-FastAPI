@@ -36,8 +36,8 @@ async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Dep
         in id_sp table we added more fields 
         
     """
-    current__user_email = authorize.get_jwt_current_user()
-    user_data=AccessController(db).get_user_apps_info_db(current__user_email)
+    current_user_email = authorize.get_jwt_current_user()
+    user_data=AccessController(db).get_user_apps_info_db(current_user_email)
     return user_data
 
 
@@ -53,8 +53,8 @@ async def verify_account_request(account_access_verify_validator: VerifyAccountA
     ):
 
     # current_user_email = user_email_role.get_user_email()
-    current__user_email = authorize.get_jwt_current_user()
-    user_data=AccessController(db).verify_account_access_otp(current__user_email,account_access_verify_validator)
+    current_user_email = authorize.get_jwt_current_user()
+    user_data=AccessController(db).verify_account_access_otp(current_user_email,account_access_verify_validator)
     return user_data
 
 
@@ -177,8 +177,8 @@ async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depen
 
 @router.put("/submit-account-access-request")
 async def submit_account_access_request(submit_account_access_validator: SubmitAccountAccessValidator, db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),):
-    current__user_email = authorize.get_jwt_current_user()
-    response=AccessController(db).submit_account_access_requests(current__user_email,submit_account_access_validator)
+    current_user_email = authorize.get_jwt_current_user()
+    response=AccessController(db).submit_account_access_requests(current_user_email,submit_account_access_validator)
     return response    
 
 
