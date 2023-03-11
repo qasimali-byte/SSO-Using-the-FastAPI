@@ -194,7 +194,6 @@ async def submit_account_access_request(submit_account_access_validator: SubmitA
     }
 )
 async def get_user_sp_apps_account_access_request(
-    user_email_role: RoleVerifierImplemented = Depends(),
     db: Session = Depends(get_db),
     authorize: AuthJWT = Depends(),
     token: str = Depends(oauth2_scheme),
