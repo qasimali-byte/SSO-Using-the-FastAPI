@@ -135,4 +135,7 @@ class User(BaseModel):
     sp_apps: List[SPApp]
 
 class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
+    total_results: int
+    page: int
+    limit: int
     users_list:  Optional[List[User]]=None
