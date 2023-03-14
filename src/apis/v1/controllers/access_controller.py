@@ -276,35 +276,29 @@ class AccessController():
         user_info=UserService(self.db).get_user_info_db(user_email)
         user_spapps_info=SPSController(self.db).get_spapps_status(user_info.id)
         user_spapps_info = json.loads(user_spapps_info)
-        validator_out = ListUnAccessibleServiceProviderValidatorOut(serviceproviders=user_spapps_info)
-
-        try:
-            validator_out = ListUnAccessibleServiceProviderValidatorOut(**validator_out.dict())
-        except Exception as e:
-            print(e)
+        user_spapps_info = ListUnAccessibleServiceProviderValidatorOut(serviceproviders=user_spapps_info)
         return user_spapps_info
     
     def add_user_verification_request(self,current__user_email,account_access_verify_validator):
         
         user_info=UserService(self.db).get_user_info_db(current__user_email)
         response=SPSController(self.db).add_verified_sp_apps(user_info.id,account_access_verify_validator)
-        if response['status_code']==409:
+        if response['statuscode']==409:
             return response
         else:
             return response
              
             
-    def verify_account_access_otp(self,current__user_email,account_access_verify_validator):
+    def verify_account_access_otp(self,current_user_email,account_access_verify_validator):
         key = account_access_verify_validator.requested_email + ",products"
         temp_data = redis_client.get(key)
         if temp_data:
             saved_otp, products = temp_data.split('+')
-            print(saved_otp, products)
             if str(account_access_verify_validator.requested_sp_app_id)!= products:
                 raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                         message='failed, Invalid product requested.')
             if saved_otp == account_access_verify_validator.otp:
-                return self.add_user_verification_request(current__user_email,account_access_verify_validator)
+                return self.add_user_verification_request(current_user_email,account_access_verify_validator)
                 # raise CustomException(status_code=status.HTTP_200_OK, message='otp successfully verified')
         
             else:
@@ -322,6 +316,6 @@ class AccessController():
         return user_data
     
     def approve_account_access_requests(self,approve_account_access_validator):
-        user_info=UserService(self.db).get_user_info_db(approve_account_access_validator.email)
-        response=UserService(self.db).approve_account_access_requests(user_info.id,approve_account_access_validator)
+        response=UserService(self.db).approve_account_access_requests(approve_account_access_validator)
         return response
+    
