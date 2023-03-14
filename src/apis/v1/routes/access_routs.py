@@ -213,6 +213,7 @@ async def get_user_sp_apps_account_access_request(
         response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
         return response
     except Exception as e:
+        print(e)
         return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
