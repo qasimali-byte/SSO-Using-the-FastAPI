@@ -27,7 +27,7 @@ router = APIRouter(tags=["Account Access"])
                         400: {"description": "Bad Request", "model": ErrorResponseValidator},
                         401: {"description": "Unauthorized", "model": ErrorResponseValidator},
                         500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
-            },status_code=200)
+            })
 async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme)):
 
     """
@@ -46,13 +46,13 @@ async def request_account(db: Session = Depends(get_db),authorize: AuthJWT = Dep
                  200: {"model": SuccessfulJsonResponseValidator},
                  400: {"description": "Bad Request", "model": ErrorResponseValidator},
                  401: {"description": "Unauthorized", "model": ErrorResponseValidator},
-                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
-             }, status_code=200)
+                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator},
+                 409:{"description": "User already verified", "model": SuccessfulJsonResponseValidator},
+             })
 
 async def verify_account_request(account_access_verify_validator: VerifyAccountAccessValidator,db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
     ):
 
-    # current_user_email = user_email_role.get_user_email()
     current_user_email = authorize.get_jwt_current_user()
     user_data=AccessController(db).verify_account_access_otp(current_user_email,account_access_verify_validator)
     return user_data
@@ -175,7 +175,14 @@ async def verify_otp_sms(otp_sms_validator: OtpSmsValidator, db: Session = Depen
 
 
 
-@router.put("/submit-account-access-request")
+@router.put("/submit-account-access-request",summary="This API will Submit Account Access requet to superAdmin",responses={
+                 200: {"model": SuccessfulJsonResponseValidator},
+                 400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                 401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                 404: {"description": "Resource not found", "model": ErrorResponseValidator},
+                 409: {"description": "already submitted account access request", "model": SuccessfulJsonResponseValidator},
+                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator},})
+
 async def submit_account_access_request(submit_account_access_validator: SubmitAccountAccessValidator, db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),):
     current_user_email = authorize.get_jwt_current_user()
     response=AccessController(db).submit_account_access_requests(current_user_email,submit_account_access_validator)
@@ -212,9 +219,12 @@ async def get_user_sp_apps_account_access_request(
 
 
 @router.put("/approve-account-access-request",responses={
-    200: {"description": "Account access requests submitted successfully"},
+    200: {"description": "Account access requests approved successfully"},
     400: {"description": "Invalid input data"},
-    500: {"description": "Internal server error"},})
+    500: {"description": "Internal server error"},
+    409:{'description':"User aleady Approved "},
+    404:{'description':"Request Not Found"},})
+# 
 async def approve_account_access_request(approve_account_access_validator: ApproveAccountAccessValidator, db: Session = Depends(get_db)):
     
     try:

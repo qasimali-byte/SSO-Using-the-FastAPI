@@ -63,10 +63,6 @@ class ApproveAccountAccessValidator(BaseModel):
         return sp_apps_ids
 
 
-
-
-
-
 class SPApp(BaseModel):
     requested_email: str
     requested_user_id: str

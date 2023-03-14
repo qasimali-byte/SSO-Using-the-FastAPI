@@ -113,8 +113,8 @@ class SPSService():
             return result_json
 
         except Exception as e:
-            print(e)
-            return []
+            
+            raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def get_sps_app_for_sp_redirections(self, user_email):
         try:
@@ -187,11 +187,10 @@ class SPSService():
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def add_sp_app_verification_status(self,idp_user_id,account_access_verify_validator):
-        print(idp_user_id,account_access_verify_validator)
         existing_idp_sp = self.db.query(idp_sp).filter_by(idp_users_id=idp_user_id, sp_apps_id=int(account_access_verify_validator.requested_sp_app_id),\
             is_verified=True).first()
         if existing_idp_sp:
-            return {'message':"App already verified",'status_code':409}
+            return {'message':"user already verified",'statuscode':409}
         else:
             return self.add_sp_app_verification(idp_user_id,account_access_verify_validator)
     
@@ -206,7 +205,7 @@ class SPSService():
         )
             self.db.add(new_idp_sp)
             self.db.commit()
-            return {'message':"user verified successfully",'status_code':200}
+            return {'message':"user verified successfully",'statuscode':200}
         
 
     def get_sp_app_by_id(self, app_id):
