@@ -62,14 +62,13 @@ class SPSService():
         try:
             
             sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
-            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email,idp_sp.is_accessible == True).all()
             serviceproviders = []
             for i in sp_query:
                 x,y = (i[1],i[2])
                 serviceproviders.append({"id": y.id, "display_name": y.display_name,"name": y.name, "image":y.logo_url,"host_url":y.host, "is_accessible":x.is_accessible,\
                     "sp_app_name": y.display_name,"logo_url": y.logo_url})
             return serviceproviders
-
         except Exception as e:
             return []
         

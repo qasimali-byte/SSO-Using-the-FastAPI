@@ -116,34 +116,31 @@ class SPSController():
             apps_list.append(apps.dict())
             
    
-    def get_apps_selected_unselected(self,total_apps, selected_apps):
-
-        apps_list=[]
-        for t_data in total_apps:
-            not_matched=0
-            apps={}
-            for s_data in selected_apps:
-                if t_data['id']==s_data['id']:            
-                    apps['id']=s_data["id"]
-                    apps['name']=s_data["name"]
-                    apps['sp_app_name']=s_data["display_name"]
-                    apps['logo_url']=s_data["logo_url"]
-                    apps['host_url']=s_data["host_url"]
-                    apps['is_selected'] = True
-                else:
-                    not_matched=not_matched+1
-                if(not_matched==len(selected_apps)):
-                    apps['id']=t_data["id"]
-                    apps['name']=t_data["name"]
-                    apps['sp_app_name']=t_data["display_name"]
-                    apps['logo_url']=t_data["logo_url"]
-                    apps['host_url']=t_data["host_url"]
-                    apps['is_selected'] = False
-            apps_list.append(apps)
+    def get_apps_selected_unselected(self,total_sp_apps, selected_sp_apps):
         
-        return apps_list
-    
-    
+        selected_ids = {app['id']: app for app in selected_sp_apps}
+
+        # Iterate through the total sp apps list, and create the final list of dictionaries
+        final_list = []
+        for app in total_sp_apps:
+            # If the app is in the selected apps list, set its is_selected value based on its is_accessible value
+            if app['id'] in selected_ids:
+                selected_app = selected_ids[app['id']]
+                app['is_selected'] = selected_app['is_accessible']
+            # Otherwise, set its is_selected value to False
+            else:
+                app['is_selected'] = False
+            # Add the app to the final list
+            final_list.append({
+                'id': app['id'],
+                'name': app['name'],
+                'sp_app_name': app['display_name'],
+                'logo_url': app['logo_url'],
+                'host_url': app['host_url'],
+                'is_selected': app['is_selected']
+            })
+
+        return final_list
     
     def get_unaccessible_apps(self,total_apps, selected_apps):
 
