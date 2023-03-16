@@ -10,6 +10,7 @@ from src.apis.v1.models.sp_apps_role_model import sp_apps_role
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.two_factor_authentication_model import two_factor_authentication
 from sqlalchemy import desc
+from dateutil.parser import parse
 class AccessService():
 
     def __init__(self, db):
@@ -83,16 +84,17 @@ class AccessService():
                 idp_sp.requested_email.label('requested_email'), 
                 idp_sp.requested_user_id.label('requested_user_id'), 
                 idp_sp.requested_date.label('requested_date'), 
-                SPAPPS.name.label('sp_app_name'), 
-                SPAPPS.id.label('sp_app_id')
+                SPAPPS.display_name.label('sp_app_name'), 
+                SPAPPS.id.label('sp_app_id'),
+                SPAPPS.logo_url.label('sp_apps_logo'),
+                idp_sp.is_accessible.label('is_accessible')
             )
             .select_from(idp_users)
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
             .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id)
             .filter(idp_sp.is_requested == True, idp_sp.is_verified == True, idp_sp.is_accessible == False)
         )
-        
-        # Filter results by search query
+
         if search:
             query = query.filter(
                 or_(
@@ -102,47 +104,52 @@ class AccessService():
                     idp_sp.requested_email.ilike(f"%{search}%"),
                 )
             )
-        
-        # Get total count of distinct users
+
         total_results = (
             self.db.query(func.count(distinct(idp_users.id)))
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
             .filter(idp_sp.is_requested == True, idp_sp.is_verified == True, idp_sp.is_accessible == False)
             .scalar()
         )
-        
-        # Apply grouping by user to return distinct users with all their associated sp_apps
+
         results = (
             query
-            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, idp_sp.requested_date, SPAPPS.name, SPAPPS.id)
+            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, idp_sp.requested_date, SPAPPS.name, SPAPPS.id, idp_sp.is_accessible)
             .order_by(idp_users.id, desc(order_by) if latest else order_by)
             .all()
         )
-            
+
         users_dict = {}
         for result in results:
             if result.id in users_dict:
                 users_dict[result.id]['sp_apps'].append({
                     'requested_email': result.requested_email,
                     'requested_user_id': result.requested_user_id,
-                    'requested_date': result.requested_date.isoformat(),
                     'sp_app_name': result.sp_app_name,
-                    'sp_app_id': result.sp_app_id
+                    'sp_app_id': result.sp_app_id,
+                    'sp_apps_logo': result.sp_apps_logo,
+                    'is_accessible': result.is_accessible
                 })
+                current_user_requested_date = parse(users_dict[result.id]['requested_date'])
+                if result.requested_date > current_user_requested_date:
+                    users_dict[result.id]['requested_date'] = result.requested_date.isoformat()
             else:
                 users_dict[result.id] = {
                     'id': result.id,
                     'username': result.username,
                     'email': result.email,
+                    'requested_date': result.requested_date.isoformat(),
                     'sp_apps': [{
                         'requested_email': result.requested_email,
                         'requested_user_id': result.requested_user_id,
-                        'requested_date': result.requested_date.isoformat(),
                         'sp_app_name': result.sp_app_name,
-                        'sp_app_id': result.sp_app_id
+                        'sp_app_id': result.sp_app_id,
+                        'sp_apps_logo': result.sp_apps_logo,
+                        'is_accessible': result.is_accessible
                     }]
                 }
 
+        users_list = []
         # Paginate by user ID, not by the sp_apps ID
         users_list = []
         user_ids = sorted(users_dict.keys())
@@ -153,10 +160,12 @@ class AccessService():
         # Split users_list into pages
         total_results = len(users_list)
     
-
         return {
             'total_results': total_results,
             'page': page,
             'limit': limit,
             'users_list': users_list,
+            'message':'successfully fetched account access request data',
+            'statuscode':200
+            
         }

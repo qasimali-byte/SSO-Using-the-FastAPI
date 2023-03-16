@@ -113,7 +113,12 @@ async def send_otp_products(products_validator: OtpProductsValidator,
 
 
 @router.post("/send-account-access-otp", summary="Send OTP via email for account access request",
-             responses={200: {"model": SuccessfulJsonResponseValidator}}, status_code=200)
+             responses={200: {"model": SuccessfulJsonResponseValidator},                         
+                 400: {"description": "Bad Request", "model": ErrorResponseValidator},
+                 401: {"description": "Unauthorized", "model": ErrorResponseValidator},
+                 404: {"description": "Invalid Email", "model": ErrorResponseValidator},
+                 500: {"description": "Internal Server Error", "model": ErrorResponseValidator}
+                        }, status_code=200)
 async def send_account_access_otp(account_access_validator: OtpaccountaccessValidator,
                             db: Session = Depends(get_db),authorize: AuthJWT = Depends(), token: str = Depends(oauth2_scheme),\
                             ):

@@ -120,18 +120,22 @@ class OtpSmsValidator(BaseModel):
 class SPApp(BaseModel):
     requested_email: str
     requested_user_id: str
-    requested_date: datetime
     sp_app_name: str
+    sp_apps_logo:str
     sp_app_id: int
+    is_accessible:bool
 
 class User(BaseModel):
     id: int
     username: str
     email: str
+    requested_date: datetime
     sp_apps: List[SPApp]
 
 class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
     total_results: int
     page: int
     limit: int
-    users_list:  Optional[List[User]]=list([])
+    users_list:  Optional[List[User]]=None
+    message:str
+    statuscode:int
