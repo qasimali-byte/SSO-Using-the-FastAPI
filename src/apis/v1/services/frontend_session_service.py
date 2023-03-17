@@ -7,6 +7,7 @@ class FrontendSessionService():
 
     def insert_frontend_session_saml(self, **kwargs):
         try:
+            print('stored frontend session-------------------')
             add_session = SAMLUserSession(**kwargs)
             self.db.add(add_session)
             self.db.commit()
