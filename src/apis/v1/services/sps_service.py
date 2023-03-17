@@ -32,7 +32,6 @@ class SPSService():
     def get_sps_app_by_name(self, name):
         try:
             value = self.db.query(SPAPPS).filter_by(name=name).first()
-            print(vars(value))
             return value
         except:
             return False
@@ -158,8 +157,6 @@ class SPSService():
                     serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'http://'+y.host}))
                 else:
                     serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
-                
-            print(serviceproviders)
             return serviceproviders
 
         except Exception as e:
