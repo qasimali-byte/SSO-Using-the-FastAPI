@@ -112,6 +112,7 @@ class SessionController(Generic[ID, SessionModel]):
 
     @staticmethod
     def check_session_db(db, cookie_id):
+        print('check_session_db function')
         try:
             session_ = SessionStore(db)
             if session_.get("cookie_id",cookie_id):
@@ -132,6 +133,7 @@ class SessionController(Generic[ID, SessionModel]):
 
     @staticmethod
     def verify_session(cookie,request):
+        print('verifying session functionality')
         try:
             signed_session_id = request.cookies.get(cookie.model.name)
             if not signed_session_id:
