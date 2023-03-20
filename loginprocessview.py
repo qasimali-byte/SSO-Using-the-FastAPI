@@ -101,6 +101,8 @@ class LoginProcessView():
         self.sp_metadata_name = sp_metadata_name
         sps_allowed = SPSService(db).get_sps_app_for_sp_redirections(user_email)
         print('sps_allowed----',sps_allowed)
+        targeted_sp_app=get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name)
+        print('targeted_sp_app--',targeted_sp_app)
         if sps_allowed:
             if get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name):
                 return status.HTTP_200_OK
