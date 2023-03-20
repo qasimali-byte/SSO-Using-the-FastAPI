@@ -140,10 +140,12 @@ async def sso_redirect(request: Request, SAMLRequest: str,
 
             email_ = req.get_userid(verified_id[0],db)
             print('email_-------',email_)
+            
             print('verified_id[0]------',verified_id[0])
             status_code = req.verify_app_allowed(SAMLRequest,db,email_)
             if status_code == 307:
                 return templates.TemplateResponse("notification.html",{"request": request})
+            # here we will decide either users rediraction
             resp = req.get(SAMLRequest,email_,db)
             print('-----------','resp',resp)
             resp = resp[0]
@@ -152,13 +154,13 @@ async def sso_redirect(request: Request, SAMLRequest: str,
     session = uuid4()
     # store the cookie in db
     IDPController(db).store_frontend_saml(session,SAMLRequest)
-    # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host = Settings().SSO_FRONTEND_URL
     # logout the user from frontend as well
     
     # response = RedirectResponse(url="http://{}/sign-in".format("localhost:8088"))
 
-    response = RedirectResponse(url="{}sign-in".format(host)) 
+    # response = RedirectResponse(url="{}sign-in".format(host)) 
     cookie_frontend.attach_to_response(response, session)
     print(cookie_frontend, vars(cookie_frontend), "---cookie--", vars(response))
     return response
