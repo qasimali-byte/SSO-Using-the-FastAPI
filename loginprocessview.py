@@ -1,6 +1,7 @@
 from fastapi import HTTPException,status
 import json
 from src.apis.v1.constants.sp_application_enums import SpAppsEnum
+from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.helpers.filter_List_dictionaries import get_item
 from src.apis.v1.routes import practices_routes
 from src.apis.v1.services.roles_service import RolesService
@@ -89,6 +90,9 @@ class LoginProcessView():
         else:
             raise HTTPException(status_code=500, detail="NO SP APP FOUND")
 
+    def get_sp_apps_email(self,db:Session,sp_apps_id:int,primary_email:str):
+        return SPSController(db).get_sp_apps_email(sp_apps_id,primary_email)
+    
     def verify_app_allowed(self, request_parms, db: Session, user_email: str) -> bool:
         ## verifies whether is app allowed to the user or not
         saml_msg = request_parms

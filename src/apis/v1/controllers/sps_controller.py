@@ -251,3 +251,7 @@ class SPSController():
     def get_sp_app_by_id(self,sp_app_id):
         sp_app_data=SPSService(self.db).get_sp_app_by_id(sp_app_id)
         return sp_app_data
+    
+    def get_sp_apps_email(self,sp_apps_id,primary_email):
+        sp_app_email=SPSService(self.db).get_sp_apps_email(sp_apps_id,primary_email)
+        return sp_app_email
