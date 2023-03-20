@@ -102,11 +102,10 @@ class LoginProcessView():
         sps_allowed = SPSService(db).get_sps_app_for_sp_redirections(user_email)
         print('sps_allowed----',sps_allowed)
         targeted_sp_app=get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name)
-        print('targeted_sp_app id ----',targeted_sp_app['id'],type(targeted_sp_app['id']))
         print('targeted_sp_app--',targeted_sp_app)
         if sps_allowed:
             if get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name):
-                return status.HTTP_200_OK
+                return {'status_code':status.HTTP_200_OK,"targeted_sp_app_id":targeted_sp_app['id']}
             else:
                 return status.HTTP_307_TEMPORARY_REDIRECT
         return status.HTTP_404_NOT_FOUND 
@@ -160,7 +159,32 @@ class LoginProcessView():
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
         users_info["email"] = email
         identity = json_updated_data
+        print('identity---',identity)
+        nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
+             text=email)
+        value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,**resp_args)
 
+        http_args = self.idp_server.apply_binding(
+            binding=BINDING_HTTP_POST,
+            msg_str=value,
+            destination=resp_args['destination'],
+            response=True)
+
+        html_response = {
+            "data": http_args,
+            "type": "REDIRECT",
+        }
+        return html_response, resp_args
+    
+    
+    def get_multiple_account_access(self, request_parms, email,db: Session):
+        from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
+
+        saml_msg =request_parms
+        data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
+        verify_request_signature(data)
+        resp_args = self.idp_server.response_args(data.message)
+        identity = {'email':email}
 
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=email)
