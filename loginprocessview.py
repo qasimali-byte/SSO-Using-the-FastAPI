@@ -33,11 +33,13 @@ class LoginProcessView():
             store.delete(user_cookie)
 
         if not store.get(session_id):
+            print('yo i am not in session')
             store.set(session_id, email)
             return "stored session"
         return "stored user session"
 
     def get_userid(self, session_id, db: Session):
+        print('get_userid function',session_id)
         store = StoreSession(db)
         usersession_obj = store.get(session_id)
         if usersession_obj :
