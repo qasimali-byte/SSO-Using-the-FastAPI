@@ -93,8 +93,10 @@ class LoginProcessView():
         ## verifies whether is app allowed to the user or not
         saml_msg = request_parms
         data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
+        print('saml data-----',data)
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
+        print('resp_args---',resp_args)
         sp_metadata_name = self.get_sp_name(resp_args)
         self.sp_metadata_name = sp_metadata_name
         sps_allowed = SPSService(db).get_sps_app_for_sp_redirections(user_email)
