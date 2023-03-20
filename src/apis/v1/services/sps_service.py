@@ -221,7 +221,6 @@ class SPSService():
         
     def get_sp_apps_email(self,targeted_sp_app_id,email_):
         result = self.db.query(idp_users_sp_apps_email.sp_apps_email)\
-                .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_)\
-                .one()
+                .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_).scalar()
         return result
 
