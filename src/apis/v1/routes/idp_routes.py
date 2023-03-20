@@ -140,10 +140,12 @@ async def sso_redirect(request: Request, SAMLRequest: str,
 
             email_ = req.get_userid(verified_id[0],db)
             print('email_-------',email_)
+            
             print('verified_id[0]------',verified_id[0])
             status_code = req.verify_app_allowed(SAMLRequest,db,email_)
             if status_code == 307:
                 return templates.TemplateResponse("notification.html",{"request": request})
+            # here we will decide either users rediraction
             resp = req.get(SAMLRequest,email_,db)
             print('-----------','resp',resp)
             resp = resp[0]
