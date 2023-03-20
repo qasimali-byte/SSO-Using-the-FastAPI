@@ -153,7 +153,6 @@ async def sso_redirect(request: Request, SAMLRequest: str,
             if result is not None:
                 sp_apps_email = result
                 resp=req.get_multiple_account_access(SAMLRequest,sp_apps_email,db)
-                # do something with sp_apps_email
             else:
                 resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]
