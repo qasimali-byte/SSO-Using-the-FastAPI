@@ -112,7 +112,7 @@ class SessionController(Generic[ID, SessionModel]):
 
     @staticmethod
     def check_session_db(db, cookie_id):
-        print('check_session_db function')
+        print('check_session_db function',cookie_id)
         try:
             session_ = SessionStore(db)
             if session_.get("cookie_id",cookie_id):
