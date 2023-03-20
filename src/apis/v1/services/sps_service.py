@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 import os
+
+from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
@@ -216,4 +218,10 @@ class SPSService():
             return app_list
         else:
             return list([])
+        
+    def get_sp_apps_email(self,targeted_sp_app_id,email_):
+        result = self.db.query(idp_users_sp_apps_email.sp_apps_email)\
+                .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_)\
+                .one()
+        return result
 

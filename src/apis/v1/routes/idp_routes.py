@@ -148,9 +148,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,
                 return templates.TemplateResponse("notification.html",{"request": request})
             # here we will decide either users rediraction
             targeted_sp_app_id=resp['targeted_sp_app_id']
-            result = session.query(idp_users_sp_apps_email.sp_apps_email)\
-                      .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_)\
-                      .one()
+            result=req.get_sp_apps_email(db,targeted_sp_app_id,email_)
     
             if result is not None:
                 sp_apps_email = result
