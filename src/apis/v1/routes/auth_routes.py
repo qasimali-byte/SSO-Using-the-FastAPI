@@ -90,8 +90,8 @@ async def sso_login(login_validator: LoginValidator, request: Request,
             if auth_result[1] != 200:
                 response = custom_response(data=auth_result[0], status_code=auth_result[1])
                 return response
-            
-            status_code = req.verify_app_allowed(verified_data[0].saml_req,db,email)
+            resp=req.verify_app_allowed(verified_data[0].saml_req,db,email)
+            status_code = resp['status_code']
             application_entity_id = req.return_sp_app_name()
             if status_code == 307:
                 session = uuid4()

@@ -30,6 +30,7 @@ from saml2 import (
 from saml2.time_util import in_a_while
 
 from serializers import SamlRequestSerializer
+from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
 
 router = APIRouter(tags=["Identity Provider"])
 templates = Jinja2Templates(directory="templates/")
@@ -140,14 +141,23 @@ async def sso_redirect(request: Request, SAMLRequest: str,
 
             email_ = req.get_userid(verified_id[0],db)
             print('email_-------',email_)
-            
             print('verified_id[0]------',verified_id[0])
-            status_code = req.verify_app_allowed(SAMLRequest,db,email_)
+            resp=req.verify_app_allowed(SAMLRequest,db,email_)
+            status_code = resp['status_code']
             if status_code == 307:
                 return templates.TemplateResponse("notification.html",{"request": request})
             # here we will decide either users rediraction
-            resp = req.get(SAMLRequest,email_,db)
-            print('-----------','resp',resp)
+            targeted_sp_app_id=resp['targeted_sp_app_id']
+            result = session.query(idp_users_sp_apps_email.sp_apps_email)\
+                      .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_)\
+                      .one()
+    
+            if result is not None:
+                sp_apps_email = result
+                resp=req.get_multiple_account_access(SAMLRequest,sp_apps_email,db)
+                # do something with sp_apps_email
+            else:
+                resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]
             return HTMLResponse(content=resp["data"]["data"])
 
@@ -201,8 +211,8 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
         return templates.TemplateResponse("loginform.html", {"request": request, "saml_request": saml_request,
                                                              "error": "Invalid username or password"})
     # print(vars(request))
-    status_code = resp.verify_app_allowed(saml_request,db,email)
-
+    response=resp.verify_app_allowed(saml_request,db,email)
+    status_code = response['status_code']
     if status_code == 307:
         return templates.TemplateResponse("notification.html",{"request": request,})
     # print(request.headers['referer'])
