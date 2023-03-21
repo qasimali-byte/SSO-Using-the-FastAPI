@@ -119,7 +119,6 @@ class LoginProcessView():
 
     def get(self, request_parms, email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
-
         saml_msg =request_parms
         data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
         verify_request_signature(data)
@@ -181,18 +180,30 @@ class LoginProcessView():
         return html_response, resp_args
     
     
-    def get_multiple_account_access(self, request_parms, email,db: Session):
+    def get_multiple_account_access(self, request_parms, sp_apps_email,primary_email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
 
         saml_msg =request_parms
         data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
         verify_request_signature(data)
         resp_args = self.idp_server.response_args(data.message)
-        identity =  {'username': 'Saimon4Test', 'email': 'saimon4@mailinator.com', 'first_name': 'Saimon4', 'last_name': 'Test', 'app_practices': ["['At Medics', 'Bank House Surgery', 'Accounts Manager']", "['At Medics', 'Barlby Surgery', 'Accounts Manager']", "['At Medics', 'Brunswick Medical Centre', 'Accounts Manager']", "['At Medics', 'Burnley Practice', 'Accounts Manager']", "['At Medics', 'Camden Health Improvement Practice', 'Accounts Manager']", "['At Medics', 'Canberra Old Oak Surgery', 'Accounts Manager']", "['At Medics', 'Carpenters Road Practice', 'Accounts Manager']", "['At Medics', 'Cassidy Medical Centre', 'Accounts Manager']", "['At Medics', 'E16 Health - Albert Road And Pontoon Dock', 'Accounts Manager']", "['At Medics', 'Earls Court Health And Wellbeing Centre', 'Accounts Manager']", "['At Medics', 'East One Health', 'Accounts Manager']", "['At Medics', 'Edith Cavell Surgery', 'Accounts Manager']", "['At Medics', 'Falmouth Road Group Practice', 'Accounts Manager']", "['At Medics', 'Fieldway Medical Centre', 'Accounts Manager']", "['At Medics', 'Hanley Primary Care Centre', 'Accounts Manager']", "['At Medics', 'Headley Drive Surgery', 'Accounts Manager']", "['At Medics', 'Kings Cross Surgery', 'Accounts Manager']", "['At Medics', 'Kings Road Medical Centre', 'Accounts Manager']", "['At Medics', 'Lucas Avenue Practice', 'Accounts Manager']", "['At Medics', 'Mitchison Road Surgery', 'Accounts Manager']", "['At Medics', 'Mollison Way Surgery', 'Accounts Manager']", "['At Medics', 'New Addington Group', 'Accounts Manager']", "['At Medics', 'Queens Road Practice', 'Accounts Manager']", "['At Medics', 'Randolph Surgery', 'Accounts Manager']", "['At Medics', 'Silverlock Medical Centre', 'Accounts Manager']", "['At Medics', 'Somers Town Medical Center', 'Accounts Manager']", "['At Medics', 'St. Anns Road Surgery', 'Accounts Manager']", "['At Medics', 'Streatham High Practice', 'Accounts Manager']", "['At Medics', 'Thamesmead Health Center', 'Accounts Manager']", "['At Medics', 'The Green House Surgery', 'Accounts Manager']", "['At Medics', 'The Hambleden Clinic', 'Accounts Manager']", "['At Medics', 'The Lister Practice', 'Accounts Manager']", "['At Medics', 'The Loxford Practice', 'Accounts Manager']", "['At Medics', 'The Ordnance Unity Centre For Health', 'Accounts Manager']", "['At Medics', 'The Wembley Practice', 'Accounts Manager']", "['At Medics', 'Thornton Road Surgery', 'Accounts Manager']", "['At Medics', 'Trowbridge Surgery', 'Accounts Manager']", "['At Medics', 'Valley Park Surgery', 'Accounts Manager']", "['At Medics', 'Whitechapel Health Centre', 'Accounts Manager']"], 'products': ["{'name': 'ez-login', 'logo': 'http://dev-sso-app.attech-ltd.com/api/v1/image/EZLOGO.svg', 'url': 'http://dev-sso-frontend.attech-ltd.com/'}", "{'name': 'ez-analytics', 'logo': 'http://dev-sso-app.attech-ltd.com/api/v1/image/EZANALYTICS.svg', 'url': 'https://dev.ezanalytics.co.uk/bi'}"]}
-
+        # identity =  {'username': 'Saimon4Test', 'email': 'saimon4@mailinator.com', 'first_name': 'Saimon4', 'last_name': 'Test', 'app_practices': ["['At Medics', 'Bank House Surgery', 'Accounts Manager']", "['At Medics', 'Barlby Surgery', 'Accounts Manager']", "['At Medics', 'Brunswick Medical Centre', 'Accounts Manager']", "['At Medics', 'Burnley Practice', 'Accounts Manager']", "['At Medics', 'Camden Health Improvement Practice', 'Accounts Manager']", "['At Medics', 'Canberra Old Oak Surgery', 'Accounts Manager']", "['At Medics', 'Carpenters Road Practice', 'Accounts Manager']", "['At Medics', 'Cassidy Medical Centre', 'Accounts Manager']", "['At Medics', 'E16 Health - Albert Road And Pontoon Dock', 'Accounts Manager']", "['At Medics', 'Earls Court Health And Wellbeing Centre', 'Accounts Manager']", "['At Medics', 'East One Health', 'Accounts Manager']", "['At Medics', 'Edith Cavell Surgery', 'Accounts Manager']", "['At Medics', 'Falmouth Road Group Practice', 'Accounts Manager']", "['At Medics', 'Fieldway Medical Centre', 'Accounts Manager']", "['At Medics', 'Hanley Primary Care Centre', 'Accounts Manager']", "['At Medics', 'Headley Drive Surgery', 'Accounts Manager']", "['At Medics', 'Kings Cross Surgery', 'Accounts Manager']", "['At Medics', 'Kings Road Medical Centre', 'Accounts Manager']", "['At Medics', 'Lucas Avenue Practice', 'Accounts Manager']", "['At Medics', 'Mitchison Road Surgery', 'Accounts Manager']", "['At Medics', 'Mollison Way Surgery', 'Accounts Manager']", "['At Medics', 'New Addington Group', 'Accounts Manager']", "['At Medics', 'Queens Road Practice', 'Accounts Manager']", "['At Medics', 'Randolph Surgery', 'Accounts Manager']", "['At Medics', 'Silverlock Medical Centre', 'Accounts Manager']", "['At Medics', 'Somers Town Medical Center', 'Accounts Manager']", "['At Medics', 'St. Anns Road Surgery', 'Accounts Manager']", "['At Medics', 'Streatham High Practice', 'Accounts Manager']", "['At Medics', 'Thamesmead Health Center', 'Accounts Manager']", "['At Medics', 'The Green House Surgery', 'Accounts Manager']", "['At Medics', 'The Hambleden Clinic', 'Accounts Manager']", "['At Medics', 'The Lister Practice', 'Accounts Manager']", "['At Medics', 'The Loxford Practice', 'Accounts Manager']", "['At Medics', 'The Ordnance Unity Centre For Health', 'Accounts Manager']", "['At Medics', 'The Wembley Practice', 'Accounts Manager']", "['At Medics', 'Thornton Road Surgery', 'Accounts Manager']", "['At Medics', 'Trowbridge Surgery', 'Accounts Manager']", "['At Medics', 'Valley Park Surgery', 'Accounts Manager']", "['At Medics', 'Whitechapel Health Centre', 'Accounts Manager']"], 'products': ["{'name': 'ez-login', 'logo': 'http://dev-sso-app.attech-ltd.com/api/v1/image/EZLOGO.svg', 'url': 'http://dev-sso-frontend.attech-ltd.com/'}", "{'name': 'ez-analytics', 'logo': 'http://dev-sso-app.attech-ltd.com/api/v1/image/EZANALYTICS.svg', 'url': 'https://dev.ezanalytics.co.uk/bi'}"]}
+        sps_app_object = SPSService(db)
+        selected_apps = sps_app_object.get_selected_sps_app_for_idp_user(primary_email)
+        identity = {
+        'username': primary_email,
+        'email': sp_apps_email,
+        'first_name': '',
+        'last_name': '',
+        'app_practices': [],
+        'products': selected_apps
+            }
+        
+        
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
-             text=email)
-        value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,**resp_args)
+             text=sp_apps_email)
+        print(identity)
+        value = self.idp_server.create_authn_response(identity,name_id=nid,userid=sp_apps_email,encrypt_cert_assertion=None,**resp_args)
 
         http_args = self.idp_server.apply_binding(
             binding=BINDING_HTTP_POST,

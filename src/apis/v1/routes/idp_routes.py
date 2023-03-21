@@ -134,6 +134,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
 
     verified_id = SessionController().verify_session(cookie, request)
+    print('verified_id[1]--',verified_id[1])
     if verified_id[1] == 200:
         # verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
         verified_status = SessionController().check_session_db(db, verified_id[0])
@@ -148,11 +149,13 @@ async def sso_redirect(request: Request, SAMLRequest: str,
                 return templates.TemplateResponse("notification.html",{"request": request})
             # here we will decide either users rediraction
             targeted_sp_app_id=resp['targeted_sp_app_id']
+            print('targeted_sp_app_id-----',targeted_sp_app_id)
             result=req.get_sp_apps_email(db,targeted_sp_app_id,email_)
-    
+            print('result-----',result)
             if result is not None:
                 sp_apps_email = result
-                resp=req.get_multiple_account_access(SAMLRequest,sp_apps_email,db)
+                print('-------------- i am here')
+                resp=req.get_multiple_account_access(SAMLRequest,sp_apps_email,email_,db)
             else:
                 resp = req.get(SAMLRequest,email_,db)
             resp = resp[0]
@@ -213,12 +216,20 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     if status_code == 307:
         return templates.TemplateResponse("notification.html",{"request": request,})
     # print(request.headers['referer'])
-    print(saml_request, "---saml_request")
+    targeted_sp_app_id=response['targeted_sp_app_id']
+    print('targeted_sp_app_id-----',targeted_sp_app_id)
+    result=resp.get_sp_apps_email(db,targeted_sp_app_id,email)
+    print('result-----',result)
     session = uuid4()
-    print(session)
+    if result is not None:
+        sp_apps_email = result
+        print('-------------- i am here')
+        resp.store_session(session,email,db)
+        resp=resp.get_multiple_account_access(saml_request,sp_apps_email,email,db)
+    else:
+        resp.store_session(session,email,db)
+        resp = resp.get(saml_request,email,db)
     ## store session in the database
-    resp.store_session(session,email,db)
-    resp = resp.get(saml_request, email,db)
     application_entity_id = resp[1]['sp_entity_id']
     resp = resp[0]
     print(application_entity_id,"application entity id")

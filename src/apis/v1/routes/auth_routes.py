@@ -79,7 +79,6 @@ async def sso_login(login_validator: LoginValidator, request: Request,
     login_dict = login_validator.dict()
     email, password = login_dict["email"], login_dict["password"]
     verified_id = SessionController().verify_session(cookie_frontend, request)
-    print('------verified id',verified_id)
     if verified_id[1] == 200:
         idp_controller = IDPController(db)
         verified_data = idp_controller.get_frontend_session_saml(verified_id[0])
