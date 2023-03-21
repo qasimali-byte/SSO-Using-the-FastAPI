@@ -108,8 +108,13 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                 cookie.attach_to_response(response, session)
                 delete_all_cookies(response, only_frontend=True)
                 return response
-
-            resp = req.get(verified_data[0].saml_req,email,db)
+            targeted_sp_app_id=resp['targeted_sp_app_id']
+            result=req.get_sp_apps_email(db,targeted_sp_app_id,email)
+            if result is not None:
+                sp_apps_email = result
+                resp=req.get_multiple_account_access(verified_data[0].saml_req,sp_apps_email,email,db)
+            else:
+                resp = req.get(verified_data[0].saml_req,email,db)
             resp = resp[0]
             # delete frontend cookie from redis store.
             # del sessionStorage[verified_id[0]]
