@@ -60,6 +60,7 @@ class AuthController:
         get_ezlogin_roles_only = RolesService(self.db).get_ezlogin_role_only(user_info_data.id)
         access_token = authorize.create_access_token(subject=email,roles=get_ezlogin_roles_only,fresh=True)
         refresh_token = authorize.create_refresh_token(subject=email,roles=get_ezlogin_roles_only)
+        print('i am here -------------------------------')
         data = LoginValidatorOut(
             product_name="ezlogin",
             message="successfully authenticated",
