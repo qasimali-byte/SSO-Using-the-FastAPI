@@ -121,6 +121,7 @@ async def sso_redirect(request: Request, SAMLRequest: str,
                        sessionStorage: SessionStorage = Depends(getSessionStorage),
                        db: Session = Depends(get_db)
                        ):
+    # this will be use for idp-initiated login
     # validate saml request parameter
     # if not validate_saml_request(SAMLRequest):
     # return Response(status_code=400, content="Invalid SAML Request")
@@ -184,6 +185,7 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
 
     # print(request['referer'])
     '''
+    this will also is using in idp initiated login flow
     '''
     valid_session = True
 

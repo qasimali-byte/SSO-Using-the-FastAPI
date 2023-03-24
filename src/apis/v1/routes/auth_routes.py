@@ -67,6 +67,7 @@ async def sso_login(login_validator: LoginValidator, request: Request,
                     sessionStorage: SessionStorage = Depends(getSessionStorage),
                     db: Session = Depends(get_db),
                     authorize: AuthJWT = Depends()):
+    # this will used for service providers
     # validate the cookie in db
     # if unique cookie is valid, use all emails
     # if email is admin: return cookie_idp + token
