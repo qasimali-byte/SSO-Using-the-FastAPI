@@ -133,27 +133,27 @@ class AccessController():
     async def send_otp_for_account_access_request(self, account_access_validator):
 
         get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.requested_sp_app_id)
-        # email_verification_url=get_sp_app_data[0]['email_verification_url']
-        # validation_payload = {"email": account_access_validator.requested_email}
-        # validation_response = requests.post(email_verification_url, data=validation_payload)
-        # validation_json = validation_response.json()
-        # if validation_json.get("code") == 200:
-        OTP = ''.join([random.choice("0123456789") for _ in range(4)])
-        otp_apps = f"{OTP}+{str(account_access_validator.requested_sp_app_id)}"
-        redis_client.setex(name=account_access_validator.requested_email + ",products", value=otp_apps, time=15 * 60 + 5)
-        date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
-        natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
-        data = {
-            "name": "There",
-            "recipient": account_access_validator.requested_email,
-            "products": get_sp_app_data,
-            "otp": OTP,
-            "expires": natural_datetime,
-        }
-        task = otp_sender_products.delay(user_data=data)
-        return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
-        # else:
-        #     return {"message": "Invalid email address",'statuscode':404}
+        email_verification_url=get_sp_app_data[0]['email_verification_url']
+        validation_payload = {"email": account_access_validator.requested_email}
+        validation_response = requests.post(email_verification_url, data=validation_payload)
+        validation_json = validation_response.json()
+        if validation_json.get("code") == 200:
+            OTP = ''.join([random.choice("0123456789") for _ in range(4)])
+            otp_apps = f"{OTP}+{str(account_access_validator.requested_sp_app_id)}"
+            redis_client.setex(name=account_access_validator.requested_email + ",products", value=otp_apps, time=15 * 60 + 5)
+            date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+            natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
+            data = {
+                "name": "There",
+                "recipient": account_access_validator.requested_email,
+                "products": get_sp_app_data,
+                "otp": OTP,
+                "expires": natural_datetime,
+            }
+            task = otp_sender_products.delay(user_data=data)
+            return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
+        else:
+            return {"message": "Invalid email address",'statuscode':404}
 
     def verify_otp_email(self, otp_validator):
         saved_otp_hash = redis_client.get(otp_validator.email)
