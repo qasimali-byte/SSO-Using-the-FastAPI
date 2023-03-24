@@ -153,7 +153,10 @@ class AccessController():
             task = otp_sender_products.delay(user_data=data)
             return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
         else:
-            return {"message": "Invalid email address",'status_code':status.HTTP_404_NOT_FOUND}
+            data= {"message": "Invalid email address",'statuscode':status.HTTP_404_NOT_FOUND}
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+            
 
     def verify_otp_email(self, otp_validator):
         saved_otp_hash = redis_client.get(otp_validator.email)
