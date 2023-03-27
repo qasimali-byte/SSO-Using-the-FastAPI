@@ -39,6 +39,7 @@ class UnAccessibleServiceProvider(BaseModel):
     is_verified: bool
     is_accessible: bool
     requested_email: Optional[str] = None
+    is_requested:bool
 
 class ListUnAccessibleServiceProviderValidatorOut(BaseModel):
     serviceproviders: Optional[List[UnAccessibleServiceProvider]] = None

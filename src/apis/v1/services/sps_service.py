@@ -82,13 +82,14 @@ class SPSService():
                 idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == True)
             
             subquery_2 = self.db.query(idp_sp.id, idp_sp.is_accessible, idp_sp.is_verified, 
-                                            idp_sp.sp_apps_id, idp_sp.requested_email).\
+                                            idp_sp.sp_apps_id, idp_sp.requested_email,idp_sp.is_requested).\
                             filter(idp_sp.idp_users_id == selected_user_id, idp_sp.is_accessible == False).\
                             subquery()
             query = self.db.query(SPAPPS.id.label("app_id"), SPAPPS.name.label("app_name"),
                                         SPAPPS.display_name.label("display_name"), SPAPPS.logo_url.label("image"),
                                         subquery_2.c.is_verified.label("is_verified"), 
                                         subquery_2.c.is_accessible.label("is_accessible"),
+                                        subquery_2.c.is_requested.label("is_requested"),
                                         subquery_2.c.requested_email.label("requested_email")).\
                             filter(SPAPPS.id.notin_(subquery_1)).\
                             outerjoin(subquery_2, SPAPPS.id == subquery_2.c.sp_apps_id).\
@@ -103,7 +104,8 @@ class SPSService():
                     "display_name": row["display_name"],
                     "image": row["image"],
                     "is_verified": row["is_verified"] or False,  # set to False if is_verified is None
-                    "is_accessible": row["is_accessible"] or False,  # set to False if is_accessible is None
+                    "is_accessible": row["is_accessible"] or False,
+                    "is_requested":row["is_requested"] or False, # set to False if is_accessible is None
                     "requested_email": row["requested_email"] if row["is_verified"] else None  # set to None if is_verified is False
                 }
                 result_list.append(result_dict)
@@ -113,7 +115,7 @@ class SPSService():
             return result_json
 
         except Exception as e:
-            
+            print(e)
             raise CustomException(message=str(e)+"error occured in sps service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def get_sps_app_for_sp_redirections(self, user_email):
