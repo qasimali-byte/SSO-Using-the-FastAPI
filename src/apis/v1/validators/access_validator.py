@@ -119,7 +119,7 @@ class OtpSmsValidator(BaseModel):
 
 class SPApp(BaseModel):
     requested_email: str
-    requested_user_id: str
+    requested_user_id: Union[str,int]=None
     sp_app_name: str
     sp_apps_logo:str
     sp_app_id: int
