@@ -396,7 +396,8 @@ class UserService():
                     idp_sp.sp_apps_id.in_(sp_apps_ids),
                     idp_sp.is_verified == True,
                     idp_sp.is_accessible != True,
-                    idp_sp.is_requested==True).all()     
+                    idp_sp.is_requested==True,
+                    ).all()     
         if is_user_already_requested:
             return {'message':'already submitted account access request','statuscode':409}
 
@@ -406,7 +407,7 @@ class UserService():
                             idp_sp.sp_apps_id.in_(sp_apps_ids),
                             idp_sp.is_verified == True ,
                             idp_sp.is_accessible != True).\
-                        update({idp_sp.is_requested: True, idp_sp.requested_date: datetime.utcnow()}):
+                        update({idp_sp.is_requested: True,idp_sp.action:'pending', idp_sp.requested_date: datetime.utcnow()}):
                 self.db.commit()
                 return {'message': 'account access request successful sent to super admin', 'statuscode':200}
             else:
@@ -444,23 +445,38 @@ class UserService():
                 
             except Exception as e:
                 raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-      
-    def approve_account_access_requests(self, approve_account_access_validator):
-        user_info=UserService(self.db).get_user_info_db(approve_account_access_validator.email)
-        sp_apps_ids=approve_account_access_validator.sp_apps_ids
+            
+    def approve_reject_account_access_requests(self, approve_reject_account_access_validator):
+        user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
+        accepted_sp_apps_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
+        rejected_sp_apps_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
+        print(rejected_sp_apps_ids)
         try:
-            self.db.query(idp_sp).\
-                filter(idp_sp.idp_users_id == user_info.id,
-                    idp_sp.sp_apps_id.in_(sp_apps_ids),
-                    idp_sp.is_verified == True,
-                    idp_sp.is_requested==True).\
-                update({idp_sp.is_accessible: True, idp_sp.action_date: datetime.utcnow()})
-            self.db.commit()
-            return self.add_sp_apps_account_access_email(user_info.id, user_info.email,sp_apps_ids)
+            if accepted_sp_apps_ids:
+                self.db.query(idp_sp).\
+                    filter(idp_sp.idp_users_id == user_info.id,
+                        idp_sp.sp_apps_id.in_(accepted_sp_apps_ids),
+                        idp_sp.is_verified == True,
+                        idp_sp.is_requested == True).\
+                    update({idp_sp.is_accessible: True, idp_sp.action: 'approved', idp_sp.action_date: datetime.utcnow()})
+                self.db.commit()
+                return self.add_sp_apps_account_access_email(user_info.id, user_info.email, accepted_sp_apps_ids)
+            
+            if rejected_sp_apps_ids:
+                self.db.query(idp_sp).\
+                    filter(idp_sp.idp_users_id == user_info.id,
+                        idp_sp.sp_apps_id.in_(rejected_sp_apps_ids),
+                        idp_sp.is_verified == True,
+                        idp_sp.is_requested == True).\
+                    update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
+            
+                self.db.commit()
+                return {"status_code": 200, "message": "Account access requests have been updated successfully."} 
             
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=404, detail="Request not found")
+
         
         
         

@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import Depends, APIRouter, Query, Request, Response
 from starlette import status
 from src.apis.v1.services.user_service import UserService
@@ -12,7 +13,7 @@ from ..controllers.access_controller import AccessController
 from ..helpers.auth import AuthJWT
 from ..helpers.customize_response import custom_response
 from ..services.access_service import AccessService
-from ..validators.access_validator import ApproveAccountAccessValidator, GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
+from ..validators.access_validator import  ApproveRejectAccountAccessValidator, GetAccountAccessRequestUsersListValidatorOut, OtpSmsValidator, ContactNoValidator, ContactNoValidatorOut, EmailValidator, OtpEmailValidator, OtpProductsValidator, OtpaccountaccessValidator, SubmitAccountAccessValidator, \
     VerifyProductsValidator, OtpAccountValidator,VerifyAccountAccessValidator
 from celery_worker import otp_sender
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -209,13 +210,15 @@ async def get_user_sp_apps_account_access_request(
     db: Session = Depends(get_db),
     authorize: AuthJWT = Depends(),
     token: str = Depends(oauth2_scheme),
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, le=100),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, le=100),
     search: str = Query(None),
+    status_filter: List[str] = Query(default=['All'])
+    
 ):
 
     try:
-        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search)
+        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter)
         return response
     except Exception as e:
         print(e)
@@ -224,17 +227,17 @@ async def get_user_sp_apps_account_access_request(
 
 
 
-@router.put("/approve-account-access-request",responses={
-    200: {"description": "Account access requests approved successfully"},
+@router.put("/approve-reject-account-access-request",responses={
+    200: {"description": "Account access requests updated successfully"},
     400: {"description": "Invalid input data"},
     500: {"description": "Internal server error"},
     409:{'description':"User aleady Approved "},
     404:{'description':"Request Not Found"},})
 # 
-async def approve_account_access_request(approve_account_access_validator: ApproveAccountAccessValidator, db: Session = Depends(get_db)):
+async def approve_reject_account_access_request(approve_reject_account_access_validator: ApproveRejectAccountAccessValidator, db: Session = Depends(get_db)):
     
     try:
-        response=AccessController(db).approve_account_access_requests(approve_account_access_validator)
+        response=AccessController(db).approve_reject_account_access_requests(approve_reject_account_access_validator)
         return response
     except Exception as e:
         return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
