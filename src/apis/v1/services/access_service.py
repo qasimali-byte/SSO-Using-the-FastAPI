@@ -1,4 +1,5 @@
 import math
+from typing import List
 from sqlalchemy import and_, distinct, func, or_
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
@@ -75,7 +76,7 @@ class AccessService():
 
 
 
-    def get_users_sp_apps_account_access_requests(self, page: int = 1, limit: int = 10, search: str = None, order_by: str = 'requested_date', latest: bool = True):
+    def get_users_sp_apps_account_access_requests(self, page: int = 1, limit: int = 10, search: str = None, order_by: str = 'requested_date', latest: bool = True,status_filter: List[str] = None):
         query = (
             self.db.query(
                 idp_users.id.label('id'), 
@@ -87,12 +88,13 @@ class AccessService():
                 SPAPPS.display_name.label('sp_app_name'), 
                 SPAPPS.id.label('sp_app_id'),
                 SPAPPS.logo_url.label('sp_apps_logo'),
-                idp_sp.is_accessible.label('is_accessible')
+                idp_sp.is_accessible.label('is_accessible'),
+                idp_sp.action.label('action').label('action')
             )
             .select_from(idp_users)
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
             .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id)
-            .filter(idp_sp.is_requested == True, idp_sp.is_verified == True, idp_sp.is_accessible == False)
+            .filter(idp_sp.is_requested == True, idp_sp.is_verified == True, idp_sp.action.is_not(None))
         )
 
         if search:
@@ -105,6 +107,12 @@ class AccessService():
                 )
             )
 
+        if status_filter==['All']:
+            query = query.filter(idp_sp.action.in_(["pending", "approved", "rejected"])) # Add default statuses
+        elif status_filter!=['All']:
+            query = query.filter(idp_sp.action.in_(status_filter))
+
+
         total_results = (
             self.db.query(func.count(distinct(idp_users.id)))
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
@@ -114,7 +122,7 @@ class AccessService():
 
         results = (
             query
-            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, idp_sp.requested_date, SPAPPS.name, SPAPPS.id, idp_sp.is_accessible)
+            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, idp_sp.requested_date, SPAPPS.name, SPAPPS.id, idp_sp.is_accessible,idp_sp.action)
             .order_by(idp_users.id, desc(order_by) if latest else order_by)
             .all()
         )
@@ -128,8 +136,9 @@ class AccessService():
                     'sp_app_name': result.sp_app_name,
                     'sp_app_id': result.sp_app_id,
                     'sp_apps_logo': result.sp_apps_logo,
-                    'is_accessible': result.is_accessible
-                })
+                    'is_accessible': result.is_accessible,
+                    'status':result.action
+                    })
                 current_user_requested_date = parse(users_dict[result.id]['requested_date'])
                 if result.requested_date > current_user_requested_date:
                     users_dict[result.id]['requested_date'] = result.requested_date.isoformat()
@@ -145,7 +154,8 @@ class AccessService():
                         'sp_app_name': result.sp_app_name,
                         'sp_app_id': result.sp_app_id,
                         'sp_apps_logo': result.sp_apps_logo,
-                        'is_accessible': result.is_accessible
+                        'is_accessible': result.is_accessible,
+                        'status':result.action,
                     }]
                 }
 

@@ -22,7 +22,6 @@ class UsersService():
         select_practices:str) -> tuple:
         try:
             get_order_by= get_order_by_query(order_by,latest)
-
             sub_query=get_subquery(search,select_practices,user_status)
 
             # subquery_2 = self.db.query(idp_users.id).filter(and_(idp_users.user_type_id == user_type_id,idp_users.is_approved == True,*sub_query)).subquery()

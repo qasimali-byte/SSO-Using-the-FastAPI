@@ -52,15 +52,22 @@ class SubmitAccountAccessValidator(BaseModel):
         return sp_apps_ids
 
 
-class ApproveAccountAccessValidator(BaseModel):
+class ApproveRejectAccountAccessValidator(BaseModel):
     email: EmailStr
-    sp_apps_ids: List[int]
-
-    @validator('sp_apps_ids')
-    def check_sp_apps_ids(cls, sp_apps_ids):
-        if not all(isinstance(item, int) for item in sp_apps_ids):
-            raise ValueError('sp_apps_ids must be a list of integers')
-        return sp_apps_ids
+    accepted_sp_apps_ids: List[int]=[]
+    rejected_sp_apps_ids: List[int]=[]
+    
+    @validator('accepted_sp_apps_ids')
+    def check_sp_apps_ids(cls, accepted_sp_apps_ids):
+        if not all(isinstance(item, int) for item in accepted_sp_apps_ids):
+            raise ValueError('accepted_sp_apps_ids must be a list of integers')
+        return accepted_sp_apps_ids
+    
+    @validator('rejected_sp_apps_ids')
+    def check_rejected_sp_apps_ids(cls, rejected_sp_apps_ids):
+        if not all(isinstance(item, int) for item in rejected_sp_apps_ids):
+            raise ValueError('rejected_sp_apps_ids must be a list of integers')
+        return rejected_sp_apps_ids
 
 
 class SPApp(BaseModel):
@@ -124,6 +131,7 @@ class SPApp(BaseModel):
     sp_apps_logo:str
     sp_app_id: int
     is_accessible:bool
+    status:str=None
 
 class User(BaseModel):
     id: int
@@ -139,3 +147,4 @@ class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
     users_list:  Optional[List[User]]=None
     message:str
     statuscode:int
+    
