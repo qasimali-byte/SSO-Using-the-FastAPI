@@ -109,6 +109,8 @@ class AccessService():
                 )
             )
 
+        
+        print('status_filter',status_filter)
         if status_filter==['All']:
             query = query.filter(idp_sp.action.in_(["pending", "approved", "rejected"])) # Add default statuses
         elif status_filter!=['All']:
