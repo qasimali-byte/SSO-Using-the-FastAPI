@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import math
 from typing import List
 from sqlalchemy import and_, distinct, func, or_
@@ -76,7 +77,8 @@ class AccessService():
 
 
 
-    def get_users_sp_apps_account_access_requests(self, page: int = 1, limit: int = 10, search: str = None, order_by: str = 'requested_date', latest: bool = True,status_filter: List[str] = None):
+    def get_users_sp_apps_account_access_requests(self, page: int = 1, limit: int = 10, search: str = None, order_by: str = 'requested_date', latest: bool = True,status_filter: List[str] = None,
+                                                  from_date: str = None, to_date: str = None):
         query = (
             self.db.query(
                 idp_users.id.label('id'), 
@@ -111,6 +113,12 @@ class AccessService():
             query = query.filter(idp_sp.action.in_(["pending", "approved", "rejected"])) # Add default statuses
         elif status_filter!=['All']:
             query = query.filter(idp_sp.action.in_(status_filter))
+
+        if from_date and to_date:
+            from_datetime = from_date
+            to_datetime = to_date + timedelta(days=1)
+            query = query.filter(idp_sp.requested_date >= from_datetime, idp_sp.requested_date < to_datetime)
+
 
 
         total_results = (

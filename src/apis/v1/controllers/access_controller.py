@@ -320,8 +320,8 @@ class AccessController():
         response=UserService(self.db).submit_account_access_requests(user_info.id,submit_account_access_validator)
         return response
     
-    def get_user_sp_apps_account_access_requests(self,page, limit, search,status_filter):
-        users_data=AccessService(self.db).get_users_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter)
+    def get_user_sp_apps_account_access_requests(self,page, limit, search,status_filter,from_date, to_date):
+        users_data=AccessService(self.db).get_users_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter,from_date=from_date, to_date=to_date)
         user_data=GetAccountAccessRequestUsersListValidatorOut(**users_data)
         return user_data
     
