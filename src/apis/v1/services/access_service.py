@@ -114,6 +114,8 @@ class AccessService():
         if status_filter==['All']:
             query = query.filter(idp_sp.action.in_(["pending", "approved", "rejected"])) # Add default statuses
         elif status_filter!=['All']:
+            status_filter = status_filter[0].split(',')
+            print('modified status',status_filter)
             query = query.filter(idp_sp.action.in_(status_filter))
 
         if from_date and to_date:
