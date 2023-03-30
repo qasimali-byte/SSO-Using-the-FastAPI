@@ -1,4 +1,5 @@
-from typing import List
+from datetime import date
+from typing import List, Optional
 from fastapi import Depends, APIRouter, Query, Request, Response
 from starlette import status
 from src.apis.v1.services.user_service import UserService
@@ -213,12 +214,14 @@ async def get_user_sp_apps_account_access_request(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10, le=100),
     search: str = Query(None),
-    status_filter: List[str] = Query(default=['All'])
+    status_filter: List[str] = Query(default=['All']),
+    from_date: Optional[date] = Query(None),
+    to_date: Optional[date] = Query(None)
     
 ):
 
     try:
-        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter)
+        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter,from_date=from_date, to_date=to_date)
         return response
     except Exception as e:
         print(e)
