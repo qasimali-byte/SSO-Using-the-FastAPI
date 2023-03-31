@@ -231,11 +231,11 @@ async def get_user_sp_apps_account_access_request(
 
 
 @router.put("/approve-reject-account-access-request",responses={
-    200: {"description": "Account access requests updated successfully"},
-    400: {"description": "Invalid input data"},
-    500: {"description": "Internal server error"},
-    409:{'description':"User aleady Approved "},
-    404:{'description':"Request Not Found"},})
+    200: {"description": "Account access requests updated successfully","model": SuccessfulJsonResponseValidator},
+    400: {"description": "Invalid input data", "model": ErrorResponseValidator},
+    500: {"description": "Internal server error", "model": ErrorResponseValidator},
+    409:{'description':"User aleady Approved ", "model": ErrorResponseValidator},
+    404:{'description':"Request Not Found", "model": ErrorResponseValidator},})
 # 
 async def approve_reject_account_access_request(approve_reject_account_access_validator: ApproveRejectAccountAccessValidator, db: Session = Depends(get_db)):
     
