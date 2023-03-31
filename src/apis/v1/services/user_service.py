@@ -415,6 +415,38 @@ class UserService():
 
         
     
+    
+    
+
+
+    def delete_sp_apps_account_access_email(self, idp_users_id, user_primary_email, sp_apps_ids):
+        result = {"statuscode": None, "message": None}
+        print(idp_users_id, user_primary_email, sp_apps_ids)
+        try:
+            rows_deleted = self.db.query(idp_users_sp_apps_email).filter(
+                idp_users_sp_apps_email.idp_users_id == idp_users_id,
+                idp_users_sp_apps_email.primary_email == user_primary_email,
+                idp_users_sp_apps_email.sp_apps_id.in_(sp_apps_ids)
+            ).delete(synchronize_session=False)
+
+            if rows_deleted > 0:
+                result["statuscode"] = 200
+                result["message"] = "Account access requests have been updated successfully."
+                self.db.commit()
+            else:
+                result["statuscode"] = 404
+                result["message"] = "No matching record found to delete."
+                self.db.rollback()
+        except Exception as e:
+            self.db.rollback()
+            result["statuscode"] = 500
+            result["message"] = f"An error occurred while deleting the records: {str(e)}"
+        finally:
+            self.db.close()
+
+        return result
+
+    
     def add_sp_apps_account_access_email(self,idp_users_id,user_primary_email,sp_apps_ids):
         
         existing_idp_sp = self.db.query(idp_users_sp_apps_email).filter(idp_users_sp_apps_email.idp_users_id==idp_users_id,\
@@ -439,7 +471,7 @@ class UserService():
                     ]
                     self.db.execute(idp_users_sp_apps_email.__table__.insert(), data_to_insert)
                     self.db.commit()
-                    return {'message': 'account access request successfully approved','status_code':200}
+                    return {'message': 'Account access requests updated successfully','statuscode':200}
                 else:
                     return {'status_code':404, 'message':"Request not found"}
                 
@@ -471,7 +503,7 @@ class UserService():
                     update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
             
                 self.db.commit()
-                return {"status_code": 200, "message": "Account access requests have been updated successfully."} 
+                return self.delete_sp_apps_account_access_email(user_info.id, user_info.email, rejected_sp_apps_ids)
             
         except Exception as e:
             print(e)
