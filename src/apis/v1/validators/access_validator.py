@@ -1,8 +1,11 @@
 from typing import Optional, Union
-from pydantic import BaseModel,EmailStr, validator
+import typing
+from pydantic import BaseModel,EmailStr, Field, validator
 from pydantic.class_validators import List
 import re
 from datetime import datetime
+
+from src.apis.v1.validators.common_validators import MetaDataValidator
 
 
 class OtpAccountValidator(BaseModel):
@@ -140,11 +143,10 @@ class User(BaseModel):
     requested_date: datetime
     sp_apps: List[SPApp]
 
+
+
 class GetAccountAccessRequestUsersListValidatorOut(BaseModel):
-    total_results: int
-    page: int
-    limit: int
-    users_list:  Optional[List[User]]=None
-    message:str
-    statuscode:int
-    
+    metadata: MetaDataValidator = Field(alias="_metadata")
+    users_data: Optional[List[User]]=None
+    message: str
+    status_code: int

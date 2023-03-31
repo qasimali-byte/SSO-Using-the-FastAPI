@@ -3,6 +3,7 @@ import math
 from typing import List
 from sqlalchemy import and_, distinct, func, or_
 from src.apis.v1.helpers.custom_exceptions import CustomException
+from src.apis.v1.helpers.customize_response import custom_response
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.roles_model import roles
@@ -13,6 +14,8 @@ from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.two_factor_authentication_model import two_factor_authentication
 from sqlalchemy import desc
 from dateutil.parser import parse
+
+from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsersListValidatorOut
 class AccessService():
 
     def __init__(self, db):
@@ -182,12 +185,17 @@ class AccessService():
         # Split users_list into pages
         total_results = len(users_list)
     
-        return {
-            'total_results': total_results,
-            'page': page,
-            'limit': limit,
-            'users_list': users_list,
-            'message':'successfully fetched account access request data',
-            'statuscode':200
-            
+    
+        _metadata = {
+            "page": page,
+            "per_page": limit,
+            "page_count": math.ceil(total_results / limit),
+            "total_records": total_results,
         }
+
+        self._metadata = _metadata
+        data = GetAccountAccessRequestUsersListValidatorOut(_metadata=self._metadata,users_data=users_list,message="Users data retrieved Sucessfully",status_code=status.HTTP_200_OK)
+        response = custom_response(data=data,status_code=status.HTTP_200_OK)
+        return response
+    
+
