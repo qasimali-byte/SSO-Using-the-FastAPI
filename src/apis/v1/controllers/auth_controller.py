@@ -3,6 +3,8 @@ from email import message
 from sqlalchemy.orm import Session
 from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.customize_response import custom_response
+from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
+from src.apis.v1.models.serviceprovidersmodel import Sps
 from src.apis.v1.services.auth_service import AuthService
 from src.apis.v1.services.roles_service import RolesService
 from src.apis.v1.services.user_service import UserService
@@ -10,6 +12,7 @@ from src.apis.v1.validators.auth_validators import EmailValidatorError, EmailVal
 from fastapi import status
 from src.apis.v1.services.user_service import UserService
 from src.apis.v1.utils.auth_utils import logout_request_from_idp
+from typing import List, Tuple
 class AuthController:
 
     def __init__(self, db: Session):
@@ -144,9 +147,42 @@ class AuthController:
         return response
 
 
+    def get_email_on_other_sp_apps(self,primary_email: str) -> List[Tuple[str, str]]:
+    # query the association table for all rows with matching primary_email
+        rows = self.db.query(idp_users_sp_apps_email).filter_by(primary_email=primary_email).all()
+
+        # extract the sp_apps_name and sp_apps_email from each row and add them to a list of tuples
+        sp_apps_info = []
+        for row in rows:
+            sp_apps_info.append((row.sp_apps_name, row.sp_apps_email))
+
+        # return the list of sp_apps_name and sp_apps_email tuples
+        return sp_apps_info
+    
+    def get_sp_destination_url(self,sp_name: str) -> str:
+
+        # query the table for the row with matching sp_name
+        sp = self.db.query(Sps).filter_by(sp_name=sp_name).first()
+
+        # extract the sp_destination_url from the row and return it
+        return sp.sp_destination_url, sp.sp_entity_id
+    
     def idp_initiated_single_logout(self,email: str):
-        service_provders=AuthService(self.db).get_all_service_providers()
-        for service_provder in service_provders:
-            logout_request_from_idp(service_provder.sp_entity_id,service_provder.sp_destination_url,email)
+        
+        sp_apps_info = self.get_email_on_other_sp_apps(email)
+        if not sp_apps_info:
+            print("No data found for the provided primary email")
+            service_provders=AuthService(self.db).get_all_service_providers()
+            for service_provder in service_provders:
+                logout_request_from_idp(service_provder.sp_entity_id,service_provder.sp_destination_url,email)
+        else:
+            for sp_app in sp_apps_info:
+                print(f"SP app name: {sp_app[0]}, SP app email: {sp_app[1]}")
+                sp_destination_url, sp_entity_id =self.get_sp_destination_url(sp_app[0])
+                logout_request_from_idp(sp_entity_id,sp_destination_url,sp_app[1])
+
+                
+        
+
             
             
