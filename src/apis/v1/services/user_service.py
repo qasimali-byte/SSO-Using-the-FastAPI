@@ -452,28 +452,34 @@ class UserService():
         existing_idp_sp = self.db.query(idp_users_sp_apps_email).filter(idp_users_sp_apps_email.idp_users_id==idp_users_id,\
         idp_users_sp_apps_email.sp_apps_id.in_(sp_apps_ids)).first()
         if existing_idp_sp:
-            return {'message':"User Already Approved",'status_code':409}
+            return {'message':"User Already Approved",'statuscode':409}
         else:
             try:
-                users_data=self.db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id,idp_sp.sp_apps_id.in_(sp_apps_ids),\
+                users_data=self.db.query(idp_sp).filter(idp_sp.idp_users_id == idp_users_id, idp_sp.sp_apps_id.in_([sp_apps_ids] if isinstance(sp_apps_ids, int) else sp_apps_ids),\
                     idp_sp.is_verified == True,
                     idp_sp.is_requested==True,
                     idp_sp.is_accessible==True).all()
                 if users_data:
-                    data_to_insert = [
-                        {
-                            'idp_users_id': user.idp_users_id,
-                            'sp_apps_id': user.sp_apps_id,
-                            'sp_apps_email': user.requested_email,
-                            'primary_email': user_primary_email
-                        }
-                        for user in users_data
-                    ]
+                    data_to_insert = []
+                    for user in users_data:
+                        sp_apps_ids = [user.sp_apps_id] if isinstance(user.sp_apps_id, int) else user.sp_apps_id
+                        for sp_apps_id in sp_apps_ids:
+                            app = self.db.query(SPAPPS).filter_by(id=sp_apps_id).first()
+                            data = {
+                                'idp_users_id': user.idp_users_id,
+                                'sp_apps_id': sp_apps_id,
+                                'sp_apps_email': user.requested_email,
+                                'primary_email': user_primary_email,
+                                'sp_apps_name': app.name
+                            }
+                            data_to_insert.append(data)
+
                     self.db.execute(idp_users_sp_apps_email.__table__.insert(), data_to_insert)
                     self.db.commit()
+
                     return {'message': 'Account access requests updated successfully','statuscode':200}
                 else:
-                    return {'status_code':404, 'message':"Request not found"}
+                    return {'statuscode':404, 'message':"Request not found"}
                 
             except Exception as e:
                 raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -482,7 +488,6 @@ class UserService():
         user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
         accepted_sp_apps_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
         rejected_sp_apps_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
-        print(rejected_sp_apps_ids)
         try:
             if accepted_sp_apps_ids:
                 self.db.query(idp_sp).\

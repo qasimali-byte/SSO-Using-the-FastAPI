@@ -14,6 +14,6 @@ class idp_users_sp_apps_email(Base):
     id = Column(Integer, primary_key=True)
     idp_users_id = Column(ForeignKey('idp_users.id'))
     sp_apps_id = Column(ForeignKey('sp_apps.id'))
-    # service_provider_id = Column(ForeignKey('service_providers.id'))
     primary_email=Column(String(100),nullable=True, unique=False)
     sp_apps_email=Column(String(100),nullable=True, unique=False)
+    sp_apps_name=Column(String(100),nullable=True, unique=False)
