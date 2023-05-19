@@ -133,29 +133,29 @@ class AccessController():
     async def send_otp_for_account_access_request(self, account_access_validator):
 
         get_sp_app_data=SPSController(self.db).get_sp_app_by_id(account_access_validator.requested_sp_app_id)
-        # email_verification_url=get_sp_app_data[0]['email_verification_url']
-        # validation_payload = {"email": account_access_validator.requested_email}
-        # validation_response = requests.post(email_verification_url, data=validation_payload)
-        # validation_json = validation_response.json()
-        # if validation_json.get("code") == 200:
-        OTP = ''.join([random.choice("0123456789") for _ in range(4)])
-        otp_apps = f"{OTP}+{str(account_access_validator.requested_sp_app_id)}"
-        redis_client.setex(name=account_access_validator.requested_email + ",products", value=otp_apps, time=15 * 60 + 5)
-        date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
-        natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
-        data = {
-            "name": "There",
-            "recipient": account_access_validator.requested_email,
-            "products": get_sp_app_data,
-            "otp": OTP,
-            "expires": natural_datetime,
-        }
-        task = otp_sender_products.delay(user_data=data)
-        return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
-        # else:
-        #     data= {"message": "Invalid email address",'statuscode':status.HTTP_404_NOT_FOUND}
-        #     validated_data = SuccessfulJsonResponseValidator(**data)
-        #     return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
+        email_verification_url=get_sp_app_data[0]['email_validation_url']
+        validation_payload = {"email": account_access_validator.requested_email}
+        validation_response = requests.post(email_verification_url, data=validation_payload)
+        validation_json = validation_response.json()
+        if validation_json.get("code") == 200:
+            OTP = ''.join([random.choice("0123456789") for _ in range(4)])
+            otp_apps = f"{OTP}+{str(account_access_validator.requested_sp_app_id)}"
+            redis_client.setex(name=account_access_validator.requested_email + ",products", value=otp_apps, time=15 * 60 + 5)
+            date_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+            natural_datetime = date_time.strftime('%I:%M:%S %p %d %b, %Y')
+            data = {
+                "name": "There",
+                "recipient": account_access_validator.requested_email,
+                "products": get_sp_app_data,
+                "otp": OTP,
+                "expires": natural_datetime,
+            }
+            task = otp_sender_products.delay(user_data=data)
+            return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
+        else:
+            data= {"message": "Invalid email address",'statuscode':status.HTTP_404_NOT_FOUND}
+            validated_data = SuccessfulJsonResponseValidator(**data)
+            return custom_response(status_code=status.HTTP_404_NOT_FOUND, data=validated_data)
             
 
     def verify_otp_email(self, otp_validator):
@@ -301,8 +301,10 @@ class AccessController():
             
     def verify_account_access_otp(self,current_user_email,account_access_verify_validator):
         key = account_access_verify_validator.requested_email + ",products"
+        print(current_user_email)
         temp_data = redis_client.get(key)
         if temp_data:
+            print(temp_data)
             saved_otp, products = temp_data.split('+')
             if str(account_access_verify_validator.requested_sp_app_id)!= products:
                 raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -324,7 +326,7 @@ class AccessController():
         users_data=AccessService(self.db).get_users_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter,from_date=from_date, to_date=to_date)
         return users_data
     
-    def approve_reject_account_access_requests(self,approve_reject_account_access_validator):
-        response=UserService(self.db).approve_reject_account_access_requests(approve_reject_account_access_validator)
+    async def approve_reject_account_access_requests(self,approve_reject_account_access_validator):
+        response=await UserService(self.db).approve_reject_account_access_requests_async(approve_reject_account_access_validator)
         return response
     

@@ -21,3 +21,6 @@ class SPAPPS(Base):
     email_verification_url = Column(String(255),nullable=True, unique=False)
     migration_url = Column(String(255),nullable=True, unique=False)
     roles = relationship("roles", secondary="sp_apps_role", back_populates='sp_apps')
+    email_validation_url = Column(String(255),nullable=True,unique=False)
+    approve_to_sso_user_url = Column(String(255),nullable=True,unique=False)
+    deletes_to_sso_user_url = Column(String(255),nullable=True,unique=False)
