@@ -212,10 +212,13 @@ class SPSService():
         result = self.db.query(SPAPPS.id.label('sp_apps_id'),
                        SPAPPS.name.label('sp_apps_name'),
                        SPAPPS.logo_url.label('sp_apps_logo_url'),
-                       SPAPPS.email_verification_url.label('sp_apps_email_verification_url')
+                       SPAPPS.email_validation_url.label('sp_apps_email_validation_url'),
+                       SPAPPS.approve_to_sso_user_url.label('sp_apps_approve_to_sso_user_url'),
+                       SPAPPS.deletes_to_sso_user_url.label('sp_apps_deletes_to_sso_user_url')
                        ).filter_by(is_active=True, id=app_id).one()
         app_list = [{'id': result.sp_apps_id, 'name': result.sp_apps_name, 'logo': result.sp_apps_logo_url,\
-            'email_verification_url':result.sp_apps_email_verification_url} ]
+            'email_validation_url':result.sp_apps_email_validation_url,'approve_to_sso_user_url':result.sp_apps_approve_to_sso_user_url,\
+               'deletes_to_sso_user_url':result.sp_apps_deletes_to_sso_user_url } ]
         if len(app_list) > 0:
             return app_list
         else:

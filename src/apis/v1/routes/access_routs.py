@@ -240,7 +240,7 @@ async def get_user_sp_apps_account_access_request(
 async def approve_reject_account_access_request(approve_reject_account_access_validator: ApproveRejectAccountAccessValidator, db: Session = Depends(get_db)):
     
     try:
-        response=AccessController(db).approve_reject_account_access_requests(approve_reject_account_access_validator)
+        response=await AccessController(db).approve_reject_account_access_requests(approve_reject_account_access_validator)
         return response
     except Exception as e:
         return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
