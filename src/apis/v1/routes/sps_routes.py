@@ -17,7 +17,7 @@ router = APIRouter(tags=["Service Providers"])
             404:{"description":"No service providers found against this email","model":ErrorResponseValidator}})
 async def list_service_providers(user_email_role:RoleVerifierImplemented = Depends(),token: str = Depends(oauth2_scheme),db: Session = Depends(get_db),):
     '''
-     List All Services Providers
+     List All Service Providers
     '''
     current_user_email = user_email_role.get_user_email()
     resp = SPSController(db).get_sps(current_user_email)
