@@ -160,7 +160,7 @@ class AccessController():
 
     def verify_otp_email(self, otp_validator):
         saved_otp_hash = redis_client.get(otp_validator.email)
-        print('saved_otp_hash ',saved_otp_hash)
+        print('saved_otp_hash :',saved_otp_hash)
         if saved_otp_hash:
             saved_otp, product_id = get_decrypted_text(saved_otp_hash).split(":")
             print(saved_otp, product_id,'otp_validator.otp',otp_validator.otp)
