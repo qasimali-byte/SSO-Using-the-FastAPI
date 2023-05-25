@@ -180,7 +180,10 @@ class AuthController:
                 print(f"SP app name: {sp_app[0]}, SP app email: {sp_app[1]}")
                 sp_destination_url, sp_entity_id =self.get_sp_destination_url(sp_app[0])
                 logout_request_from_idp(sp_entity_id,sp_destination_url,sp_app[1])
-
+            
+            service_provders=AuthService(self.db).get_all_service_providers()
+            for service_provder in service_provders:
+                logout_request_from_idp(service_provder.sp_entity_id,service_provder.sp_destination_url,email)
                 
         
 
