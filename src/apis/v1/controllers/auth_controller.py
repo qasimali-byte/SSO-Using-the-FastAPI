@@ -171,7 +171,7 @@ class AuthController:
         
         sp_apps_info = self.get_email_on_other_sp_apps(email)
         if not sp_apps_info:
-            print("No data found for the provided primary email ")
+            print("No data found for the provided primary email :")
             service_provders=AuthService(self.db).get_all_service_providers()
             for service_provder in service_provders:
                 logout_request_from_idp(service_provder.sp_entity_id,service_provder.sp_destination_url,email)
