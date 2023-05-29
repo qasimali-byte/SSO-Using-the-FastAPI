@@ -131,7 +131,7 @@ class AccessService():
         total_results = (
             self.db.query(func.count(distinct(idp_users.id)))
             .join(idp_sp, idp_users.id == idp_sp.idp_users_id)
-            .filter(idp_sp.is_requested == True, idp_sp.is_verified == True, idp_sp.is_accessible == False)
+            .filter(idp_sp.is_requested == True, idp_sp.is_verified == True)
             .scalar()
         )
 
@@ -183,7 +183,7 @@ class AccessService():
             users_list.append(users_dict[user_id])
         
         # Split users_list into pages
-        total_results = len(users_list)
+        # total_results = len(users_list)
     
     
         _metadata = {
