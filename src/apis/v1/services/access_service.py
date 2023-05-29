@@ -12,7 +12,7 @@ from fastapi import status, HTTPException
 from src.apis.v1.models.sp_apps_role_model import sp_apps_role
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.two_factor_authentication_model import two_factor_authentication
-from sqlalchemy import desc
+from sqlalchemy import asc
 from dateutil.parser import parse
 
 from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsersListValidatorOut
@@ -137,8 +137,9 @@ class AccessService():
 
         results = (
             query
-            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, idp_sp.requested_date, SPAPPS.name, SPAPPS.id, idp_sp.is_accessible,idp_sp.action)
-            .order_by(idp_users.id, desc(order_by) if latest else order_by)
+            .group_by(idp_users.id, idp_sp.requested_email, idp_sp.requested_user_id, 
+                      idp_sp.requested_date, SPAPPS.name, SPAPPS.id, idp_sp.is_accessible,idp_sp.action)
+            .order_by(idp_users.id, asc(order_by) if latest else order_by)
             .all()
         )
 
