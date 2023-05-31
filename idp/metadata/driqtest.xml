@@ -75,15 +75,15 @@ x5Ql0ejivIJAYcMGUyA+/YwJg2FGoA==
         <md:AssertionConsumerService
             index="0"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            Location="https://qa1-app.dr-iq.com/acs"/>
+            Location="https://2013-2407-d000-a-35cd-25da-3c1e-6766-40f9.ngrok-free.app/dr-iq-web/web/app.php/acs"/>
         <md:AssertionConsumerService
             isDefault="true"
             index="1"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
-            Location="https://qa1-app.dr-iq.com/acs"/>
+            Location="https://2013-2407-d000-a-35cd-25da-3c1e-6766-40f9.ngrok-free.app/dr-iq-web/web/app.php/acs"/>
         <md:AssertionConsumerService
             index="2"
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="https://qa1-app.dr-iq.com/acs"/>
+            Location="https://2013-2407-d000-a-35cd-25da-3c1e-6766-40f9.ngrok-free.app/dr-iq-web/web/app.php/acs"/>
     </md:SPSSODescriptor>
 </md:EntityDescriptor>
