@@ -3,6 +3,7 @@ from enum import Enum
 class SpAppsEnum(str,Enum):
     ezanalytics = 'ezanalytics/saml','ezanalytics/local/saml'
     ezweb = "ezweb/saml","ezweb/local/saml","ezweb/test/saml"
+    driq="driq/local/saml"
 
     def __new__(cls, *values):
         obj = str.__new__(cls)
