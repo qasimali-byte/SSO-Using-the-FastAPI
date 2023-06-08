@@ -170,14 +170,25 @@ class SPSService():
         try:
             objects = []
             sps_object = sps_object_list
+            
+            # In case if created user is on EzLogin dashboard with looked EzLogin icon, 
+            # so we by default added EzLogin_app_id:7 in the sps_object list to resolve this problem... 
 
-            for sp in sps_object:
-                objects.append(idp_sp(
-                    is_accessible=True,
-                    idp_users_id = user_id,
-                    sp_apps_id  = sp,
-
-                ))
+            if 7 not in sps_object:
+                sps_object.append(7)                
+                for sp in sps_object:
+                    objects.append(idp_sp(
+                        is_accessible=True,
+                        idp_users_id = user_id,
+                        sp_apps_id  = sp,
+                    ))
+            else:
+                for sp in sps_object:
+                    objects.append(idp_sp(
+                        is_accessible=True,
+                        idp_users_id = user_id,
+                        sp_apps_id  = sp,
+                    ))
 
             self.db.bulk_save_objects(objects)
             self.db.commit()
