@@ -176,18 +176,18 @@ class SPSService():
 
             if 7 not in sps_object:
                 sps_object.append(7)                
-                for sp in sps_object:
+                for sps in sps_object:
                     objects.append(idp_sp(
                         is_accessible=True,
                         idp_users_id = user_id,
-                        sp_apps_id  = sp,
+                        sp_apps_id  = sps,
                     ))
             else:
-                for sp in sps_object:
+                for sps in sps_object:
                     objects.append(idp_sp(
                         is_accessible=True,
                         idp_users_id = user_id,
-                        sp_apps_id  = sp,
+                        sp_apps_id  = sps,
                     ))
 
             self.db.bulk_save_objects(objects)
