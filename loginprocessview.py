@@ -99,10 +99,12 @@ class LoginProcessView():
         data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
         print('saml data-----',data)
         verify_request_signature(data)
+        print('data.message-----',data.message)
         resp_args = self.idp_server.response_args(data.message)
         print('resp_args---',resp_args)
         sp_metadata_name = self.get_sp_name(resp_args)
         self.sp_metadata_name = sp_metadata_name
+        print('sp_metadata_name',sp_metadata_name)
         sps_allowed = SPSService(db).get_sps_app_for_sp_redirections(user_email)
         print('sps_allowed----',sps_allowed)
         targeted_sp_app=get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name)
@@ -129,6 +131,7 @@ class LoginProcessView():
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)
         practice_roles_data,practice_roles_status = UserService(db).get_all_sps_practice_roles_db(email)
+        print('practice_roles_data',practice_roles_data)
         sps_app_object = SPSService(db)
         selected_apps = sps_app_object.get_selected_sps_app_for_idp_user(email)
         users_info, user_info_data_id = self.get_user_info(email,db)
@@ -156,6 +159,7 @@ class LoginProcessView():
                 app_practices.append(str(temp_list))
                 temp_list = list([])
         
+        print('------',app_practices)
         users_info['app_practices']=app_practices
         users_info['products']= selected_apps
         new_json_data = json.dumps(users_info)

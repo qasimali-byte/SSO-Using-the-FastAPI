@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
@@ -17,7 +18,8 @@ from ..utils.auth_utils import create_password_hash
 from ..validators.common_validators import SuccessfulJsonResponseValidator
 from sqlalchemy.orm import aliased, load_only,Load
 from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
-
+import asyncio
+import aiohttp
 class UserService():
 
     def __init__(self, db):
@@ -410,7 +412,11 @@ class UserService():
                             idp_sp.is_accessible != True).\
                         update({idp_sp.is_requested: True,idp_sp.action:'pending', idp_sp.requested_date: datetime.utcnow()}):
                 self.db.commit()
+<<<<<<< HEAD
                 return {'message': 'Account Access request successfully sent to super admin', 'statuscode':200}
+=======
+                return {'message': 'account access request successfully sent to super admin', 'statuscode':200}
+>>>>>>> 8f9b5056f8c6cb3c1b657b5f58af2f8d53a42f5e
             else:
                 raise HTTPException(status_code=404, detail="Request not found")
 
@@ -485,38 +491,158 @@ class UserService():
             except Exception as e:
                 raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
-    def approve_reject_account_access_requests(self, approve_reject_account_access_validator):
+    
+    def get_the_requested_email_on_sp_apps(self,idp_user_id, approve_reject_account_access_validator):
+        self.db.query.query(idp_sp.requested_email)\
+       .filter(idp_sp.idp_users_id == idp_user_id)\
+       .filter(idp_sp.sp_apps_id == approve_reject_account_access_validator.accepted_sp_apps_ids)\
+       .all()
+
+        
+    
+    # def approve_sso_user_on_sp_level(self,approve_reject_account_access_validator):
+        
+    #     user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
+        
+    #     for app_id in approve_reject_account_access_validator.requested_sp_app_id:
+    #         get_sp_app_data=SPSController(self.db).get_sp_app_by_id(app_id)
+            
+    #         approve_to_sso_user_url=get_sp_app_data[0]['approve_to_sso_user_url']
+    #         requested_emails=self.get_the_requested_email_on_sp_apps(user_info.id,approve_reject_account_access_validator)
+            
+    #         approve_to_sso_user_payload = {"email": [email[0] for email in requested_emails]}
+    #         approve_to_sso_user_response = requests.post(approve_to_sso_user_url, data=approve_to_sso_user_payload)
+            
+    #         approve_to_sso_user_json = approve_to_sso_user_response.json()
+    #         if approve_to_sso_user_json.get("code") == 200:
+    
+    
+    
+    
+    
+    # def approve_reject_account_access_requests(self, approve_reject_account_access_validator):
+    #     user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
+    #     accepted_sp_apps_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
+    #     rejected_sp_apps_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
+    #     try:
+    #         if accepted_sp_apps_ids:
+    #             self.db.query(idp_sp).\
+    #                 filter(idp_sp.idp_users_id == user_info.id,
+    #                     idp_sp.sp_apps_id.in_(accepted_sp_apps_ids),
+    #                     idp_sp.is_verified == True,
+    #                     idp_sp.is_requested == True).\
+    #                 update({idp_sp.is_accessible: True, idp_sp.action: 'approved', idp_sp.action_date: datetime.utcnow()})
+    #             self.db.commit()
+    #             return self.add_sp_apps_account_access_email(user_info.id, user_info.email, accepted_sp_apps_ids)
+            
+    #         if rejected_sp_apps_ids:
+    #             self.db.query(idp_sp).\
+    #                 filter(idp_sp.idp_users_id == user_info.id,
+    #                     idp_sp.sp_apps_id.in_(rejected_sp_apps_ids),
+    #                     idp_sp.is_verified == True,
+    #                     idp_sp.is_requested == True).\
+    #                 update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
+            
+    #             self.db.commit()
+    #             return self.delete_sp_apps_account_access_email(user_info.id, user_info.email, rejected_sp_apps_ids)
+            
+    #     except Exception as e:
+    #         print(e)
+    #         raise HTTPException(status_code=404, detail="Request not found")
+
+        
+
+
+
+    async def get_requested_emails_on_sp_apps(self, idp_user_id, sp_app_ids):
+        requested_email = self.db.query(idp_sp.requested_email) \
+            .filter(idp_sp.idp_users_id == idp_user_id) \
+            .filter(idp_sp.sp_apps_id.in_(sp_app_ids)) \
+            .filter(idp_sp.is_verified == True) \
+            .filter(idp_sp.is_requested == True) \
+            .one()
+        return requested_email[0]
+
+    async def send_to_sp_apps_request(self, session, url, payload):
+        async with session.post(url, data=payload) as response:
+            response_json = await response.json()
+            return response.status, response_json
+
+
+    async def approve_sso_user_on_sp_level_async(self, approve_reject_account_access_validator):
+        user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
+        requested_sp_app_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
+        tasks = []
+        async with aiohttp.ClientSession() as session:
+            for app_id in requested_sp_app_ids:
+                sp_app_data = SPSController(self.db).get_sp_app_by_id(app_id)
+                approve_to_sso_user_url = sp_app_data[0]['approve_to_sso_user_url']
+                requested_emails = await self.get_requested_emails_on_sp_apps(user_info.id, [app_id])
+                print('requested_emails',requested_emails)
+                approve_to_sso_user_payload = {"email": requested_emails}
+                tasks.append(asyncio.create_task(self.send_to_sp_apps_request(session, approve_to_sso_user_url, approve_to_sso_user_payload)))
+
+            responses = await asyncio.gather(*tasks)
+            return [(status, response_json) for status, response_json in responses]
+        
+        
+    async def revoke_sso_user_on_sp_level_async(self, approve_reject_account_access_validator):
+        user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
+        requested_sp_app_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
+        tasks = []
+        async with aiohttp.ClientSession() as session:
+            for app_id in requested_sp_app_ids:
+                sp_app_data = SPSController(self.db).get_sp_app_by_id(app_id)
+                revoke_to_sso_user_url = sp_app_data[0]['deletes_to_sso_user_url']
+                requested_emails = await self.get_requested_emails_on_sp_apps(user_info.id, [app_id])
+                revoke_to_sso_user_payload = {"email": requested_emails}
+                tasks.append(asyncio.create_task(self.send_to_sp_apps_request(session, revoke_to_sso_user_url, revoke_to_sso_user_payload)))
+
+            responses = await asyncio.gather(*tasks)
+            return [(status, response_json) for status, response_json in responses]
+
+    
+    def all_responses_successful(self, responses):
+        for status, response_json in responses:
+            if status != 200 or response_json.get('code') != 200:
+                return False
+        return True
+
+    
+    async def approve_reject_account_access_requests_async(self, approve_reject_account_access_validator):
         user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
         accepted_sp_apps_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
         rejected_sp_apps_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
         try:
             if accepted_sp_apps_ids:
-                self.db.query(idp_sp).\
-                    filter(idp_sp.idp_users_id == user_info.id,
-                        idp_sp.sp_apps_id.in_(accepted_sp_apps_ids),
-                        idp_sp.is_verified == True,
-                        idp_sp.is_requested == True).\
-                    update({idp_sp.is_accessible: True, idp_sp.action: 'approved', idp_sp.action_date: datetime.utcnow()})
-                self.db.commit()
-                return self.add_sp_apps_account_access_email(user_info.id, user_info.email, accepted_sp_apps_ids)
-            
+                responses = await self.approve_sso_user_on_sp_level_async(approve_reject_account_access_validator)
+                if self.all_responses_successful(responses):
+                    self.db.query(idp_sp) \
+                        .filter(idp_sp.idp_users_id == user_info.id,
+                                idp_sp.sp_apps_id.in_(accepted_sp_apps_ids),
+                                idp_sp.is_verified == True,
+                                idp_sp.is_requested == True) \
+                        .update({idp_sp.is_accessible: True, idp_sp.action: 'approved', idp_sp.action_date: datetime.utcnow()})
+                    self.db.commit()
+                    self.add_sp_apps_account_access_email(user_info.id, user_info.email, accepted_sp_apps_ids)
+                    return {"statuscode": 200, "message": "Account access requests updated successfully"}
+                else:
+                    raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             if rejected_sp_apps_ids:
-                self.db.query(idp_sp).\
-                    filter(idp_sp.idp_users_id == user_info.id,
-                        idp_sp.sp_apps_id.in_(rejected_sp_apps_ids),
-                        idp_sp.is_verified == True,
-                        idp_sp.is_requested == True).\
-                    update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
-            
-                self.db.commit()
-                return self.delete_sp_apps_account_access_email(user_info.id, user_info.email, rejected_sp_apps_ids)
-            
+                responses = await self.revoke_sso_user_on_sp_level_async(approve_reject_account_access_validator)
+                if self.all_responses_successful(responses):
+                    self.db.query(idp_sp) \
+                        .filter(idp_sp.idp_users_id == user_info.id,
+                                idp_sp.sp_apps_id.in_(rejected_sp_apps_ids),
+                                idp_sp.is_verified == True,
+                                idp_sp.is_requested == True) \
+                        .update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
+                    self.db.commit()
+                    self.delete_sp_apps_account_access_email(user_info.id, user_info.email, rejected_sp_apps_ids)
+                    return {"statuscode": 200, "message": "Account access requests updated successfully"}
+                else:
+                    raise CustomException(message=str(e) + self.error_string, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             print(e)
             raise HTTPException(status_code=404, detail="Request not found")
-
-        
-        
-        
-        
-        

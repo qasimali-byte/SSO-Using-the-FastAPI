@@ -131,6 +131,7 @@ def send_otp(user_data, attachment=None):
         print("===================================================")
         recipient = user_data["recipient"]
         base_url = f"{os.environ.get('SSO_BACKEND_URL')}api/v1/"
+        print('user_data',user_data)
         html_ = populate_html_file_otp_products(user_data, base_url)
         mail_content = MIMEText(html_, "html")
         print("=======================Status======================")

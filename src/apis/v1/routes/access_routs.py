@@ -216,12 +216,16 @@ async def get_user_sp_apps_account_access_request(
     search: str = Query(None),
     status_filter: List[str] = Query(default=['All']),
     from_date: Optional[date] = Query(None),
-    to_date: Optional[date] = Query(None)
+    to_date: Optional[date] = Query(None),
+    order_by: Optional[str] = Query(default='requested_date'),
+    latest: bool = True
     
 ):
 
     try:
-        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit, search=search,status_filter=status_filter,from_date=from_date, to_date=to_date)
+        response=AccessController(db).get_user_sp_apps_account_access_requests(page=page, limit=limit,order_by=order_by,latest=latest, 
+                                                                               search=search,status_filter=status_filter,
+                                                                               from_date=from_date, to_date=to_date)
         return response
     except Exception as e:
         print(e)
@@ -240,7 +244,7 @@ async def get_user_sp_apps_account_access_request(
 async def approve_reject_account_access_request(approve_reject_account_access_validator: ApproveRejectAccountAccessValidator, db: Session = Depends(get_db)):
     
     try:
-        response=AccessController(db).approve_reject_account_access_requests(approve_reject_account_access_validator)
+        response=await AccessController(db).approve_reject_account_access_requests(approve_reject_account_access_validator)
         return response
     except Exception as e:
         return Response(content={"message": "Internal server error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

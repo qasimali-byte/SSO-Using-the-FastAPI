@@ -183,7 +183,7 @@ class AccessService():
             users_list.append(users_dict[user_id])
         
         # Split users_list into pages
-        total_results = len(users_list)
+        # total_results = len(users_list)
     
     
         _metadata = {
