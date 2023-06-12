@@ -412,11 +412,9 @@ class UserService():
                             idp_sp.is_accessible != True).\
                         update({idp_sp.is_requested: True,idp_sp.action:'pending', idp_sp.requested_date: datetime.utcnow()}):
                 self.db.commit()
-<<<<<<< HEAD
-                return {'message': 'Account Access request successfully sent to super admin', 'statuscode':200}
-=======
+
+              
                 return {'message': 'account access request successfully sent to super admin', 'statuscode':200}
->>>>>>> 8f9b5056f8c6cb3c1b657b5f58af2f8d53a42f5e
             else:
                 raise HTTPException(status_code=404, detail="Request not found")
 
