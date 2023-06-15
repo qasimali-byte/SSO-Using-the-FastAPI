@@ -29,6 +29,7 @@ class UserService():
     def get_user_info_db(self, user_email):
         try:
             user_info_object = self.db.query(idp_users).filter(idp_users.email == user_email).first()
+
             return user_info_object
 
         except Exception as e:
@@ -411,6 +412,8 @@ class UserService():
                             idp_sp.is_accessible != True).\
                         update({idp_sp.is_requested: True,idp_sp.action:'pending', idp_sp.requested_date: datetime.utcnow()}):
                 self.db.commit()
+
+              
                 return {'message': 'account access request successfully sent to super admin', 'statuscode':200}
             else:
                 raise HTTPException(status_code=404, detail="Request not found")

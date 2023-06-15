@@ -168,14 +168,14 @@ class AccessController():
             if saved_otp == otp_validator.otp or int(product_id)==otp_validator.app_id:
                 redis_client.delete(otp_validator.email)
                 data = {
-                    "message": 'otp verified success',
+                    "message": 'OTP verified success',
                     "statuscode": status.HTTP_200_OK
                 }
                 validated_data = SuccessfulJsonResponseValidator(**data)
                 return custom_response(status_code=status.HTTP_200_OK, data=validated_data)
 
             data = {
-                "message": 'otp verification failed',
+                "message": 'OTP verification failed',
                 "statuscode": status.HTTP_404_NOT_FOUND
             }
             validated_data = SuccessfulJsonResponseValidator(**data)
