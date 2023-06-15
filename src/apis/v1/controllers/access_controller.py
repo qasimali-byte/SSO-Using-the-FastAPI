@@ -164,7 +164,7 @@ class AccessController():
         if saved_otp_hash:
             saved_otp, product_id = get_decrypted_text(saved_otp_hash).split(":")
             print(saved_otp, product_id,'otp_validator.otp',otp_validator.otp)
-            if saved_otp == otp_validator.otp or int(product_id)==otp_validator.app_id:
+            if saved_otp == otp_validator.otp:
                 redis_client.delete(otp_validator.email)
                 data = {
                     "message": 'OTP verified success',
