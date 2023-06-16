@@ -158,9 +158,9 @@ class SPSService():
             for i in sp_query:
                 y = (i[2])
                 if(y.host=='dev-sso-frontend.attech-ltd.com/'):
-                    serviceproviders.append(str({"name": y.display_name, "logo":base_url+y.logo_url,"url":'http://'+y.host}))
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'http://'+y.host}))
                 else:
-                    serviceproviders.append(str({"name": y.display_name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
+                    serviceproviders.append(str({"name": y.name, "logo":base_url+y.logo_url,"url":'https://'+y.host}))
             return serviceproviders
 
         except Exception as e:
