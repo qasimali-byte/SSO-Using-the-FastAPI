@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
+from src.apis.v1.models.practice_regions_model import practice_regions
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.idp_users_practices_model import idp_users_practices
 from src.apis.v1.models.practices_model import practices
@@ -234,49 +235,177 @@ class UserService():
             print(e, "error")
             return "Error: {}".format(e), status.HTTP_500_INTERNAL_SERVER_ERROR
 
+    # def get_practice_roles_data_for_sps(self, type_of_user, user_sp_apps, practice_roles_data):
+    #     user_id = type_of_user[1]
+    #     practices_als = aliased(practices, name='practices_aliased')
+    #     for values in user_sp_apps:
+    #         regions_list = {}
+    #         regions = {}
+    #         if values[1].id == 3:
+    #             data = self.db.query(practices).options(Load(practices).load_only("id", "name")) \
+    #                 .join(practice_regions, practices.region_id == practice_regions.id) \
+    #                 .filter(practices.sp_apps_id == values[1].id) \
+    #                 .with_entities(practices.id, practices.name, practice_regions.name, practice_regions.id) \
+    #                 .all()
+    #         else:
+    #             data = self.db.query(practices, practices_als).options(Load(practices).load_only("id", "name")) \
+    #                 .options(Load(practices_als).load_only("id", "name")) \
+    #                 .join(practices_als, practices.practice_region_id == practices_als.id, full=True).filter(
+    #                 practices.sp_apps_id == values[1].id) \
+    #                 .join(idp_users_practices, practices.id == idp_users_practices.practices_id).filter(
+    #                 idp_users_practices.idp_users_id == user_id) \
+    #                 .all()
+                    
+
+
+            
+    #         for practices_values in data:
+    #             if practices_values[1] is None:
+    #                 regions['id'] = str(practices_values[0].id)
+    #                 regions['name'] = practices_values[0].name
+    #                 if regions['id'] not in regions_list:
+    #                     regions['practices'] = []
+    #                     regions_list[regions['id']] = dict(regions)
+    #                 else:
+    #                     regions_list[regions['id']]['practices'].append(
+    #                         {'id': practices_values[0].id, 'name': practices_values[0].name})
+
+    #             else:
+    #                 regions['id'] = str(practices_values[1].id)
+    #                 regions['name'] = practices_values[1].name
+    #                 if regions['id'] not in regions_list:
+    #                     regions['practices'] = [{'id': practices_values[0].id, 'name': practices_values[0].name}]
+    #                     regions_list[regions['id']] = dict(regions)
+    #                 else:
+    #                     regions_list[regions['id']]['practices'].append(
+    #                         {'id': practices_values[0].id, 'name': practices_values[0].name})
+
+    #         regions_list = [i for i in regions_list.values()]
+    #         if values[1].name == "ez-login" and type_of_user[0].lower() == "internal":
+    #             user_selected_roles = RolesService(self.db).get_user_selected_role(values[1].name, user_id)
+
+    #             # it should be get from db
+    #             if user_selected_roles == "super-admin":
+    #                 user_roles = [{"id": 1, "name": "Sub Admin", "sub_roles": []},
+    #                               {"id": 16, "name": "Practice Admin", "sub_roles": []}]
+    #             elif user_selected_roles == "sub-admin":
+    #                 user_roles = [{"id": 16, "name": "Practice Admin", "sub_roles": []}]
+    #             else:
+    #                 user_roles = []
+
+    #             if user_selected_roles != "practice-administrator":
+    #                 practice_roles_data.insert(0, {
+    #                     "id": values[1].id,
+    #                     "name": values[1].name,
+    #                     "sp_app_name": values[1].display_name,
+    #                     "sp_app_image": values[1].logo_url,
+    #                     "roles": user_roles,
+    #                     "practices": []
+    #                 })
+
+    #         elif values[1].name == "dr-iq":
+    #             user_roles = RolesService(self.db).get_apps_practice_roles(values[1].id)
+    #             gender_data = GenderService(self.db).get_genders_db()
+
+    #             practice_roles_data.append({
+    #                 "id": values[1].id,
+    #                 "name": values[1].name,
+    #                 "gender": gender_data['gender'],
+    #                 "sp_app_name": values[1].display_name,
+    #                 "sp_app_image": values[1].logo_url,
+    #                 "roles": user_roles,
+    #                 "practices": regions_list
+    #             })
+    #         else:
+    #             user_roles = RolesService(self.db).get_apps_practice_roles(values[1].id)
+    #             practice_roles_data.append({
+    #                 "id": values[1].id,
+    #                 "name": values[1].name,
+    #                 "sp_app_name": values[1].display_name,
+    #                 "sp_app_image": values[1].logo_url,
+    #                 "roles": user_roles,
+    #                 "practices": regions_list
+    #             })
+
+    #     return practice_roles_data
+
     def get_practice_roles_data_for_sps(self, type_of_user, user_sp_apps, practice_roles_data):
         user_id = type_of_user[1]
         practices_als = aliased(practices, name='practices_aliased')
+        
         for values in user_sp_apps:
             regions_list = {}
             regions = {}
-            data = self.db.query(practices, practices_als).options(Load(practices).load_only("id", "name")) \
-                .options(Load(practices_als).load_only("id", "name")) \
-                .join(practices_als, practices.practice_region_id == practices_als.id, full=True).filter(
-                practices.sp_apps_id == values[1].id) \
-                .join(idp_users_practices, practices.id == idp_users_practices.practices_id).filter(
-                idp_users_practices.idp_users_id == user_id) \
-                .all()
+            
+            if values[1].id == 3:
+                data = self.db.query(practices).options(Load(practices).load_only("id", "name", "dr_iq_practice_id")) \
+                    .join(practice_regions, practices.region_id == practice_regions.id) \
+                    .filter(practices.sp_apps_id == values[1].id) \
+                    .with_entities(practices.id, practices.name, practice_regions.name, practice_regions.id, practices.dr_iq_practice_id) \
+                    .all()
 
-            for practices_values in data:
-                if practices_values[1] is None:
-                    regions['id'] = str(practices_values[0].id)
-                    regions['name'] = practices_values[0].name
-                    if regions['id'] not in regions_list:
-                        regions['practices'] = []
-                        regions_list[regions['id']] = dict(regions)
+                for practices_values in data:
+                    region_id = str(practices_values[3])  # Region ID
+                    practice_id = practices_values[0]  # Practice ID
+                    practice_name = practices_values[1]  # Practice Name
+                    dr_iq_practice_id = practices_values[4]  # dr_iq_practice_id
+
+                    # Create a new region dictionary if it doesn't exist in regions_list
+                    if region_id not in regions_list:
+                        regions_list[region_id] = {
+                            "id": region_id,
+                            "name": practices_values[2],  # Region Name
+                            "practices": []
+                        }
+
+                    # Append the practice details to the corresponding region
+                    regions_list[region_id]['practices'].append({
+                        "id": practice_id,
+                        "name": practice_name,
+                        "dr_iq_practice_id": dr_iq_practice_id
+                    })
+
+                regions_list = list(regions_list.values())
+            else:
+                data = self.db.query(practices, practices_als).options(Load(practices).load_only("id", "name")) \
+                    .options(Load(practices_als).load_only("id", "name")) \
+                    .join(practices_als, practices.practice_region_id == practices_als.id, full=True).filter(
+                    practices.sp_apps_id == values[1].id) \
+                    .join(idp_users_practices, practices.id == idp_users_practices.practices_id).filter(
+                    idp_users_practices.idp_users_id == user_id) \
+                    .all()
+
+                for practices_values in data:
+                    if practices_values[1] is None:
+                        regions['id'] = str(practices_values[0].id)
+                        regions['name'] = practices_values[0].name
+                        
+                        if regions['id'] not in regions_list:
+                            regions['practices'] = []
+                            regions_list[regions['id']] = dict(regions)
+                        else:
+                            regions_list[regions['id']]['practices'].append(
+                                {'id': practices_values[0].id, 'name': practices_values[0].name})
                     else:
-                        regions_list[regions['id']]['practices'].append(
-                            {'id': practices_values[0].id, 'name': practices_values[0].name})
+                        regions['id'] = str(practices_values[1].id)
+                        regions['name'] = practices_values[1].name
+                        
+                        if regions['id'] not in regions_list:
+                            regions['practices'] = [{'id': practices_values[0].id, 'name': practices_values[0].name}]
+                            regions_list[regions['id']] = dict(regions)
+                        else:
+                            regions_list[regions['id']]['practices'].append(
+                                {'id': practices_values[0].id, 'name': practices_values[0].name})
 
-                else:
-                    regions['id'] = str(practices_values[1].id)
-                    regions['name'] = practices_values[1].name
-                    if regions['id'] not in regions_list:
-                        regions['practices'] = [{'id': practices_values[0].id, 'name': practices_values[0].name}]
-                        regions_list[regions['id']] = dict(regions)
-                    else:
-                        regions_list[regions['id']]['practices'].append(
-                            {'id': practices_values[0].id, 'name': practices_values[0].name})
-
-            regions_list = [i for i in regions_list.values()]
+                regions_list = [i for i in regions_list.values()]
+            
             if values[1].name == "ez-login" and type_of_user[0].lower() == "internal":
                 user_selected_roles = RolesService(self.db).get_user_selected_role(values[1].name, user_id)
 
                 # it should be get from db
                 if user_selected_roles == "super-admin":
                     user_roles = [{"id": 1, "name": "Sub Admin", "sub_roles": []},
-                                  {"id": 16, "name": "Practice Admin", "sub_roles": []}]
+                                {"id": 16, "name": "Practice Admin", "sub_roles": []}]
                 elif user_selected_roles == "sub-admin":
                     user_roles = [{"id": 16, "name": "Practice Admin", "sub_roles": []}]
                 else:
@@ -305,6 +434,7 @@ class UserService():
                     "roles": user_roles,
                     "practices": regions_list
                 })
+                
             else:
                 user_roles = RolesService(self.db).get_apps_practice_roles(values[1].id)
                 practice_roles_data.append({
@@ -332,8 +462,8 @@ class UserService():
             user_sp_apps = self.db.query(idp_users,SPAPPS) \
             .filter(idp_users.email == email) \
             .join(idp_sp,idp_users.id == idp_sp.idp_users_id) \
-            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(SPAPPS.is_active == True).all()
-
+            .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(SPAPPS.is_active == True).all()                    
+            
             if len(user_sp_apps) > 0:
                 practice_roles_data = self.get_practice_roles_data_for_sps(type_of_user, user_sp_apps,
                                                                            practice_roles_data)
