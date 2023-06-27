@@ -2,6 +2,7 @@ from pydantic import BaseModel, validator, typing, Field
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 
 from src.apis.v1.models.practices_model import practices
+from pydantic import BaseModel, Field, typing
 
 # PracticesGeneralValidator = sqlalchemy_to_pydantic(practices)
 
@@ -18,13 +19,40 @@ class ListPracticesGeneralValidator(BaseModel):
     __root__: typing.List[PracticesGeneralValidator]
     class Config:
         orm_mode = True 
+# class SPPracticesValidator(BaseModel):
+#     id: int
+#     name: str
+#     dr_iq_practice_id:int
+#     is_selected: typing.Optional[bool] = Field(alias='isChecked')
+#     class Config:
+#         allow_population_by_field_name = True
+
+
+
 class SPPracticesValidator(BaseModel):
     id: int
     name: str
+    dr_iq_practice_id: typing.Optional[int]
     is_selected: typing.Optional[bool] = Field(alias='isChecked')
+
     class Config:
         allow_population_by_field_name = True
-        
+
+        @staticmethod
+        def pre_process_config(cls, field: Field):
+            if field.name == 'dr_iq_practice_id':
+                field.required = False  # Make the field optional during validation
+            return field
+
+        @staticmethod
+        def post_process_result(cls, result):
+            if 'dr_iq_practice_id' in result:
+                return result
+            else:
+                return {k: v for k, v in result.items() if k != 'dr_iq_practice_id'}
+
+
+ 
 class LogedInUserSPPracticesValidator(BaseModel):
     id: int
     name: str

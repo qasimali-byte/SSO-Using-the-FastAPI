@@ -76,13 +76,14 @@ class RolesService():
         roles_object = self.db.query(SPAPPS).options(joinedload(SPAPPS.roles)).filter(SPAPPS.id == sp_app_id).first()
         if sp_app_id == 3:
             for values in roles_object.roles:
-                dr_iq_practices_roles_object = self.db.query(sp_apps_role).filter(and_(sp_apps_role.roles_id == values.id, sp_apps_role.sp_apps_id == 3)).options(joinedload(sp_apps_role.driq_practices_role)).first()
-                sub_roles = SubRolesValidator(id=values.id,name=values.label,sub_roles=dr_iq_practices_roles_object.driq_practices_role).dict()
+                dr_iq_practices_roles_object = self.db.query(sp_apps_role).filter(and_(sp_apps_role.roles_id == values.id, sp_apps_role.sp_apps_id == 3))\
+                    .options(joinedload(sp_apps_role.driq_practices_role)).first()
+                sub_roles = SubRolesValidator(id=values.id,name=values.label,dr_iq_role_id=values.dr_iq_role_id,sub_roles=dr_iq_practices_roles_object.driq_practices_role).dict()
                 roles.append(sub_roles)
-
             return roles
         else:
             roles = RolesValidator(roles = roles_object.roles).dict()
+            
             return roles["roles"]
         
         

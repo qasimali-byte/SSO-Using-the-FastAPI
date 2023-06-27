@@ -21,13 +21,15 @@ class ListSPRolesValidator(BaseModel):
 class ListSubRolesValidator(BaseModel):
     id: int
     name: str = Field(alias='label')
+    dr_iq_practice_role_id: int
 
     class Config:
         orm_mode = True
 
 class SubRolesValidator(BaseModel):
     id: int
-    name: str 
+    name: str
+    dr_iq_role_id: Optional[int]
     sub_roles: Optional[List[ListSubRolesValidator]]
     
 
@@ -48,6 +50,7 @@ class RolesValidator(BaseModel):
 class SubRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str 
+    dr_iq_practice_role_id: Optional[int]
     is_selected: Optional[bool] = Field(alias='isSelected')
 
     class Config:
@@ -60,11 +63,26 @@ class LogedInUserSubRolesValidatorWithOutOrm(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+from typing import List, Optional
+from pydantic import BaseModel, Field
+
 class ListRolesValidatorWithOutOrm(BaseModel):
     id: int
     name: str
+    dr_iq_role_id: Optional[int]
     is_selected: Optional[bool] = Field(alias='isSelected')
-    sub_roles : Optional[List[SubRolesValidatorWithOutOrm]] = []
+    sub_roles: Optional[List[SubRolesValidatorWithOutOrm]] = []
+
+    class Config:
+        allow_population_by_field_name = True
+
+    @classmethod
+    def from_orm(cls, obj):
+        model_dict = obj.__dict__
+        if 'dr_iq_role_id' not in model_dict:
+            model_dict.pop('dr_iq_role_id', None)
+        return cls(**model_dict)
+
 
     class Config:
         allow_population_by_field_name = True

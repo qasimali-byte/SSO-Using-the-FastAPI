@@ -150,7 +150,6 @@ class AccessController():
                 "otp": OTP,
                 "expires": natural_datetime,
             }
-            print('----------------------')
             task = otp_sender_products.delay(user_data=data)
             return {'status_code': status.HTTP_200_OK, "expires": date_time, 'task_id': task.id}
         else:

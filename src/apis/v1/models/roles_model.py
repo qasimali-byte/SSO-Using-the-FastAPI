@@ -14,3 +14,5 @@ class roles(Base):
     user_type_id = Column(Integer, ForeignKey("idp_user_types.id"))
     type_role_permissions = Column(Integer, ForeignKey("type_role_permissions.id"))
     sp_apps = relationship("SPAPPS", secondary="sp_apps_role", back_populates='roles')
+    dr_iq_role_id = Column(Integer, nullable=True)
+    
