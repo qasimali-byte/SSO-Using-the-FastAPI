@@ -259,6 +259,7 @@ class UserService():
                     if region_id not in regions_list:
                         regions_list[region_id] = {
                             "id": region_id,
+                            "region_id": region_id,
                             "name": practices_values[2],  # Region Name
                             "practices": []
                         }
