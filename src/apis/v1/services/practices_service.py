@@ -15,24 +15,26 @@ class PracticesService():
     def assign_practices_user_db(self, user_id, practices_list, practices_dr_iq_region_list=None):
         try:
             objects = []
-            sps_practices = practices_list
-
-            for index, practice in enumerate(sps_practices):
+            for index, practice in enumerate(practices_list):
                 region_id = None
                 if practices_dr_iq_region_list and len(practices_dr_iq_region_list) > index:
                     region_id = int(practices_dr_iq_region_list[index])
+                
+                if region_id != practice:
+                    objects.append(idp_users_practices(
+                        idp_users_id=user_id,
+                        practices_id=practice,
+                        dr_iq_practice_region_id=region_id
+                    ))
 
-                objects.append(idp_users_practices(
-                    idp_users_id=user_id,
-                    practices_id=practice,
-                    dr_iq_practice_region_id=region_id
-                ))
+            if objects:
+                self.db.bulk_save_objects(objects)
+                self.db.commit()
 
-            self.db.bulk_save_objects(objects)
-            self.db.commit()
-            return "assigned practices to user"
+            return "Assigned practices to user"
         except Exception as e:
-            raise CustomException(message=str(e) + "error occured in practices service", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise CustomException(message=str(e) + " Error occurred in practices service",
+                                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
