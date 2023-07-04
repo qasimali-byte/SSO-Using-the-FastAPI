@@ -31,6 +31,7 @@ class ChangePasswordValidator(BaseModel):
 
 class IdsList(BaseModel):
     id: int
+    region_id:typing.Optional[int]
 class UserRolesValidatorIn(BaseModel):
     id: int
     sub_role: typing.Optional[int] = None

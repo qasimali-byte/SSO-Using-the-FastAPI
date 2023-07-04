@@ -25,6 +25,7 @@ from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsers
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
 from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut, ListUnAccessibleServiceProviderValidatorOut
 from src.apis.v1.validators.user_validator import CreateInternalExternalUserValidatorIn, CreateUserValidator
+from src.packages.usermigrations.driq import DRIQMigrate
 from src.packages.usermigrations.ezanalytics import EZAnalyticsMigrate
 from src.packages.usermigrations.ezweb import EZWEBMigrate
 from test_migrate import UserMigrate
@@ -193,7 +194,7 @@ class AccessController():
                     raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                           message='failed, Illegal product requested.')
             if saved_otp == validator_data.otp:
-                redis_client.delete(key)
+                # redis_client.delete(key)
                 # is user requesting allowed products.
                 if AccessService(self.db).if_user_exists_db(user_email=validator_data.email):
                     raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -217,6 +218,9 @@ class AccessController():
                         apps_list.append(EZAnalyticsMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
                     elif ids == '6':
                         apps_list.append(EZWEBMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
+                    elif ids == '3':
+                        print('i am here')
+                        apps_list.append(DRIQMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
                     
                 user_validator = CreateInternalExternalUserValidatorIn(firstname="first name",
                                                                         lastname="last name",

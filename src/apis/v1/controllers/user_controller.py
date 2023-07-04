@@ -36,13 +36,13 @@ class UserController():
     def __init__(self, db) -> None:
         self.db = db
         self.log = logging.getLogger(__name__)
-    def assign_practices_apps_roles(self, user_id: int, apps_ids_list, practices_ids_list, selected_roles_list) -> int:
+    def assign_practices_apps_roles(self, user_id: int, apps_ids_list, practices_ids_list, selected_roles_list,practices_dr_iq_region_list=None) -> int:
 
         # assign sp apps to user
         SPSController(self.db).assign_sps_to_user(user_id=user_id, sps_object_list=apps_ids_list)
 
         # ## assign sp practices to user
-        PracticesController(self.db).assign_practices_to_user(user_id=user_id, practices_list=practices_ids_list)
+        PracticesController(self.db).assign_practices_to_user(user_id=user_id, practices_list=practices_ids_list,practices_dr_iq_region_list=practices_dr_iq_region_list)
 
         # ## assign sp roles to user
         RolesController(self.db).assign_roles_to_user(user_id=user_id, roles_list=selected_roles_list)
@@ -57,7 +57,8 @@ class UserController():
         # ## roles must be atleast selected when the app is selected roles cannot be empty
 
         # ## format data for create user
-        apps_ids_list, practices_ids_list, selected_roles_list = format_data_for_create_user(user_data)
+        print('user_data---',user_data)
+        apps_ids_list, practices_ids_list, selected_roles_list,practices_dr_iq_region_list = format_data_for_create_user(user_data)
 
         ## verify if user already exists
         check_email = AuthController(self.db).email_verification(user_data['email'])
@@ -85,7 +86,7 @@ class UserController():
         user_id = user_created_data.id
 
         self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list,
-                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
+                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list,practices_dr_iq_region_list=practices_dr_iq_region_list)
 
         data = UserValidatorOut()
         self.send_email_to_user(user_data=user_created_data)

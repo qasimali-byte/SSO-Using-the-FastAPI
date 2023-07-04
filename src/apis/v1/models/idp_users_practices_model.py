@@ -8,3 +8,5 @@ class idp_users_practices(Base):
     id = Column(Integer, primary_key=True)
     idp_users_id = Column(ForeignKey('idp_users.id'))
     practices_id = Column(ForeignKey('practices.id'))
+    dr_iq_practice_region_id = Column(ForeignKey('practice_regions.id'), nullable=True)
+
