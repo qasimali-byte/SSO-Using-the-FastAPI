@@ -1,4 +1,5 @@
 from sqlalchemy import func, or_, union_all
+from src.apis.v1.models.practice_regions_model import practice_regions
 from src.apis.v1.models.practices_model import practices
 from src.apis.v1.utils.practices_utils import  format_practices_edit_user_data_selected_unselected, format_practices_user_data_selected
 from src.apis.v1.models.sp_apps_model import SPAPPS
@@ -85,13 +86,50 @@ class PracticesService():
         return edit_practices_list
 
     def get_selected_practices_db_by_id_loged_in_user(self, app_id, user_id, selected_user_id):
-        practices_als = aliased(practices, name='practices_aliased')
-        practices_of_selecteduserid = self.db.query(practices,practices_als).with_entities(practices.id.label('practices_id'),practices.name.label('practices_name'),practices_als.id.label('practices_als_id'),practices_als.name.label('practices_als_name')).options(Load(practices).load_only("id","name"))\
-        .options(Load(practices_als).load_only("id","name"))\
-        .join(practices_als, practices.practice_region_id == practices_als.id, isouter=True).filter(practices.sp_apps_id == app_id) \
-        .join(idp_users_practices,practices.id == idp_users_practices.practices_id).filter(idp_users_practices.idp_users_id == selected_user_id).all()
-        formated_practices=format_practices_user_data_selected(practices_of_selecteduserid)
-        return formated_practices
+        if(app_id==3):
+            subquery = self.db.query(idp_users_practices.practices_id) \
+                .filter(idp_users_practices.idp_users_id == selected_user_id) \
+                .subquery()
+
+            data = self.db.query(practices) \
+                .join(practice_regions, practices.region_id == practice_regions.id) \
+                .filter(practices.sp_apps_id == 3) \
+                .filter(practices.id.in_(self.db.query(subquery.c.practices_id))) \
+                .with_entities(practices.id.label('practices_id'),
+                            practices.name.label('practices_name'),
+                            practice_regions.name.label('region_name'),
+                            practice_regions.id.label('region_id'),
+                            practices.dr_iq_practice_id) \
+                .all()
+
+            formatted_data = []
+            region_dict = {}
+            practices_list = []
+
+            for practice in data:
+                practice_id = practice.practices_id
+                practice_name = practice.practices_name
+                region_name = practice.region_name
+                region_id = practice.region_id
+
+                if region_id not in region_dict:
+                    region_dict[region_id] = {'id': region_id, 'name': region_name, 'practices': []}
+                region_dict[region_id]['practices'].append({'id': practice_id, 'name': practice_name})
+
+            formatted_data = [region for region in region_dict.values()]
+
+            return formatted_data
+
+                
+        else:
+                    
+            practices_als = aliased(practices, name='practices_aliased')
+            practices_of_selecteduserid = self.db.query(practices,practices_als).with_entities(practices.id.label('practices_id'),practices.name.label('practices_name'),practices_als.id.label('practices_als_id'),practices_als.name.label('practices_als_name')).options(Load(practices).load_only("id","name"))\
+            .options(Load(practices_als).load_only("id","name"))\
+            .join(practices_als, practices.practice_region_id == practices_als.id, isouter=True).filter(practices.sp_apps_id == app_id) \
+            .join(idp_users_practices,practices.id == idp_users_practices.practices_id).filter(idp_users_practices.idp_users_id == selected_user_id).all()
+            formated_practices=format_practices_user_data_selected(practices_of_selecteduserid)
+            return formated_practices
 
     def create_practice_db(self, practice_data):
         try:
