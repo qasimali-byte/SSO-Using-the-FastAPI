@@ -33,6 +33,7 @@ class SPPracticesValidator(BaseModel):
     id: int
     name: str
     dr_iq_practice_id: typing.Optional[int]
+    region_id: typing.Optional[int]
     is_selected: typing.Optional[bool] = Field(alias='isChecked')
 
     class Config:
@@ -63,7 +64,7 @@ class LogedInUserSPPracticesValidator(BaseModel):
 class ListSPRegionsValidator(BaseModel):
     id: int
     name: str
-    region_id: typing.Optional[int] 
+    region_id: typing.Optional[int]
     is_selected: typing.Optional[bool] = Field(alias='isChecked')
     practices: typing.List[SPPracticesValidator]
     class Config:

@@ -268,7 +268,8 @@ class UserService():
                     regions_list[region_id]['practices'].append({
                         "id": practice_id,
                         "name": practice_name,
-                        "dr_iq_practice_id": dr_iq_practice_id
+                        "dr_iq_practice_id": dr_iq_practice_id,
+                        "region_id": region_id,
                     })
 
                 regions_list = list(regions_list.values())
