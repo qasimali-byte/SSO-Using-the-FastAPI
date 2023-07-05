@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, typing
 class PracticesGeneralValidator(BaseModel):
     id:int
     name: str
+    region_id: typing.Optional[int]
 
     # @validator('name')
     # def change_name_lower(cls,name):
@@ -19,14 +20,6 @@ class ListPracticesGeneralValidator(BaseModel):
     __root__: typing.List[PracticesGeneralValidator]
     class Config:
         orm_mode = True 
-# class SPPracticesValidator(BaseModel):
-#     id: int
-#     name: str
-#     dr_iq_practice_id:int
-#     is_selected: typing.Optional[bool] = Field(alias='isChecked')
-#     class Config:
-#         allow_population_by_field_name = True
-
 
 
 class SPPracticesValidator(BaseModel):

@@ -32,13 +32,26 @@ class ChangePasswordValidator(BaseModel):
 class IdsList(BaseModel):
     id: int
     region_id:typing.Optional[int]
+    
 class UserRolesValidatorIn(BaseModel):
     id: int
     sub_role: typing.Optional[int] = None
+# class UserAppsValidatorIn(BaseModel):
+#     id: int
+#     practices: typing.List[IdsList] = []
+#     role: UserRolesValidatorIn
 class UserAppsValidatorIn(BaseModel):
     id: int
-    practices: typing.List[IdsList] = []
+    practices:typing.List[IdsList] = []
     role: UserRolesValidatorIn
+
+    @validator('practices', pre=True)
+    def remove_none_region_id(cls, v, values):
+        if 'id' in values and values['id'] == 3: # Only for app with id 3
+            return [{'id': practice.get('id'), 'region_id': practice.get('region_id')} for practice in v]
+        else:
+            return [{'id': practice.get('id')} for practice in v]
+
 
 class CreateInternalExternalUserValidatorIn(BaseModel):
     """

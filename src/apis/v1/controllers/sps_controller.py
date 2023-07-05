@@ -170,17 +170,13 @@ class SPSController():
         return apps_list
    
    
-            
 
-    def get_practices_roles_by_apps_loged_in_user(self,apps_list,app, selected_apps, user_id, selected_id):
+    def get_practices_roles_by_apps_loged_in_user(self,apps_list,app, user_id, selected_id):
+        
         apps = LogedInUserSPPracticeRoleValidator(id=app["id"],name=app["name"],
         sp_app_name=app["sp_app_name"],sp_app_image=app["image"],is_selected=False,
         role=RolesController(self.db).get_allowed_roles_by_userid_loged_in_user(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid_loged_in_user(app["id"],user_id,selected_id)) 
-
-        for iteration2 in selected_apps:
-            if app["id"] == iteration2["id"]:
-                pass
 
         if apps.id == 7: ## ez login id
             apps_list.insert(0,apps.dict())
@@ -227,19 +223,17 @@ class SPSController():
         return spapps_status
     
     
-    def get_allowed_apps_by_userid_for_loged_in_user(self,selected_email, user_id, selected_id):
-
-        apps_list = [] # contains all the apps 
+    def get_allowed_apps_by_userid_for_loged_in_user(self, selected_email, user_id, selected_id):
+        apps_list = []  # contains all the apps 
         sps_app_object = SPSService(self.db)
         total_allowed_apps = sps_app_object.get_sps_app(selected_email)
-        selected_apps = sps_app_object.get_sps_app(selected_email)
-
-        if len(total_allowed_apps) == 0:
-            return apps_list
-
         for apps_object in total_allowed_apps:
-            self.get_practices_roles_by_apps_loged_in_user(apps_list,apps_object, selected_apps, user_id, selected_id)
+            self.get_practices_roles_by_apps_loged_in_user(apps_list, apps_object, user_id, selected_id)
+
         return apps_list
+
+    
+    
 
     def get_specific_product_byappid(self, app_id:int):
         dto = SyncSpsDAO(self.db).get(filter_data={SPAPPS.is_active: True,SPAPPS.id:app_id})

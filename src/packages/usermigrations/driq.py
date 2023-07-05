@@ -23,9 +23,7 @@ class DRIQMigrate:
             self.db = session
 
         app_data = self.product_details(app_id)
-        print(app_data)
         practices_app = self.practices_data_by_app_name(app_data[0])
-        print(practices_app)
         try:
             payload={'email':email,'type':'migration'}
             response = requests.request("POST", app_data[1],  data=payload)
@@ -43,7 +41,6 @@ class DRIQMigrate:
 
         dr_iq_role_id = self.validate_dr_iq_role_by_response_role(response['data']['roles']['dr_iq_role']['title'],roles_data)
         dr_iq_practice_role_id=self.validate_dr_iq_practice_role_by_response_role(response['data']['roles']['practice_role']['title'],roles_data)
-        print(dr_iq_role_id,dr_iq_practice_role_id)
         
         if len(response['data']['selected_practice']) < 1:
             return {
@@ -100,5 +97,5 @@ class DRIQMigrate:
         for values in response_data[0]:
             for practice in practice_data:
                 if values['name'].lower() == practice['name'].lower():
-                    practices_ids.append({'id':practice['id']})
+                    practices_ids.append({'id':practice['id'],'region_id':practice['region_id']})             
         return practices_ids
