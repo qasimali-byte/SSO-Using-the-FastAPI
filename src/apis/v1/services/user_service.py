@@ -19,6 +19,7 @@ from ..utils.auth_utils import create_password_hash
 from ..validators.common_validators import SuccessfulJsonResponseValidator
 from sqlalchemy.orm import aliased, load_only,Load
 from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
+from src.apis.v1.utils.roles_utils import format_dr_iq_user_role
 import asyncio
 import aiohttp
 class UserService():
@@ -533,58 +534,7 @@ class UserService():
 
         
     
-    # def approve_sso_user_on_sp_level(self,approve_reject_account_access_validator):
-        
-    #     user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
-        
-    #     for app_id in approve_reject_account_access_validator.requested_sp_app_id:
-    #         get_sp_app_data=SPSController(self.db).get_sp_app_by_id(app_id)
-            
-    #         approve_to_sso_user_url=get_sp_app_data[0]['approve_to_sso_user_url']
-    #         requested_emails=self.get_the_requested_email_on_sp_apps(user_info.id,approve_reject_account_access_validator)
-            
-    #         approve_to_sso_user_payload = {"email": [email[0] for email in requested_emails]}
-    #         approve_to_sso_user_response = requests.post(approve_to_sso_user_url, data=approve_to_sso_user_payload)
-            
-    #         approve_to_sso_user_json = approve_to_sso_user_response.json()
-    #         if approve_to_sso_user_json.get("code") == 200:
     
-    
-    
-    
-    
-    # def approve_reject_account_access_requests(self, approve_reject_account_access_validator):
-    #     user_info = UserService(self.db).get_user_info_db(approve_reject_account_access_validator.email)
-    #     accepted_sp_apps_ids = approve_reject_account_access_validator.accepted_sp_apps_ids
-    #     rejected_sp_apps_ids = approve_reject_account_access_validator.rejected_sp_apps_ids
-    #     try:
-    #         if accepted_sp_apps_ids:
-    #             self.db.query(idp_sp).\
-    #                 filter(idp_sp.idp_users_id == user_info.id,
-    #                     idp_sp.sp_apps_id.in_(accepted_sp_apps_ids),
-    #                     idp_sp.is_verified == True,
-    #                     idp_sp.is_requested == True).\
-    #                 update({idp_sp.is_accessible: True, idp_sp.action: 'approved', idp_sp.action_date: datetime.utcnow()})
-    #             self.db.commit()
-    #             return self.add_sp_apps_account_access_email(user_info.id, user_info.email, accepted_sp_apps_ids)
-            
-    #         if rejected_sp_apps_ids:
-    #             self.db.query(idp_sp).\
-    #                 filter(idp_sp.idp_users_id == user_info.id,
-    #                     idp_sp.sp_apps_id.in_(rejected_sp_apps_ids),
-    #                     idp_sp.is_verified == True,
-    #                     idp_sp.is_requested == True).\
-    #                 update({idp_sp.is_accessible: False, idp_sp.action: 'rejected', idp_sp.action_date: datetime.utcnow()})
-            
-    #             self.db.commit()
-    #             return self.delete_sp_apps_account_access_email(user_info.id, user_info.email, rejected_sp_apps_ids)
-            
-    #     except Exception as e:
-    #         print(e)
-    #         raise HTTPException(status_code=404, detail="Request not found")
-
-        
-
 
 
     async def get_requested_emails_on_sp_apps(self, idp_user_id, sp_app_ids):
@@ -679,3 +629,41 @@ class UserService():
         except Exception as e:
             print(e)
             raise HTTPException(status_code=404, detail="Request not found")
+        
+    
+    
+    
+    
+    
+    
+    
+    def get_dr_iq_user_practices_role(self,user_email):
+        user_info=self.get_user_info_db(user_email)
+        idp_users_id=user_info.id
+        sp_apps_id=3
+        practice_list = []  # Initialize regions_list as an empty dictionary
+        data =self.db.query(practices).options(Load(practices).load_only("id", "name", "dr_iq_practice_id"))\
+            .join(idp_users_practices, practices.id == idp_users_practices.practices_id)\
+            .filter(practices.sp_apps_id == sp_apps_id, idp_users_practices.idp_users_id == idp_users_id)\
+            .with_entities(practices.id, practices.name, practices.dr_iq_practice_id)\
+            .all()
+
+        
+        roles_data=RolesService(self.db).get_user_selected_role_db_appid_userid(sp_apps_id,idp_users_id)
+        roles_data=format_dr_iq_user_role(roles_data)
+        
+        for practices_values in data:
+            practice_name = practices_values[1]  # Practice Name
+            dr_iq_practice_id = practices_values[2]  # dr_iq_practice_id
+
+            # Append the practice details to the corresponding region
+            practice_list.append({
+                "id": dr_iq_practice_id,
+                "name": practice_name,
+            })
+            
+
+        gender_data = GenderService(self.db).get_driq_selected_gender_loged_in_user(idp_users_id)
+
+    
+        return practice_list,roles_data,gender_data['name']

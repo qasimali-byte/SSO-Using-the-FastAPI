@@ -34,13 +34,11 @@ class LoginProcessView():
             store.delete(user_cookie)
 
         if not store.get(session_id):
-            print('yo i am not in session')
             store.set(session_id, email)
             return "stored session"
         return "stored user session"
 
     def get_userid(self, session_id, db: Session):
-        print('get_userid function',session_id)
         store = StoreSession(db)
         usersession_obj = store.get(session_id)
         if usersession_obj :
@@ -70,7 +68,8 @@ class LoginProcessView():
             "username": user_info_data.username,
             "email": user_info_data.email,
             "first_name": user_info_data.first_name,
-            "last_name": user_info_data.last_name
+            "last_name": user_info_data.last_name,
+            "contact_no": user_info_data.contact_no
 
 
         })
@@ -97,18 +96,12 @@ class LoginProcessView():
         ## verifies whether is app allowed to the user or not
         saml_msg = request_parms
         data = self.idp_server.parse_authn_request(saml_msg,BINDING_HTTP_REDIRECT)
-        print('saml data-----',data)
         verify_request_signature(data)
-        print('data.message-----',data.message)
         resp_args = self.idp_server.response_args(data.message)
-        print('resp_args---',resp_args)
         sp_metadata_name = self.get_sp_name(resp_args)
         self.sp_metadata_name = sp_metadata_name
-        print('sp_metadata_name',sp_metadata_name)
         sps_allowed = SPSService(db).get_sps_app_for_sp_redirections(user_email)
-        print('sps_allowed----',sps_allowed)
         targeted_sp_app=get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name)
-        print('targeted_sp_app--',targeted_sp_app)
         if sps_allowed:
             if get_item(sps_allowed,key="sp_app_name",target=sp_metadata_name):
                 return {'status_code':status.HTTP_200_OK,"targeted_sp_app_id":targeted_sp_app['id']}
@@ -118,7 +111,7 @@ class LoginProcessView():
 
     def return_sp_app_name(self):
         return self.sp_metadata_name
-
+        
     def get(self, request_parms, email,db: Session):
         from saml2.saml import NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED, NameID, NAMEID_FORMAT_TRANSIENT
         saml_msg =request_parms
@@ -131,42 +124,62 @@ class LoginProcessView():
         ## return the sp apps data
         sp_apps_data = self.query_sp_apps_sp_metadata_name(sp_metadata_name,db)
         practice_roles_data,practice_roles_status = UserService(db).get_all_sps_practice_roles_db(email)
-        print('practice_roles_data',practice_roles_data)
         sps_app_object = SPSService(db)
         selected_apps = sps_app_object.get_selected_sps_app_for_idp_user(email)
         users_info, user_info_data_id = self.get_user_info(email,db)
         app_role=RolesService(db).get_user_selected_role_db_appid_userid(sp_apps_data.id,user_info_data_id )
-        apps = list()
-        for i in range(len(practice_roles_data)):
-            if practice_roles_data[i].get('name') == str(sp_apps_data.name):
-                apps.append({'app_practices': practice_roles_data[i].get('practices')})
-        app_practices_list = list()
-        for app in apps[0]['app_practices']:
-            try:
-                app_practices_list.append({'parent': app['name'], 'practices': app['practices']})
-            except:
-                pass
-        app_practices = list([])
-        for i in range(len(app_practices_list)):
-            temp_list = list([])
-            for index in range(len(app_practices_list[i]['practices'])):
-                temp_list.append(app_practices_list[i]['parent'])
-                temp_list.append(app_practices_list[i]['practices'][index]['name'])
+ 
+        if (sp_metadata_name=='driq'):
+            practice_list,roles_data,gender_data=UserService(db).get_dr_iq_user_practices_role(email)
+            users_info['gender'] = gender_data
+            users_info['selected_practice']=practice_list
+            users_info['selected_practice'] = json.dumps(users_info['selected_practice'])
+            users_info['roles']=roles_data
+            users_info['roles'] = json.dumps(users_info['roles'])
+            users_info['products']=selected_apps
+            
+        else:
+            apps = list()
+            for i in range(len(practice_roles_data)):
+                if practice_roles_data[i].get('name') == str(sp_apps_data.name):
+                    apps.append({'app_practices': practice_roles_data[i].get('practices')})
+            app_practices_list = list()
+            for app in apps[0]['app_practices']:
                 try:
-                    temp_list.append(app_role[1].label)
-                except Exception as e:
-                    temp_list.append(None)
-                app_practices.append(str(temp_list))
+                    app_practices_list.append({'parent': app['name'], 'practices': app['practices']})
+                except:
+                    pass
+            app_practices = list([])
+            
+            for i in range(len(app_practices_list)):
                 temp_list = list([])
-        
-        print('------',app_practices)
-        users_info['app_practices']=app_practices
-        users_info['products']= selected_apps
+                if app_practices_list[i]['practices']:
+                    for index in range(len(app_practices_list[i]['practices'])):
+                        temp_list.append(app_practices_list[i]['parent'])
+                        temp_list.append(app_practices_list[i]['practices'][index]['name'])
+                        try:
+                            temp_list.append(app_role[1].label)
+                        except Exception as e:
+                            temp_list.append(None)
+                        app_practices.append(str(temp_list))
+                        temp_list = list([])
+                else:
+                    temp_list.append(app_practices_list[i]['parent'])
+                    temp_list.append(None)  # Append None for 'name'
+                    try:
+                        temp_list.append(app_role[1].label)
+                    except Exception as e:
+                        temp_list.append(None)
+                    app_practices.append(str(temp_list))
+                    temp_list = list([])
+            
+            users_info['app_practices']=app_practices
+            users_info['products']= selected_apps
         new_json_data = json.dumps(users_info)
         json_updated_data = json.loads(new_json_data.replace(r"\'", '"'))
         users_info["email"] = email
         identity = json_updated_data
-        print('identity---',identity)
+        print('identity',identity)
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=email)
         value = self.idp_server.create_authn_response(identity,name_id=nid,userid=email,encrypt_cert_assertion=None,**resp_args)
@@ -206,7 +219,6 @@ class LoginProcessView():
         
         nid = NameID(name_qualifier="foo", format=NAMEID_FORMAT_TRANSIENT,
              text=sp_apps_email)
-        print(identity)
         value = self.idp_server.create_authn_response(identity,name_id=nid,userid=sp_apps_email,encrypt_cert_assertion=None,**resp_args)
 
         http_args = self.idp_server.apply_binding(

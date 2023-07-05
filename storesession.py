@@ -26,7 +26,6 @@ class StoreSession(Store):
         self.db = db
     
     def get(self, key):
-        print('storesession.py file ', key)
         return self.db.query(UserSession).filter_by(cookie_id=key).first()
     
     def get_userid(self,key):

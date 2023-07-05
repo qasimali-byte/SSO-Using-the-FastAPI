@@ -135,27 +135,21 @@ async def sso_redirect(request: Request, SAMLRequest: str,
     SamlRequestSerializer(SAMLRequest=SAMLRequest)
 
     verified_id = SessionController().verify_session(cookie, request)
-    print('verified_id[1]--',verified_id[1])
     if verified_id[1] == 200:
         # verified_status = SessionController().check_session_redis(sessionStorage, verified_id[0])
         verified_status = SessionController().check_session_db(db, verified_id[0])
         if verified_status[1] == 200:
 
             email_ = req.get_userid(verified_id[0],db)
-            print('email_-------',email_)
-            print('verified_id[0]------',verified_id[0])
             resp=req.verify_app_allowed(SAMLRequest,db,email_)
             status_code = resp['status_code']
             if status_code == 307:
                 return templates.TemplateResponse("notification.html",{"request": request})
             # here we will decide either users rediraction
             targeted_sp_app_id=resp['targeted_sp_app_id']
-            print('targeted_sp_app_id-----',targeted_sp_app_id)
             result=req.get_sp_apps_email(db,targeted_sp_app_id,email_)
-            print('result-----',result)
             if result is not None:
                 sp_apps_email = result
-                print('-------------- i am here')
                 resp=req.get_multiple_account_access(SAMLRequest,sp_apps_email,email_,db)
             else:
                 resp = req.get(SAMLRequest,email_,db)
@@ -165,25 +159,20 @@ async def sso_redirect(request: Request, SAMLRequest: str,
     session = uuid4()
     # store the cookie in db
     IDPController(db).store_frontend_saml(session,SAMLRequest)
-    # response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
+    response = templates.TemplateResponse("loginform.html", {"request": request,"saml_request":SAMLRequest, "error": None})
     host = Settings().SSO_FRONTEND_URL
     # logout the user from frontend as well
     
     # response = RedirectResponse(url="http://{}/sign-in".format("localhost:8088"))
 
-    response = RedirectResponse(url="{}sign-in".format(host)) 
+    # response = RedirectResponse(url="{}sign-in".format(host)) 
     cookie_frontend.attach_to_response(response, session)
-    print(cookie_frontend, vars(cookie_frontend), "---cookie--", vars(response))
     return response
 
 
 @router.post("/sso/login", summary="Submit Login Page API submission")
 async def sso_login(response: Response, request: Request, email: str = Form(...), password: str = Form(...),
                     saml_request: str = Form(...), db: Session = Depends(get_db)):
-    # print(vars(request.form))
-    # print(request)
-
-    # print(request['referer'])
     '''
     this will also is using in idp initiated login flow
     '''
@@ -212,20 +201,15 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     if user == None:
         return templates.TemplateResponse("loginform.html", {"request": request, "saml_request": saml_request,
                                                              "error": "Invalid username or password"})
-    # print(vars(request))
     response=resp.verify_app_allowed(saml_request,db,email)
     status_code = response['status_code']
     if status_code == 307:
         return templates.TemplateResponse("notification.html",{"request": request,})
-    # print(request.headers['referer'])
     targeted_sp_app_id=response['targeted_sp_app_id']
-    print('targeted_sp_app_id-----',targeted_sp_app_id)
     result=resp.get_sp_apps_email(db,targeted_sp_app_id,email)
-    print('result-----',result)
     session = uuid4()
     if result is not None:
         sp_apps_email = result
-        print('-------------- i am here')
         resp.store_session(session,email,db)
         resp=resp.get_multiple_account_access(saml_request,sp_apps_email,email,db)
     else:
@@ -234,8 +218,6 @@ async def sso_login(response: Response, request: Request, email: str = Form(...)
     ## store session in the database
     application_entity_id = resp[1]['sp_entity_id']
     resp = resp[0]
-    print(application_entity_id,"application entity id")
-    # print(resp["data"]["data"])
     response = HTMLResponse(content=resp["data"]["data"]) #### thisone uncomment
     cookie.attach_to_response(response, session)
     return response
@@ -278,7 +260,6 @@ def test_logout_request_from_idp(remove_sp, name_id):
 # SAMLRequest: str
 @router.get("/sso/logout", summary=["Logout Request API From Service Provider"])
 async def logout(request: Request, response: Response, SAMLRequest: str, db: Session = Depends(get_db), ):
-    print(SAMLRequest)
     from base64 import decodebytes as b64decode
     from saml2 import server
     idp_server = server.Server(config_file="idp/idp_conf.py")
@@ -286,8 +267,6 @@ async def logout(request: Request, response: Response, SAMLRequest: str, db: Ses
     samlreq = SAMLRequest
 
     req_info = idp_server.parse_logout_request(samlreq, BINDING_HTTP_REDIRECT)
-    print(vars(req_info), "---req_info---", "req_info.message.name_id.text",req_info.message.name_id.text, vars(req_info.message),
-          req_info.message.issuer.text)
     # response = RedirectResponse(url=redirect_url,status_code=status.HTTP_302_FOUND)
 
     # verify_request_signature(req_info)
@@ -297,9 +276,7 @@ async def logout(request: Request, response: Response, SAMLRequest: str, db: Ses
 
     # find the users logged in database in which sp
     resp = idp_server.create_logout_response(req_info.message, [entity.BINDING_HTTP_REDIRECT])
-    print(vars(resp.issuer), "--req_info--")
     hinfo = idp_server.apply_binding(entity.BINDING_HTTP_REDIRECT, resp.__str__(), resp.destination, "/", response=True)
-    print(hinfo, "---hinfo---")
     # create logout request for sp2
     # test_logout_request_from_idp("loadbalancer-91.siroe.com")
     # html_response = {
@@ -311,10 +288,8 @@ async def logout(request: Request, response: Response, SAMLRequest: str, db: Ses
         if key == 'Location':
             redirect_url = value
             break
-    print(redirect_url, "----redirect_url")
     response = RedirectResponse(url=redirect_url, status_code=status.HTTP_302_FOUND)
     verified_id = SessionController().verify_session(cookie, request)
-    print(verified_id)
     if verified_id[1] == 200:
         verified_status = SessionController().check_session_db(db, verified_id[0])
         if verified_status[1] == 200:

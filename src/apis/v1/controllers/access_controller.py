@@ -10,11 +10,9 @@ from starlette import status
 from fastapi import Request, Response
 from celery_worker import otp_sender, otp_sender_products, otp_sms_sender, super_admin_email_sender
 from src.apis.v1.controllers.async_auth_controller import AsyncAuthController
-from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.controllers.user_controller import UserController
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from src.apis.v1.helpers.customize_response import custom_response
-from src.apis.v1.helpers.global_helpers import create_unique_id
 from src.apis.v1.models import idp_users
 from src.apis.v1.services.access_service import AccessService
 from src.apis.v1.services.user_service import UserService

@@ -120,7 +120,6 @@ class SPSService():
         
     def get_sps_app_for_sp_redirections(self, user_email):
         try:
-            print('user_email---',user_email)
             sp_query = self.db.query(idp_users,idp_sp,SPAPPS).join(idp_sp, idp_users.id == idp_sp.idp_users_id) \
             .join(SPAPPS, idp_sp.sp_apps_id == SPAPPS.id).filter(idp_users.email == user_email).order_by(desc(idp_sp.is_accessible == True)).all()
             serviceproviders = []
@@ -236,7 +235,6 @@ class SPSService():
             return list([])
         
     def get_sp_apps_email(self,targeted_sp_app_id,email_):
-        print('get_sp_apps_email---',targeted_sp_app_id,email_)
         result = self.db.query(idp_users_sp_apps_email.sp_apps_email)\
                 .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_).scalar()
         return result

@@ -34,4 +34,18 @@ def format_loged_in_user_role(selected_role):
             selected_roles['sub_role']=dict({'id':selected_role[2].id,'name':selected_role[2].name})
         else:
             selected_roles['sub_role']=None
-    return selected_roles           
+    return selected_roles
+
+def format_dr_iq_user_role(selected_role):
+    selected_roles = {'dr_iq_role':{'id':int, 'name':str},
+                      'practice_role':{'id':int, 'name':str}}
+    if selected_role is None:
+        return None
+    else:
+        selected_roles['dr_iq_role']['id']=selected_role[1].dr_iq_role_id
+        selected_roles['dr_iq_role']['name']=selected_role[1].name
+        if selected_role[2] != None:
+            selected_roles['practice_role']=dict({'id':selected_role[2].dr_iq_practice_role_id,'name':selected_role[2].name})
+        else:
+            selected_roles['practice_role']=None
+    return selected_roles             
