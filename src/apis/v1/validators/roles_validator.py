@@ -63,7 +63,7 @@ class LogedInUserSubRolesValidatorWithOutOrm(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-from typing import List, Optional
+from typing import Any, List, Optional
 from pydantic import BaseModel, Field
 
 class ListRolesValidatorWithOutOrm(BaseModel):
@@ -76,18 +76,16 @@ class ListRolesValidatorWithOutOrm(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
+    def dict(self, **kwargs: Any) -> Dict[str, Any]:
+        d = super().dict(**kwargs)
+        return {k: v for k, v in d.items() if v is not None}
+
     @classmethod
     def from_orm(cls, obj):
         model_dict = obj.__dict__
-        if 'dr_iq_role_id' not in model_dict:
+        if model_dict.get('dr_iq_role_id') is None:
             model_dict.pop('dr_iq_role_id', None)
         return cls(**model_dict)
-
-
-    class Config:
-        allow_population_by_field_name = True
-
-
 class LogedInUserListRolesValidatorWithOutOrm(BaseModel):
     id: Optional[int]
     name: Optional[str]

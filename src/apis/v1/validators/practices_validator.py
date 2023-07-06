@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator, typing, Field
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
-
+from typing import Dict, Any, List, Optional
 from src.apis.v1.models.practices_model import practices
 from pydantic import BaseModel, Field, typing
 
@@ -22,6 +22,7 @@ class ListPracticesGeneralValidator(BaseModel):
         orm_mode = True 
 
 
+
 class SPPracticesValidator(BaseModel):
     id: int
     name: str
@@ -32,20 +33,9 @@ class SPPracticesValidator(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
-        @staticmethod
-        def pre_process_config(cls, field: Field):
-            if field.name == 'dr_iq_practice_id':
-                field.required = False  # Make the field optional during validation
-            return field
-
-        @staticmethod
-        def post_process_result(cls, result):
-            if 'dr_iq_practice_id' in result:
-                return result
-            else:
-                return {k: v for k, v in result.items() if k != 'dr_iq_practice_id'}
-
-
+    def dict(self, **kwargs) -> Dict[str, Any]:
+        result = super().dict(**kwargs)
+        return {k: v for k, v in result.items() if v is not None}
  
 class LogedInUserSPPracticesValidator(BaseModel):
     id: int
@@ -57,11 +47,23 @@ class LogedInUserSPPracticesValidator(BaseModel):
 class ListSPRegionsValidator(BaseModel):
     id: int
     name: str
-    region_id: typing.Optional[int]
-    is_selected: typing.Optional[bool] = Field(alias='isChecked')
-    practices: typing.List[SPPracticesValidator]
+    region_id: Optional[int]
+    is_selected: Optional[bool] = Field(alias='isChecked')
+    practices: List[SPPracticesValidator]
+
     class Config:
         allow_population_by_field_name = True
+
+    def dict(self, **kwargs: Any) -> Dict[str, Any]:
+        d = super().dict(**kwargs)
+        return {k: v for k, v in d.items() if v is not None}
+
+    @classmethod
+    def from_orm(cls, obj):
+        model_dict = obj.__dict__
+        if model_dict.get('region_id') is None:
+            model_dict.pop('region_id', None)
+        return cls(**model_dict)
   
 
 class LogedInUserListSPRegionsValidator(BaseModel):

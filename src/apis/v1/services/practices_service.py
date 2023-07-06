@@ -59,35 +59,58 @@ class PracticesService():
 
     
     def get_selected_unselected_practices_dbquery_by_appid_userid(self, app_id, user_id, selected_user_id):
-        practices_als = aliased(practices, name='practices_aliased')
-
-        selected_unselected_practices_data = self.db.query(
+        
+        if (app_id==3):
+            selected_unselected_practices_data = self.db.query(
             practices.id.label('practices_id'),
             practices.name.label('practices_name'),
-            practices_als.id.label('practices_als_id'),
-            practices_als.name.label('practices_als_name'),
+            practice_regions.id.label('practices_als_id'),
+            practice_regions.name.label('practices_als_name'),
             func.count(practices.id)
-        ).join(idp_users_practices, practices.id == idp_users_practices.practices_id)\
-        .join(practices_als, practices.practice_region_id == practices_als.id, isouter=True)\
-        .filter(practices.sp_apps_id == app_id)\
-        .filter(or_(idp_users_practices.idp_users_id == user_id, idp_users_practices.idp_users_id == selected_user_id))\
-        .group_by(
-            practices.id,
-            practices.name,
-            practices_als.id,
-            practices_als.name
-        ).all()
+            ).join(idp_users_practices, practices.id == idp_users_practices.practices_id)\
+            .join(practice_regions, practices.region_id == practice_regions.id, isouter=True)\
+            .filter(practices.sp_apps_id == app_id)\
+            .filter(or_(idp_users_practices.idp_users_id == user_id, idp_users_practices.idp_users_id == selected_user_id))\
+            .group_by(
+                practices.id,
+                practices.name,
+                practice_regions.id,
+                practice_regions.name
+            ).all()
+            
+            
+        else:
+            practices_als = aliased(practices, name='practices_aliased')
 
+            selected_unselected_practices_data = self.db.query(
+                practices.id.label('practices_id'),
+                practices.name.label('practices_name'),
+                practices_als.id.label('practices_als_id'),
+                practices_als.name.label('practices_als_name'),
+                func.count(practices.id)
+            ).join(idp_users_practices, practices.id == idp_users_practices.practices_id)\
+            .join(practices_als, practices.practice_region_id == practices_als.id, isouter=True)\
+            .filter(practices.sp_apps_id == app_id)\
+            .filter(or_(idp_users_practices.idp_users_id == user_id, idp_users_practices.idp_users_id == selected_user_id))\
+            .group_by(
+                practices.id,
+                practices.name,
+                practices_als.id,
+                practices_als.name
+            ).all()
+            
         return selected_unselected_practices_data
+    
+        
 
 
     def get_selected_practices_db_by_id(self, app_id, user_id, selected_user_id):
-
         selected_unselected_practices_data = self.get_selected_unselected_practices_dbquery_by_appid_userid(app_id, user_id, selected_user_id)
         edit_practices_list = format_practices_edit_user_data_selected_unselected(selected_unselected_practices_data)
         return edit_practices_list
 
     def get_selected_practices_db_by_id_loged_in_user(self, app_id, user_id, selected_user_id):
+        
         if(app_id==3):
             subquery = self.db.query(idp_users_practices.practices_id) \
                 .filter(idp_users_practices.idp_users_id == selected_user_id) \
@@ -119,7 +142,6 @@ class PracticesService():
                 region_dict[region_id]['practices'].append({'id': practice_id, 'name': practice_name})
 
             formatted_data = [region for region in region_dict.values()]
-
             return formatted_data
 
                 
