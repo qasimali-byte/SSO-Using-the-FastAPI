@@ -68,9 +68,7 @@ class LoginProcessView():
             "username": user_info_data.username,
             "email": user_info_data.email,
             "first_name": user_info_data.first_name,
-            "last_name": user_info_data.last_name,
-            "contact_no": user_info_data.contact_no
-
+            "last_name": user_info_data.last_name
 
         })
         return users_info, user_info_data.id
@@ -131,6 +129,13 @@ class LoginProcessView():
  
         if (sp_metadata_name=='driq'):
             practice_list,roles_data,gender_data=UserService(db).get_dr_iq_user_practices_role(email)
+            user_info_data = UserService(db).get_user_info_db(email)
+            users_info = dict({
+            "username": user_info_data.username,
+            "email": user_info_data.email,
+            "first_name": user_info_data.first_name,
+            "last_name": user_info_data.last_name,
+            "contact_no": user_info_data.contact_no })
             users_info['gender'] = gender_data
             users_info['selected_practice']=practice_list
             users_info['selected_practice'] = json.dumps(users_info['selected_practice'])
