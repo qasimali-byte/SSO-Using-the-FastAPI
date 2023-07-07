@@ -106,7 +106,7 @@ class PracticesService():
 
     def get_selected_practices_db_by_id(self, app_id, user_id, selected_user_id):
         selected_unselected_practices_data = self.get_selected_unselected_practices_dbquery_by_appid_userid(app_id, user_id, selected_user_id)
-        edit_practices_list = format_practices_edit_user_data_selected_unselected(selected_unselected_practices_data)
+        edit_practices_list = format_practices_edit_user_data_selected_unselected(selected_unselected_practices_data,app_id)
         return edit_practices_list
 
     def get_selected_practices_db_by_id_loged_in_user(self, app_id, user_id, selected_user_id):

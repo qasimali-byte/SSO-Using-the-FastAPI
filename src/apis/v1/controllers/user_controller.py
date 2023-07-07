@@ -198,7 +198,7 @@ class UserController():
             Update User Practices, SP Applications And Roles By User ID
         """
         # ## format data for create user
-        apps_ids_list, practices_ids_list, selected_roles_list = format_data_for_create_user(user_data)
+        apps_ids_list, practices_ids_list, selected_roles_list,practices_dr_iq_region_list = format_data_for_create_user(user_data)
 
         # ## get type of user
         user_type_id = TypeUserController(self.db).get_type_of_user(user_data['type_of_user'])['id']

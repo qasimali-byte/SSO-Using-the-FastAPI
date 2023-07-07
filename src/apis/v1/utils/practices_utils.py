@@ -62,60 +62,115 @@ def format_practices_edit_user_data(practices_of_userid, practices_of_selected_u
     regions_list = [i for i in regions_list.values()]
     return regions_list
 
-def format_practices_edit_user_data_selected_unselected(practices_selected_unselected):
+def format_practices_edit_user_data_selected_unselected(practices_selected_unselected,app_id):
     regions_list = {}
     regions = {}
     practices_child_dict = {}
-    for practices_child_id,practices_child_name, practices_parent_id, practices_parent_name,count in practices_selected_unselected: 
-        ## create parent regions for practices
-        if practices_parent_id == None:
+    if (app_id==3):
 
-            ## check whether already parent exsists or not 
-            ## if parent exsists then we don't want to create parent again
-            if regions_list.get(practices_child_id) == None:
-                regions['id'] = practices_child_id
-                regions['name'] = practices_child_name
-                regions['practices'] = []
+        for practices_child_id,practices_child_name, practices_parent_id, practices_parent_name,count in practices_selected_unselected: 
+            ## create parent regions for practices
+            if practices_parent_id == None:
 
+                ## check whether already parent exsists or not 
+                ## if parent exsists then we don't want to create parent again
+                if regions_list.get(practices_child_id) == None:
+                    regions['id'] = practices_child_id
+                    regions['name'] = practices_child_name
+                    regions['practices'] = []
+
+                    if count > 1:
+                        regions['is_selected'] = True
+                    else:
+                        regions['is_selected'] = False
+
+                    ## creating a region for practices in unique practices id list
+                    regions_list[regions['id']] = dict(regions)
+
+
+            elif practices_parent_id != None:
+                regions['id'] = practices_parent_id
+                regions['name'] = practices_parent_name
+                regions['region_id']=practices_parent_id
+                ## empty practices created when the regions_list['id'] does not contain practices key:
+                if regions_list.get(practices_parent_id) == None:
+                    if count > 1:
+                        regions['is_selected'] = True
+                    else:
+                        regions['is_selected'] = False
+
+                    regions['practices'] = []
+                    ## creating a region for practices in unique practices id list
+                    regions_list[regions['id']] = dict(regions)
+
+                
+
+                ## create child practices for regions
+                practices_child_dict['id'] = practices_child_id
+                practices_child_dict['name'] = practices_child_name
+                practices_child_dict['region_id']=practices_parent_id
                 if count > 1:
-                    regions['is_selected'] = True
+                    practices_child_dict['is_selected'] = True
                 else:
-                    regions['is_selected'] = False
+                    practices_child_dict['is_selected'] = False
 
-                ## creating a region for practices in unique practices id list
-                regions_list[regions['id']] = dict(regions)
+                regions_list[regions['id']]['practices'].append(dict(practices_child_dict))
+
+        regions_list = [i for i in regions_list.values()]
+        return regions_list
+    
+    else:
+        for practices_child_id,practices_child_name, practices_parent_id, practices_parent_name,count in practices_selected_unselected: 
+            ## create parent regions for practices
+            if practices_parent_id == None:
+
+                ## check whether already parent exsists or not 
+                ## if parent exsists then we don't want to create parent again
+                if regions_list.get(practices_child_id) == None:
+                    regions['id'] = practices_child_id
+                    regions['name'] = practices_child_name
+                    regions['practices'] = []
+
+                    if count > 1:
+                        regions['is_selected'] = True
+                    else:
+                        regions['is_selected'] = False
+
+                    ## creating a region for practices in unique practices id list
+                    regions_list[regions['id']] = dict(regions)
 
 
-        elif practices_parent_id != None:
-            regions['id'] = practices_parent_id
-            regions['name'] = practices_parent_name
-            
-            ## empty practices created when the regions_list['id'] does not contain practices key:
-            if regions_list.get(practices_parent_id) == None:
+            elif practices_parent_id != None:
+                regions['id'] = practices_parent_id
+                regions['name'] = practices_parent_name
+                
+                ## empty practices created when the regions_list['id'] does not contain practices key:
+                if regions_list.get(practices_parent_id) == None:
+                    if count > 1:
+                        regions['is_selected'] = True
+                    else:
+                        regions['is_selected'] = False
+
+                    regions['practices'] = []
+                    ## creating a region for practices in unique practices id list
+                    regions_list[regions['id']] = dict(regions)
+
+                
+
+                ## create child practices for regions
+                practices_child_dict['id'] = practices_child_id
+                practices_child_dict['name'] = practices_child_name
                 if count > 1:
-                    regions['is_selected'] = True
+                    practices_child_dict['is_selected'] = True
                 else:
-                    regions['is_selected'] = False
+                    practices_child_dict['is_selected'] = False
 
-                regions['practices'] = []
-                ## creating a region for practices in unique practices id list
-                regions_list[regions['id']] = dict(regions)
+                regions_list[regions['id']]['practices'].append(dict(practices_child_dict))
 
-            
-
-            ## create child practices for regions
-            practices_child_dict['id'] = practices_child_id
-            practices_child_dict['name'] = practices_child_name
-            if count > 1:
-                practices_child_dict['is_selected'] = True
-            else:
-                practices_child_dict['is_selected'] = False
-
-            regions_list[regions['id']]['practices'].append(dict(practices_child_dict))
-
-    regions_list = [i for i in regions_list.values()]
-    return regions_list
-
+        regions_list = [i for i in regions_list.values()]
+        return regions_list
+    
+        
 
 def format_practices_user_data_selected(practices_selected):
     regions_list = {}
