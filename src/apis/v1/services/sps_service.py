@@ -1,13 +1,15 @@
 from datetime import datetime
 import json
 import os
+from src.apis.v1.models.idp_user_apps_roles_model import idp_user_apps_roles
 
 from src.apis.v1.models.idp_users_sp_apps_email_model import idp_users_sp_apps_email
+from src.apis.v1.models.sp_apps_role_model import sp_apps_role
 from ..helpers.custom_exceptions import CustomException
 from src.apis.v1.models.user_idp_sp_apps_model import idp_sp
 from src.apis.v1.models.idp_users_model import idp_users
 from src.apis.v1.models.sp_apps_model import SPAPPS
-from sqlalchemy import desc
+from sqlalchemy import desc, select
 from fastapi import status
 
 class SPSService():
@@ -238,4 +240,15 @@ class SPSService():
         result = self.db.query(idp_users_sp_apps_email.sp_apps_email)\
                 .filter_by(sp_apps_id=targeted_sp_app_id, primary_email=email_).scalar()
         return result
+    
+    def get_those_apps_on_which_user_has_role(self, user_id,spapp_id):
+        data = self.db.query(SPAPPS).\
+        join(sp_apps_role, SPAPPS.id == sp_apps_role.sp_apps_id).\
+        join(idp_user_apps_roles, sp_apps_role.id == idp_user_apps_roles.sp_apps_role_id).\
+        join(idp_users, idp_user_apps_roles.idp_users_id == idp_users.id).\
+        where(idp_users.id == user_id,SPAPPS.id == spapp_id).all()
 
+        if data:
+            return True
+        else:
+            return False        

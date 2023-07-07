@@ -100,8 +100,9 @@ class SPSController():
         roles=RolesController(self.db).get_allowed_roles_by_userid(app_id=app["id"], user_id=user_id, selected_id=selected_id),
         practices=PracticesController(self.db).get_allowed_practices_by_userid(app["id"],user_id,selected_id)) 
 
+
         for iteration2 in selected_apps:
-            if app["id"] == iteration2["id"]:
+            if app["id"] == iteration2["id"] and self.get_those_apps_on_which_user_has_role(selected_id,app["id"]):
                 apps.is_selected = True
 
         if apps.id == 7: ## ez login id
@@ -249,3 +250,7 @@ class SPSController():
     def get_sp_apps_email(self,sp_apps_id,primary_email):
         sp_app_email=SPSService(self.db).get_sp_apps_email(sp_apps_id,primary_email)
         return sp_app_email
+    
+    def get_those_apps_on_which_user_has_role(self,user_id,sp_apps_id):
+        sp_app_role=SPSService(self.db).get_those_apps_on_which_user_has_role(user_id,sp_apps_id)
+        return sp_app_role
