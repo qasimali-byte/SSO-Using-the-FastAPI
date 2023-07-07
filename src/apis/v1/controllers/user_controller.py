@@ -230,7 +230,7 @@ class UserController():
 
         ## assign sp applications, practices and roles to user
         self.assign_practices_apps_roles(user_id=user_id, apps_ids_list=apps_ids_list,
-                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list)
+                                         practices_ids_list=practices_ids_list, selected_roles_list=selected_roles_list,practices_dr_iq_region_list=practices_dr_iq_region_list)
 
         data = {
             "message": "successfully updated user practices, apps and roles",
