@@ -57,7 +57,6 @@ class UserController():
         # ## roles must be atleast selected when the app is selected roles cannot be empty
 
         # ## format data for create user
-        print('user_data---',user_data)
         apps_ids_list, practices_ids_list, selected_roles_list,practices_dr_iq_region_list = format_data_for_create_user(user_data)
 
         ## verify if user already exists
@@ -74,9 +73,11 @@ class UserController():
         driq_gender_id = check_driq_gender_id_exsist(user_data)
 
         # ## create user data
+        contact_no = user_data['contact_no'] if user_data['contact_no'] else None
         idp_user_data = CreateUserValidator(uuid=create_unique_id(), firstname=user_data['firstname'],
                                             lastname=user_data['lastname'], email=user_data['email'],
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
+                                            contact_no=contact_no,
                                             user_type_id=user_type_id, dr_iq_gender_id=driq_gender_id,
                                             password_hash=create_password_hash(generate_password(size=12)),
                                             created_by=user_creator_email

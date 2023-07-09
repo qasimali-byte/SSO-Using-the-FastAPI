@@ -60,6 +60,7 @@ class CreateInternalExternalUserValidatorIn(BaseModel):
     firstname: str 
     lastname: str 
     email: EmailStr
+    contact_no: typing.Optional[str] = None
     type_of_user: typing.Literal['internal','external']
     dr_iq_gender_id: typing.Optional[int] = None
     apps: typing.List[UserAppsValidatorIn]
@@ -297,3 +298,17 @@ class UpdateUserValidatorDataClass(BaseModel):
     user_type_id: int
     dr_iq_gender_id: typing.Optional[int]
     is_active: bool = True
+
+
+
+class UserInfoValidator(BaseModel):
+    first_name: str
+    last_name: str
+    contact_no: str = None
+    dr_iq_gender_id: int = None
+
+    @validator('contact_no')
+    def validate_contact_no(cls, v):
+        if v and not str(v).isdigit():
+            return None  # Return None when the contact number is not valid
+        return v

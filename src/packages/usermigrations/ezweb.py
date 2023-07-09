@@ -29,10 +29,17 @@ class EZWEBMigrate:
             raise CustomException(message="ez web not working", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         response = response.json()
+        first_name = response['data']['first_name']
+        last_name = response['data']['last_name']
+        contact_no=response['data']['contact_no']
         roles_data = self.roles_data_by_app_id(app_id)
         role_id = self.validate_roles_by_response_role(response['data']['role'],roles_data)
         if len(response['data']['selected_practice']) < 1:
             return {
+            'first_name':first_name,
+            'last_name':last_name,
+            'contact_no':contact_no,
+            'dr_iq_gender_id':None,
             'id':app_id,
             'practices': [],
             'role':{
@@ -43,6 +50,10 @@ class EZWEBMigrate:
         practice_ids = self.validate_practices_data_by_response(response['data']['selected_practice'],practices_app['__root__'])
 
         return {
+                        'first_name':first_name,
+            'last_name':last_name,
+            'contact_no':contact_no,
+            'dr_iq_gender_id':None,
             'id':app_id,
             'practices':practice_ids,
             'role':{

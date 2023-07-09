@@ -28,11 +28,17 @@ class EZAnalyticsMigrate:
         except Exception as e:
             print(e)
             raise CustomException(message="ez analytics not working", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
         response = response.json()
+        first_name = response['Data']['first_name']
+        last_name = response['Data']['last_name']
+        contact_no=response['Data']['contact_no']
         roles_data = self.roles_data_by_app_id(app_id)
         if len(response['Data']['selected_practice']) < 1:
             return {
+            'first_name':first_name,
+            'last_name':last_name,
+            'contact_no':contact_no,
+            'dr_iq_gender_id':None,
             'id':app_id,
             'practices': [],
             'role':{
@@ -47,6 +53,10 @@ class EZAnalyticsMigrate:
         
         role_id = self.validate_roles_by_response_role(response['Data']['selected_practice'][0]['role'],roles_data)
         return {
+            'first_name':first_name,
+            'last_name':last_name,
+            'contact_no':contact_no,
+            'dr_iq_gender_id':None,
             'id':app_id,
             'practices':practice_ids,
             'role':{

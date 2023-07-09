@@ -6,7 +6,9 @@ from src.apis.v1.core.project_settings import Settings
 from src.apis.v1.helpers.custom_exceptions import CustomException
 from fastapi import status
 from cryptography.fernet import Fernet
+from typing import List
 
+from src.apis.v1.validators.user_validator import UserInfoValidator
 
 
 
@@ -124,3 +126,35 @@ def check_driq_gender_id_exsist(user_data):
         
     return None
 
+
+
+
+def format_user_data(data: List[dict]):
+    consolidated = {'sp_apps_practices_list': []}
+    first_name = None
+    last_name = None
+    contact_no = None
+
+    for item in data:
+        try:
+            user = UserInfoValidator(**item)
+            if user.first_name:
+                first_name = user.first_name
+            if user.last_name:
+                last_name = user.last_name
+            if user.contact_no:
+                contact_no = user.contact_no
+        except ValueError:
+            continue
+
+        consolidated['sp_apps_practices_list'].append(
+            {k: v for k, v in item.items() if k not in ["first_name", "last_name", "contact_no", "dr_iq_gender_id"]}
+        )
+        for key in ["dr_iq_gender_id"]:
+            if key in item and item[key] is not None:
+                consolidated[key] = item[key]
+
+    consolidated['first_name'] = first_name
+    consolidated['last_name'] = last_name
+    consolidated['contact_no'] = contact_no
+    return consolidated

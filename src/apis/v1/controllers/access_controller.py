@@ -18,7 +18,7 @@ from src.apis.v1.services.access_service import AccessService
 from src.apis.v1.services.user_service import UserService
 from src.apis.v1.controllers.sps_controller import SPSController
 from src.apis.v1.utils.auth_utils import create_password_hash, generate_password
-from src.apis.v1.utils.user_utils import get_encrypted_text, get_decrypted_text
+from src.apis.v1.utils.user_utils import format_user_data, get_encrypted_text, get_decrypted_text
 from src.apis.v1.validators.access_validator import GetAccountAccessRequestUsersListValidatorOut
 from src.apis.v1.validators.common_validators import SuccessfulJsonResponseValidator
 from src.apis.v1.validators.sps_validator import ListServiceProviderValidatorOut, ListUnAccessibleServiceProviderValidatorOut
@@ -192,7 +192,7 @@ class AccessController():
                     raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
                                           message='failed, Illegal product requested.')
             if saved_otp == validator_data.otp:
-                # redis_client.delete(key)
+                redis_client.delete(key)
                 # is user requesting allowed products.
                 if AccessService(self.db).if_user_exists_db(user_email=validator_data.email):
                     raise CustomException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -217,15 +217,15 @@ class AccessController():
                     elif ids == '6':
                         apps_list.append(EZWEBMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
                     elif ids == '3':
-                        print('i am here')
                         apps_list.append(DRIQMigrate().user_migration_request(email=validator_data.email,app_id=int(ids)))
-                    
-                user_validator = CreateInternalExternalUserValidatorIn(firstname="first name",
-                                                                        lastname="last name",
+                format_users_data=format_user_data(apps_list)
+                user_validator = CreateInternalExternalUserValidatorIn(firstname=format_users_data['first_name'],
+                                                                        lastname=format_users_data['last_name'],
                                                                         email=validator_data.email,
                                                                         type_of_user="external",
-                                                                        dr_iq_gender_id=None,
-                                                                        apps=apps_list,
+                                                                        dr_iq_gender_id=format_users_data['dr_iq_gender_id'],
+                                                                        contact_no=format_users_data['contact_no'],
+                                                                        apps=format_users_data['sp_apps_practices_list'],
                                                                         is_active=True)
 
                 UserController(self.db).create_user(user_validator.dict())
