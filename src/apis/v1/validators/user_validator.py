@@ -301,7 +301,7 @@ class UpdateUserValidatorDataClass(BaseModel):
 
 
 
-class UserInfoValidator(BaseModel):
+class ExternalUserInfoValidator(BaseModel):
     first_name: str
     last_name: str
     contact_no: str = None
