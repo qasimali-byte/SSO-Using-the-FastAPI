@@ -31,14 +31,13 @@ class EZWEBMigrate:
         response = response.json()
         first_name = response['data']['first_name']
         last_name = response['data']['last_name']
-        contact_no=response['data']['contact_no']
         roles_data = self.roles_data_by_app_id(app_id)
         role_id = self.validate_roles_by_response_role(response['data']['role'],roles_data)
         if len(response['data']['selected_practice']) < 1:
             return {
             'first_name':first_name,
             'last_name':last_name,
-            'contact_no':contact_no,
+            'contact_no':None,
             'dr_iq_gender_id':None,
             'id':app_id,
             'practices': [],
@@ -52,7 +51,7 @@ class EZWEBMigrate:
         return {
                         'first_name':first_name,
             'last_name':last_name,
-            'contact_no':contact_no,
+            'contact_no':None,
             'dr_iq_gender_id':None,
             'id':app_id,
             'practices':practice_ids,
