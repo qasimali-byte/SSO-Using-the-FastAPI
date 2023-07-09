@@ -8,7 +8,7 @@ from fastapi import status
 from cryptography.fernet import Fernet
 from typing import List
 
-from src.apis.v1.validators.user_validator import UserInfoValidator
+from src.apis.v1.validators.user_validator import ExternalUserInfoValidator
 
 
 
@@ -130,14 +130,13 @@ def check_driq_gender_id_exsist(user_data):
 
 
 def format_user_data(data: List[dict]):
-    consolidated = {'sp_apps_practices_list': []}
+    consolidated = {'sp_apps_practices_list': [], 'dr_iq_gender_id': None}  # set default value
     first_name = None
     last_name = None
     contact_no = None
-
     for item in data:
         try:
-            user = UserInfoValidator(**item)
+            user = ExternalUserInfoValidator(**item)
             if user.first_name:
                 first_name = user.first_name
             if user.last_name:
