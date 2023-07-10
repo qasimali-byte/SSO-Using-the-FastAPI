@@ -1,4 +1,4 @@
-from sqlalchemy import func, or_, union_all
+from sqlalchemy import func, or_
 from src.apis.v1.models.practice_regions_model import practice_regions
 from src.apis.v1.models.practices_model import practices
 from src.apis.v1.utils.practices_utils import  format_practices_edit_user_data_selected_unselected, format_practices_user_data_selected
@@ -41,10 +41,22 @@ class PracticesService():
 
 
     def get_practices_db_by_app_name(self, app_name):
+        
+        region_id_label = practices.region_id.label('region_id') if app_name == 'driq' else practices.practice_region_id.label('region_id')
 
-        practices_of_app = self.db.query(practices).join(SPAPPS, SPAPPS.id == practices.sp_apps_id) \
-        .filter(SPAPPS.sp_metadata == app_name).all()
+        practices_of_app = self.db.query(
+            practices.id,
+            practices.name,
+            region_id_label
+        ).join(
+            SPAPPS, SPAPPS.id == practices.sp_apps_id
+        ).filter(
+            SPAPPS.sp_metadata == app_name
+        ).all()
+
+
         return practices_of_app
+
 
     def get_practices_db_by_appid_userid(self, app_id, user_id):
 
@@ -177,3 +189,5 @@ class PracticesService():
         except Exception as e:
             raise CustomException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                   message=str(e) + "- error occurred in practices_service.py")
+    
+

@@ -81,7 +81,7 @@ class EZAnalyticsMigrate:
                         practices_ids.append({'id':practice['id']})
                         empty_practice_set.add(practice['id'])
                 
-                if values['parent_organization'].lower() if values['parent_organization'] else None == practice['name'].lower():
+                if values['parent_organization'] and values['parent_organization'].lower() == practice['name'].lower():
                     if practice['id'] not in empty_practice_set:
                         practices_ids.append({'id':practice['id']})
                         empty_practice_set.add(practice['id'])

@@ -74,6 +74,7 @@ class UserController():
 
         # ## create user data
         contact_no = user_data['contact_no'] if user_data['contact_no'] else None
+        user_creator_email = user_creator_email if user_creator_email else "external"
         idp_user_data = CreateUserValidator(uuid=create_unique_id(), firstname=user_data['firstname'],
                                             lastname=user_data['lastname'], email=user_data['email'],
                                             username=str(user_data['firstname']) + str(user_data['lastname']),
