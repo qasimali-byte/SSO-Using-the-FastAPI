@@ -309,8 +309,6 @@ class ExternalUserInfoValidator(BaseModel):
 
     @validator('contact_no')
     def validate_contact_no(cls, v):
-        if v:
-            v = v.replace(" ", "")
-            if not v.isdigit():
-                return None  # Return None when the contact number is not valid
+        if v and not str(v).isdigit():
+            return None  # Return None when the contact number is not valid
         return v
